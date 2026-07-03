@@ -52,4 +52,4 @@ Detailed reasoning is recorded in the Architecture Decision Records (ADR).
 
 | Version | Date | Author | Notes |
 |----------|------|--------|-------|
-| 1.0.0 | July 2026 | Tim Kent / ChatGPT | Initial decision log |
+| 1.0.0 | July 2026 | Tim Kent / ChatGPT | Initial decision log |This is my first real change.
