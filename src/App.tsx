@@ -2,19 +2,15 @@ import Header from "./components/Header/Header";
 import Navigation from "./components/Navigation/Navigation";
 import Dashboard from "./components/Dashboard/Dashboard";
 
+import "./App.css";
+
 function App() {
   return (
-    <div
-      style={{
-        fontFamily: "Arial, sans-serif",
-        minHeight: "100vh",
-        backgroundColor: "#f4f6f8",
-      }}
-    >
+    <div className="app">
       <Header />
       <Navigation />
 
-      <main>
+      <main className="app-main">
         <Dashboard />
       </main>
     </div>
