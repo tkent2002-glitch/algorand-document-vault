@@ -2,7 +2,11 @@ import { useState } from "react";
 
 import Header from "./components/Header/Header";
 import Navigation from "./components/Navigation/Navigation";
-import Dashboard from "./components/Dashboard/Dashboard";
+import DashboardPage from "./pages/DashboardPage/DashboardPage";
+import NotarizePage from "./pages/NotarizePage/NotarizePage";
+import VerifyPage from "./pages/VerifyPage/VerifyPage";
+import VaultPage from "./pages/VaultPage/VaultPage";
+import WalletPage from "./pages/WalletPage/WalletPage";
 
 import "./App.css";
 
@@ -14,18 +18,16 @@ function App() {
   return (
     <div className="app">
       <Header />
-
       <Navigation activePage={activePage} onNavigate={setActivePage} />
 
       <main className="app-main">
         {activePage === "dashboard" && (
-          <Dashboard onNavigate={setActivePage} />
+          <DashboardPage onNavigate={setActivePage} />
         )}
-
-        {activePage === "notarize" && <h2>Notarize Document</h2>}
-        {activePage === "verify" && <h2>Verify Document</h2>}
-        {activePage === "vault" && <h2>Document Vault</h2>}
-        {activePage === "wallet" && <h2>Wallet Status</h2>}
+        {activePage === "notarize" && <NotarizePage />}
+        {activePage === "verify" && <VerifyPage />}
+        {activePage === "vault" && <VaultPage />}
+        {activePage === "wallet" && <WalletPage />}
       </main>
     </div>
   );
