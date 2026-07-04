@@ -1,5 +1,28 @@
 import "./Dashboard.css";
 
+const dashboardItems = [
+  {
+    icon: "📄",
+    title: "Notarize Document",
+    description: "Create a SHA-256 fingerprint and notarize it on Algorand.",
+  },
+  {
+    icon: "✅",
+    title: "Verify Document",
+    description: "Check whether a document still matches its blockchain proof.",
+  },
+  {
+    icon: "🗂",
+    title: "Document Vault",
+    description: "View saved notarization records and transaction details.",
+  },
+  {
+    icon: "👛",
+    title: "Wallet Status",
+    description: "Connect Pera Wallet and view your current wallet state.",
+  },
+];
+
 function Dashboard() {
   return (
     <section className="dashboard">
@@ -9,25 +32,13 @@ function Dashboard() {
       </p>
 
       <div className="dashboard-grid">
-        <div className="dashboard-card">
-          <h3>📄 Notarize Document</h3>
-          <p>Create a SHA-256 fingerprint and notarize it on Algorand.</p>
-        </div>
-
-        <div className="dashboard-card">
-          <h3>✅ Verify Document</h3>
-          <p>Check whether a document still matches its blockchain proof.</p>
-        </div>
-
-        <div className="dashboard-card">
-          <h3>🗂 Document Vault</h3>
-          <p>View saved notarization records and transaction details.</p>
-        </div>
-
-        <div className="dashboard-card">
-          <h3>👛 Wallet Status</h3>
-          <p>Connect Pera Wallet and view your current wallet state.</p>
-        </div>
+        {dashboardItems.map((item) => (
+          <button className="dashboard-card" key={item.title} type="button">
+            <span className="dashboard-card-icon">{item.icon}</span>
+            <h3>{item.title}</h3>
+            <p>{item.description}</p>
+          </button>
+        ))}
       </div>
     </section>
   );
