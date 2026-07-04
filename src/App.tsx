@@ -1,5 +1,6 @@
-import Header from "./components/Header";
+import Header from "./components/Header/Header";
 import Navigation from "./components/Navigation/Navigation";
+import Dashboard from "./components/Dashboard/Dashboard";
 
 function App() {
   return (
@@ -13,38 +14,8 @@ function App() {
       <Header />
       <Navigation />
 
-      <main
-        style={{
-          padding: "40px",
-          textAlign: "center",
-        }}
-      >
-        <h2>Welcome</h2>
-
-        <p>Welcome to Algorand Document Vault.</p>
-
-        <p>
-          This application will allow you to securely notarize documents on the
-          Algorand blockchain while keeping your files private.
-        </p>
-
-        <hr />
-
-        <h3>Coming Soon</h3>
-
-        <ul
-          style={{
-            listStyle: "none",
-            padding: 0,
-            fontSize: "1.2rem",
-            lineHeight: "2",
-          }}
-        >
-          <li>📄 Notarize Document</li>
-          <li>✅ Verify Document</li>
-          <li>🗂 Document Vault</li>
-          <li>👛 Wallet Connection</li>
-        </ul>
+      <main>
+        <Dashboard />
       </main>
     </div>
   );
