@@ -1,3 +1,6 @@
+import Header from "./components/Header";
+import Navigation from "./components/Navigation/Navigation";
+
 function App() {
   return (
     <div
@@ -7,27 +10,18 @@ function App() {
         backgroundColor: "#f4f6f8",
       }}
     >
-      <header
-        style={{
-          backgroundColor: "#0b3d91",
-          color: "white",
-          padding: "20px 40px",
-        }}
-      >
-        <h1>Algorand Document Vault</h1>
-        <p>Secure Blockchain Document Notarization</p>
-      </header>
+      <Header />
+      <Navigation />
 
       <main
         style={{
           padding: "40px",
+          textAlign: "center",
         }}
       >
         <h2>Welcome</h2>
 
-        <p>
-          Welcome to Algorand Document Vault.
-        </p>
+        <p>Welcome to Algorand Document Vault.</p>
 
         <p>
           This application will allow you to securely notarize documents on the
@@ -38,7 +32,14 @@ function App() {
 
         <h3>Coming Soon</h3>
 
-        <ul>
+        <ul
+          style={{
+            listStyle: "none",
+            padding: 0,
+            fontSize: "1.2rem",
+            lineHeight: "2",
+          }}
+        >
           <li>📄 Notarize Document</li>
           <li>✅ Verify Document</li>
           <li>🗂 Document Vault</li>
