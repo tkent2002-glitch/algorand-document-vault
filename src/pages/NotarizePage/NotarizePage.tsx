@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DocumentValidationService, FileHashService } from "../../services";
+import { DocumentValidationService, HashService } from "../../services";
 import "./NotarizePage.css";
 
 function NotarizePage() {
@@ -19,7 +19,7 @@ function NotarizePage() {
       return;
     }
 
-    const hash = await FileHashService.sha256(file);
+    const hash = await HashService.sha256FromFile(file);
     setFileHash(hash);
   }
 
