@@ -1,17 +1,20 @@
 import {
   DocumentValidationService,
+  EvidenceRecordService,
   HashService,
   NotarizationService,
   ProofPayloadSerializer,
 } from "../services";
 
 import type { DocumentHash, NotarizationProof } from "../types";
+import type { EvidenceRecord } from "../services";
 
 export type NotarizationWorkflowResult = {
   fileName: string;
   hashValue: string;
   documentHash: DocumentHash | null;
   proof: NotarizationProof | null;
+  evidenceRecord: EvidenceRecord | null;
   serializedProofPayload: string;
   errors: string[];
 };
@@ -26,6 +29,7 @@ export class NotarizationWorkflow {
         hashValue: "",
         documentHash: null,
         proof: null,
+        evidenceRecord: null,
         serializedProofPayload: "",
         errors: validation.errors,
       };
@@ -39,6 +43,7 @@ export class NotarizationWorkflow {
     };
 
     const proof = NotarizationService.createProof(documentHash);
+    const evidenceRecord = EvidenceRecordService.createDraft(file.name, proof);
     const serializedProofPayload = ProofPayloadSerializer.serialize(proof);
 
     return {
@@ -46,6 +51,7 @@ export class NotarizationWorkflow {
       hashValue,
       documentHash,
       proof,
+      evidenceRecord,
       serializedProofPayload,
       errors: [],
     };
