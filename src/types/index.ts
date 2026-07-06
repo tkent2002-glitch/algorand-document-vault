@@ -6,3 +6,12 @@ export type {
   NotarizationStatus,
 } from "./Notarization";
 export type { VerificationResult, VerificationStatus } from "./Verification";
+
+export type {
+  NotarizationProof,
+  NotarizationProofStatus,
+  ProofPayload,
+  ProofSchemaVersion,
+  VerificationProof,
+  VerificationProofStatus,
+} from "./proof";
