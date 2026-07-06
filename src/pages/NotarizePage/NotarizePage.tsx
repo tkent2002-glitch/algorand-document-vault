@@ -1,10 +1,6 @@
 import { useState } from "react";
+import { DocumentPipeline } from "../../core";
 import type { NotarizationProof } from "../../types";
-import {
-  DocumentValidationService,
-  HashService,
-  NotarizationService,
-} from "../../services";
 import "./NotarizePage.css";
 
 function NotarizePage() {
@@ -15,28 +11,12 @@ function NotarizePage() {
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
-    const result = DocumentValidationService.validate(file);
+    const result = await DocumentPipeline.prepareNotarization(file);
 
+    setFileName(result.fileName);
+    setFileHash(result.hashValue);
+    setProof(result.proof);
     setErrors(result.errors);
-    setFileHash("");
-    setProof(null);
-    setFileName(file?.name ?? "");
-
-    if (!result.valid || !file) {
-      return;
-    }
-
-    const hashValue = await HashService.sha256FromFile(file);
-
-    const documentHash = {
-      algorithm: "SHA-256" as const,
-      value: hashValue,
-    };
-
-    const notarizationProof = NotarizationService.createProof(documentHash);
-
-    setFileHash(hashValue);
-    setProof(notarizationProof);
   }
 
   return (
