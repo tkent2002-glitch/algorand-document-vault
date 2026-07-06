@@ -1,5 +1,4 @@
 ﻿import { useEffect, useMemo, useState } from "react";
-import EvidenceCard from "../../components/cards/EvidenceCard";
 import EvidenceDetailsPanel from "../../components/evidence/EvidenceDetailsPanel";
 import { EvidenceRecordStoreService } from "../../services";
 import type { EvidenceRecord } from "../../services";
@@ -25,8 +24,7 @@ function buildEvidenceIndex(records: EvidenceRecord[]): EvidenceIndexItem[] {
 
   return Array.from(grouped.entries()).map(([hashValue, group]) => {
     const sorted = [...group].sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
     return {
@@ -38,11 +36,19 @@ function buildEvidenceIndex(records: EvidenceRecord[]): EvidenceIndexItem[] {
   });
 }
 
+function shorten(value: string): string {
+  if (value.length <= 18) {
+    return value;
+  }
+
+  return `${value.slice(0, 8)}...${value.slice(-6)}`;
+}
+
 function VaultPage() {
   const [records, setRecords] = useState<EvidenceRecord[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<VaultStatusFilter>("all");
-  const [selectedRecord, setSelectedRecord] = useState<EvidenceRecord | null>(null);
+  const [selectedHash, setSelectedHash] = useState<string>("");
 
   useEffect(() => {
     setRecords(EvidenceRecordStoreService.list());
@@ -61,10 +67,13 @@ function VaultPage() {
     return matchesSearch && matchesStatus;
   });
 
+  const selectedItem =
+    filteredIndex.find((item) => item.hashValue === selectedHash) ??
+    filteredIndex[0] ??
+    null;
+
   const draftCount = records.filter((record) => record.status === "draft").length;
-  const confirmedCount = records.filter(
-    (record) => record.status === "confirmed"
-  ).length;
+  const confirmedCount = records.filter((record) => record.status === "confirmed").length;
 
   return (
     <section className="page vault-page">
@@ -122,13 +131,6 @@ function VaultPage() {
         </select>
       </div>
 
-      {selectedRecord && (
-        <EvidenceDetailsPanel
-          record={selectedRecord}
-          onClose={() => setSelectedRecord(null)}
-        />
-      )}
-
       {records.length === 0 ? (
         <div className="vault-empty">
           <strong>No evidence records yet.</strong>
@@ -140,21 +142,58 @@ function VaultPage() {
           <p>Try changing the search text or status filter.</p>
         </div>
       ) : (
-        <div className="vault-list">
-          {filteredIndex.map((item) => (
-            <div className="vault-index-card" key={item.hashValue}>
-              <div className="vault-index-meta">
-                <p className="vault-index-label">Unique Document Fingerprint</p>
-                <h3>{item.documentName}</h3>
-                <p>Evidence records for this fingerprint: {item.records.length}</p>
-              </div>
+        <div className="evidence-workspace">
+          <aside className="evidence-index">
+            <h3>Unique Document Fingerprints</h3>
 
-              <EvidenceCard
-                record={item.latestRecord}
-                onViewDetails={setSelectedRecord}
-              />
-            </div>
-          ))}
+            {filteredIndex.map((item) => (
+              <button
+                className={
+                  selectedItem?.hashValue === item.hashValue
+                    ? "evidence-index-item active"
+                    : "evidence-index-item"
+                }
+                key={item.hashValue}
+                type="button"
+                onClick={() => setSelectedHash(item.hashValue)}
+              >
+                <strong>{item.documentName}</strong>
+                <span>{item.latestRecord.status}</span>
+                <span>{item.records.length} records</span>
+                <code>{shorten(item.hashValue)}</code>
+              </button>
+            ))}
+          </aside>
+
+          <main className="evidence-workspace-detail">
+            {selectedItem && (
+              <>
+                <div className="evidence-workspace-summary">
+                  <p className="vault-index-label">Selected Unique Document Fingerprint</p>
+                  <h3>{selectedItem.documentName}</h3>
+                  <p>Evidence records for this fingerprint: {selectedItem.records.length}</p>
+                  <code>{selectedItem.hashValue}</code>
+                </div>
+
+                <EvidenceDetailsPanel
+                  record={selectedItem.latestRecord}
+                  onClose={() => setSelectedHash("")}
+                />
+
+                <div className="evidence-history">
+                  <h3>Evidence History</h3>
+
+                  {selectedItem.records.map((record) => (
+                    <div className="evidence-history-item" key={record.id}>
+                      <strong>{record.status}</strong>
+                      <span>{new Date(record.createdAt).toLocaleString()}</span>
+                      <code>{shorten(record.id)}</code>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </main>
         </div>
       )}
     </section>
