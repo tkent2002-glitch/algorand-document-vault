@@ -1,11 +1,12 @@
-import type { WalletConnection } from "../../types/wallet";
+import { PeraWalletConnect } from "@perawallet/connect";
 
 export class WalletService {
 
-    static getConnection(): WalletConnection {
+    private static readonly pera =
+        new PeraWalletConnect();
 
-        return {
-            status: "disconnected"
-        };
+    static sdkLoaded(): boolean {
+
+        return WalletService.pera instanceof PeraWalletConnect;
     }
 }
