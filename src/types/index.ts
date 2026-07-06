@@ -15,3 +15,10 @@ export type {
   VerificationProof,
   VerificationProofStatus,
 } from "./proof";
+
+export type {
+  WalletConnection,
+  WalletConnectionStatus,
+} from "./wallet";
+
+export type { AlgorandProofTransactionDraft } from "./algorand";
