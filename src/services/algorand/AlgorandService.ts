@@ -1,21 +1,27 @@
+import algosdk from "algosdk";
 import type { NotarizationProof } from "../../types";
 
 export class AlgorandService {
+  static getSdkStatus(): string {
+    return typeof algosdk === "object"
+      ? "Algorand SDK loaded"
+      : "Algorand SDK unavailable";
+  }
 
-    static async submitProof(
-        proof: NotarizationProof
-    ): Promise<NotarizationProof> {
+  static createTestAccountAddress(): string {
+    const account = algosdk.generateAccount();
 
-        console.log(
-            "Algorand submission placeholder",
-            proof
-        );
+    return account.addr.toString();
+  }
 
-        return {
+  static async submitProof(
+    proof: NotarizationProof
+  ): Promise<NotarizationProof> {
+    console.log("Algorand submission placeholder", proof);
 
-            ...proof,
-
-            status: "pending_wallet_signature"
-        };
-    }
+    return {
+      ...proof,
+      status: "pending_wallet_signature",
+    };
+  }
 }
