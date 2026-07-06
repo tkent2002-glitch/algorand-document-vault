@@ -1,4 +1,5 @@
 import { PeraWalletConnect } from "@perawallet/connect";
+import type { Transaction } from "algosdk";
 import type { WalletConnection } from "../../types/wallet";
 
 export class WalletService {
@@ -54,5 +55,15 @@ export class WalletService {
 
   static isConnected(): boolean {
     return WalletService.pera.isConnected;
+  }
+
+  static async signSingleTransaction(
+    transaction: Transaction
+  ): Promise<Uint8Array> {
+    const signedTransactions = await WalletService.pera.signTransaction([
+      [{ txn: transaction }],
+    ]);
+
+    return signedTransactions[0];
   }
 }
