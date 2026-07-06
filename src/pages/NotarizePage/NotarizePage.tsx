@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NotarizationWorkflow } from "../../core";
+import { WalletService } from "../../services";
 import type { NotarizationProof } from "../../types";
+import type { WalletConnection } from "../../types/wallet";
 import "./NotarizePage.css";
 
 function NotarizePage() {
@@ -10,6 +12,13 @@ function NotarizePage() {
   const [serializedProofPayload, setSerializedProofPayload] =
     useState<string>("");
   const [errors, setErrors] = useState<string[]>([]);
+  const [wallet, setWallet] = useState<WalletConnection>({
+    status: "disconnected",
+  });
+
+  useEffect(() => {
+    WalletService.reconnect().then(setWallet);
+  }, []);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
@@ -22,12 +31,25 @@ function NotarizePage() {
     setErrors(result.errors);
   }
 
+  const walletReady = wallet.status === "connected";
+
   return (
     <section className="page">
       <h2>Notarize Document</h2>
       <p>Upload a document and preview the proof payload.</p>
 
       <div className="notarize-panel">
+        <div className="notarize-result">
+          <strong>Wallet Readiness:</strong>
+          <p>{walletReady ? "Pera Wallet connected." : "Pera Wallet not connected."}</p>
+
+          {wallet.address && (
+            <p>
+              <strong>Wallet Address:</strong> {wallet.address}
+            </p>
+          )}
+        </div>
+
         <input type="file" onChange={handleFileChange} />
 
         {errors.length > 0 && (
