@@ -2,6 +2,7 @@ export {
   AlgorandProofNoteService,
   AlgorandProofTransactionDraftService,
   AlgorandService,
+  AlgorandTransactionBuilderService,
 } from "./algorand";
 export { HashService } from "./crypto";
 export { DocumentValidationService } from "./documents";

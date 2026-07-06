@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { NotarizationWorkflow } from "../../core";
-import { AlgorandProofTransactionDraftService, WalletService } from "../../services";
-import type { AlgorandProofTransactionDraft, NotarizationProof } from "../../types";
+import {
+  AlgorandProofTransactionDraftService,
+  WalletService,
+} from "../../services";
+import type {
+  AlgorandProofTransactionDraft,
+  NotarizationProof,
+} from "../../types";
 import type { WalletConnection } from "../../types/wallet";
 import "./NotarizePage.css";
 
@@ -45,16 +51,39 @@ function NotarizePage() {
   }
 
   const walletReady = wallet.status === "connected";
+  const readyForSignature = Boolean(walletReady && proof && transactionDraft);
+
+  const prettyPayload = serializedProofPayload
+    ? JSON.stringify(JSON.parse(serializedProofPayload), null, 2)
+    : "";
 
   return (
     <section className="page">
       <h2>Notarize Document</h2>
-      <p>Upload a document and preview the proof payload.</p>
+      <p>Upload a document, inspect its proof, then prepare for Algorand notarization.</p>
 
       <div className="notarize-panel">
         <div className="notarize-result">
-          <strong>Wallet Readiness:</strong>
-          <p>{walletReady ? "Pera Wallet connected." : "Pera Wallet not connected."}</p>
+          <strong>Notarization Progress</strong>
+          <p>{fileName ? "? Document selected" : "? Document selected"}</p>
+          <p>{fileHash ? "? SHA-256 hash generated" : "? SHA-256 hash generated"}</p>
+          <p>{proof ? "? Proof created" : "? Proof created"}</p>
+          <p>{serializedProofPayload ? "? Payload prepared" : "? Payload prepared"}</p>
+          <p>{walletReady ? "? Wallet connected" : "? Wallet connected"}</p>
+          <p>{transactionDraft ? "? Transaction draft prepared" : "? Transaction draft prepared"}</p>
+          <p>{readyForSignature ? "? Ready for signature" : "? Ready for signature"}</p>
+        </div>
+
+        <div className="notarize-result">
+          <strong>Wallet Status</strong>
+          <p>{walletReady ? "Pera Wallet connected." : "No Pera Wallet connected."}</p>
+
+          {!walletReady && (
+            <p>
+              To continue, install or open Pera Wallet, connect it on the Wallet page,
+              then return here.
+            </p>
+          )}
 
           {wallet.address && (
             <p>
@@ -87,33 +116,37 @@ function NotarizePage() {
           </div>
         )}
 
-        {proof && (
+        {prettyPayload && (
           <div className="notarize-result">
-            <strong>Proof Status:</strong>
-            <p>{proof.status}</p>
-            <strong>Proof Created:</strong>
-            <p>{proof.createdAt}</p>
-          </div>
-        )}
-
-        {serializedProofPayload && (
-          <div className="notarize-result">
-            <strong>Blockchain Proof Payload Preview:</strong>
+            <strong>Blockchain Proof Payload Preview</strong>
+            <p>This is the only document proof data prepared for Algorand.</p>
             <pre>
-              <code>{serializedProofPayload}</code>
+              <code>{prettyPayload}</code>
             </pre>
           </div>
         )}
 
         {transactionDraft && (
           <div className="notarize-result">
-            <strong>Algorand Transaction Draft:</strong>
+            <strong>Transaction Review</strong>
+            <p>Network: TestNet</p>
+            <p>Transaction Type: Payment transaction with proof note</p>
+            <p>Amount: 0 ALGO</p>
+            <p>Estimated Minimum Fee: 0.001 ALGO</p>
             <p>Sender: {transactionDraft.senderAddress}</p>
             <p>Receiver: {transactionDraft.receiverAddress}</p>
-            <p>Note bytes: {transactionDraft.noteByteLength}</p>
-            <p>Minimum fee: {transactionDraft.minimumFeeMicroAlgos} microAlgos</p>
+            <p>Note Size: {transactionDraft.noteByteLength} bytes</p>
           </div>
         )}
+
+        <div className="notarize-result">
+          <strong>Signature Readiness</strong>
+          <p>
+            {readyForSignature
+              ? "Ready for Pera Wallet signature."
+              : "Not ready for signature."}
+          </p>
+        </div>
       </div>
     </section>
   );

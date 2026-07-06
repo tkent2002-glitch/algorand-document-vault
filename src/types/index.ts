@@ -25,6 +25,7 @@ export type {
   AlgorandNetwork,
   AlgorandNetworkConfig,
   AlgorandProofTransactionDraft,
+  AlgorandUnsignedProofTransaction,
 } from "./algorand";
 
 export { DEFAULT_ALGORAND_NETWORK_CONFIG } from "./algorand";
