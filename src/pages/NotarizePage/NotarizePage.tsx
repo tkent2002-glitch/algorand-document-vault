@@ -14,6 +14,7 @@ import type { EvidenceRecord } from "../../services";
 import type { WalletConnection } from "../../types/wallet";
 import BlockchainPreparationStep from "./components/BlockchainPreparationStep";
 import DocumentSummaryStep from "./components/DocumentSummaryStep";
+import DuplicateEvidenceWarning from "./components/DuplicateEvidenceWarning";
 import EvidenceRecordPreview from "./components/EvidenceRecordPreview";
 import EvidenceReviewStep from "./components/EvidenceReviewStep";
 import ProgressTimeline from "./components/ProgressTimeline";
@@ -26,6 +27,7 @@ function NotarizePage() {
   const [fileHash, setFileHash] = useState<string>("");
   const [proof, setProof] = useState<NotarizationProof | null>(null);
   const [evidenceRecord, setEvidenceRecord] = useState<EvidenceRecord | null>(null);
+  const [duplicateRecord, setDuplicateRecord] = useState<EvidenceRecord | null>(null);
   const [transactionDraft, setTransactionDraft] =
     useState<AlgorandProofTransactionDraft | null>(null);
   const [signedTransaction, setSignedTransaction] =
@@ -49,6 +51,7 @@ function NotarizePage() {
     setFileHash(result.hashValue);
     setProof(result.proof);
     setEvidenceRecord(result.evidenceRecord);
+    setDuplicateRecord(result.duplicateRecord);
     setSerializedProofPayload(result.serializedProofPayload);
     setErrors(result.errors);
     setSignedTransaction(null);
@@ -119,6 +122,7 @@ function NotarizePage() {
               fileHash={fileHash}
               errors={errors}
             />
+            <DuplicateEvidenceWarning duplicateRecord={duplicateRecord} />
             <EvidenceRecordPreview evidenceRecord={evidenceRecord} />
           </div>
         </div>
