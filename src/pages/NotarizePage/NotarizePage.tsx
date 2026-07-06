@@ -7,6 +7,8 @@ function NotarizePage() {
   const [fileName, setFileName] = useState<string>("");
   const [fileHash, setFileHash] = useState<string>("");
   const [proof, setProof] = useState<NotarizationProof | null>(null);
+  const [serializedProofPayload, setSerializedProofPayload] =
+    useState<string>("");
   const [errors, setErrors] = useState<string[]>([]);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -16,13 +18,14 @@ function NotarizePage() {
     setFileName(result.fileName);
     setFileHash(result.hashValue);
     setProof(result.proof);
+    setSerializedProofPayload(result.serializedProofPayload);
     setErrors(result.errors);
   }
 
   return (
     <section className="page">
       <h2>Notarize Document</h2>
-      <p>Upload a document and create a SHA-256 fingerprint.</p>
+      <p>Upload a document and preview the proof payload.</p>
 
       <div className="notarize-panel">
         <input type="file" onChange={handleFileChange} />
@@ -55,6 +58,15 @@ function NotarizePage() {
             <p>{proof.status}</p>
             <strong>Proof Created:</strong>
             <p>{proof.createdAt}</p>
+          </div>
+        )}
+
+        {serializedProofPayload && (
+          <div className="notarize-result">
+            <strong>Blockchain Proof Payload Preview:</strong>
+            <pre>
+              <code>{serializedProofPayload}</code>
+            </pre>
           </div>
         )}
       </div>
