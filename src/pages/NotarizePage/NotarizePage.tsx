@@ -25,15 +25,12 @@ function NotarizePage() {
   const [fileName, setFileName] = useState<string>("");
   const [fileHash, setFileHash] = useState<string>("");
   const [proof, setProof] = useState<NotarizationProof | null>(null);
-  const [evidenceRecord, setEvidenceRecord] = useState<EvidenceRecord | null>(
-    null
-  );
+  const [evidenceRecord, setEvidenceRecord] = useState<EvidenceRecord | null>(null);
   const [transactionDraft, setTransactionDraft] =
     useState<AlgorandProofTransactionDraft | null>(null);
   const [signedTransaction, setSignedTransaction] =
     useState<AlgorandSignedProofTransaction | null>(null);
-  const [serializedProofPayload, setSerializedProofPayload] =
-    useState<string>("");
+  const [serializedProofPayload, setSerializedProofPayload] = useState<string>("");
   const [errors, setErrors] = useState<string[]>([]);
   const [signingMessage, setSigningMessage] = useState<string>("");
   const [wallet, setWallet] = useState<WalletConnection>({
@@ -101,14 +98,42 @@ function NotarizePage() {
     : "";
 
   return (
-    <section className="page">
-      <h2>Notarize Document</h2>
-      <p>
-        Upload a document, inspect its proof, then prepare for Algorand
-        notarization.
-      </p>
+    <section className="page notarize-page">
+      <div className="notarize-header">
+        <h2>Notarize Document</h2>
+        <p>
+          Create cryptographic evidence for one document and prepare it for
+          Algorand notarization.
+        </p>
+      </div>
 
-      <div className="notarize-panel">
+      <div className="notarize-workspace">
+        <div className="notarize-row">
+          <div className="notarize-section">
+            <UploadStep onFileChange={handleFileChange} />
+          </div>
+
+          <div className="notarize-section">
+            <DocumentSummaryStep
+              fileName={fileName}
+              fileHash={fileHash}
+              errors={errors}
+            />
+            <EvidenceRecordPreview evidenceRecord={evidenceRecord} />
+          </div>
+        </div>
+
+        <BlockchainPreparationStep transactionDraft={transactionDraft} />
+
+        <EvidenceReviewStep prettyPayload={prettyPayload} />
+
+        <SignSubmitStep
+          readyForSignature={readyForSignature}
+          signingMessage={signingMessage}
+          signedTransaction={signedTransaction}
+          onSignTransaction={handleSignTransaction}
+        />
+
         <ProgressTimeline
           fileName={fileName}
           fileHash={fileHash}
@@ -118,45 +143,6 @@ function NotarizePage() {
           walletReady={walletReady}
           transactionDraft={transactionDraft}
           signedTransaction={signedTransaction}
-        />
-
-        <div className="notarize-result">
-          <strong>Wallet Status</strong>
-          <p>{walletReady ? "Pera Wallet connected." : "No Pera Wallet connected."}</p>
-
-          {!walletReady && (
-            <p>
-              To continue, install or open Pera Wallet, connect it on the Wallet
-              page, then return here.
-            </p>
-          )}
-
-          {wallet.address && (
-            <p>
-              <strong>Wallet Address:</strong> {wallet.address}
-            </p>
-          )}
-        </div>
-
-        <UploadStep onFileChange={handleFileChange} />
-
-        <DocumentSummaryStep
-          fileName={fileName}
-          fileHash={fileHash}
-          errors={errors}
-        />
-
-        <EvidenceRecordPreview evidenceRecord={evidenceRecord} />
-
-        <EvidenceReviewStep prettyPayload={prettyPayload} />
-
-        <BlockchainPreparationStep transactionDraft={transactionDraft} />
-
-        <SignSubmitStep
-          readyForSignature={readyForSignature}
-          signingMessage={signingMessage}
-          signedTransaction={signedTransaction}
-          onSignTransaction={handleSignTransaction}
         />
       </div>
     </section>
