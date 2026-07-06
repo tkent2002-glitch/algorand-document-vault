@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { NotarizationWorkflow } from "../../core";
 import {
   AlgorandProofTransactionDraftService,
+  AlgorandTransactionSigningService,
   WalletService,
 } from "../../services";
 import type {
   AlgorandProofTransactionDraft,
+  AlgorandSignedProofTransaction,
   NotarizationProof,
 } from "../../types";
 import type { WalletConnection } from "../../types/wallet";
@@ -17,9 +19,12 @@ function NotarizePage() {
   const [proof, setProof] = useState<NotarizationProof | null>(null);
   const [transactionDraft, setTransactionDraft] =
     useState<AlgorandProofTransactionDraft | null>(null);
+  const [signedTransaction, setSignedTransaction] =
+    useState<AlgorandSignedProofTransaction | null>(null);
   const [serializedProofPayload, setSerializedProofPayload] =
     useState<string>("");
   const [errors, setErrors] = useState<string[]>([]);
+  const [signingMessage, setSigningMessage] = useState<string>("");
   const [wallet, setWallet] = useState<WalletConnection>({
     status: "disconnected",
   });
@@ -37,6 +42,8 @@ function NotarizePage() {
     setProof(result.proof);
     setSerializedProofPayload(result.serializedProofPayload);
     setErrors(result.errors);
+    setSignedTransaction(null);
+    setSigningMessage("");
 
     if (result.proof && wallet.address) {
       const draft = AlgorandProofTransactionDraftService.createDraft(
@@ -47,6 +54,28 @@ function NotarizePage() {
       setTransactionDraft(draft);
     } else {
       setTransactionDraft(null);
+    }
+  }
+
+  async function handleSignTransaction() {
+    if (!proof || !wallet.address) {
+      setSigningMessage("Proof and connected wallet are required before signing.");
+      return;
+    }
+
+    try {
+      setSigningMessage("Opening Pera Wallet for signature approval...");
+
+      const signed = await AlgorandTransactionSigningService.signProofTransaction(
+        proof,
+        wallet.address
+      );
+
+      setSignedTransaction(signed);
+      setSigningMessage("Transaction signed successfully. It has not been submitted to Algorand yet.");
+    } catch (error) {
+      console.error("Transaction signing failed:", error);
+      setSigningMessage("Transaction signing failed or was rejected.");
     }
   }
 
@@ -71,7 +100,9 @@ function NotarizePage() {
           <p>{serializedProofPayload ? "? Payload prepared" : "? Payload prepared"}</p>
           <p>{walletReady ? "? Wallet connected" : "? Wallet connected"}</p>
           <p>{transactionDraft ? "? Transaction draft prepared" : "? Transaction draft prepared"}</p>
-          <p>{readyForSignature ? "? Ready for signature" : "? Ready for signature"}</p>
+          <p>{signedTransaction ? "? Transaction signed" : "? Transaction signed"}</p>
+          <p>? Transaction submitted</p>
+          <p>? Confirmation received</p>
         </div>
 
         <div className="notarize-result">
@@ -146,7 +177,29 @@ function NotarizePage() {
               ? "Ready for Pera Wallet signature."
               : "Not ready for signature."}
           </p>
+
+          {signingMessage && <p>{signingMessage}</p>}
+
+          <button onClick={handleSignTransaction} disabled={!readyForSignature}>
+            Sign with Pera Wallet
+          </button>
         </div>
+
+        {signedTransaction && (
+          <div className="notarize-result">
+            <strong>Submission Confirmation</strong>
+            <p>Transaction signed successfully.</p>
+            <p>Transaction ID: {signedTransaction.txId}</p>
+            <p>Signed Bytes: {signedTransaction.signedTransactionByteLength}</p>
+            <p>Signed At: {signedTransaction.signedAt}</p>
+            <p>Status: Signed but not submitted to Algorand.</p>
+            <p>Next step: submit this signed transaction to Algorand TestNet.</p>
+
+            <button disabled>
+              Submit to Algorand Coming Next
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
