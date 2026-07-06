@@ -1,4 +1,65 @@
-.page {
-  padding: 40px;
+.verify-page {
+  text-align: left;
+}
+
+.verify-header {
+  max-width: 760px;
+  margin: 0 auto 1.5rem;
   text-align: center;
+}
+
+.verify-eyebrow {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.verify-workspace {
+  display: grid;
+  gap: 1rem;
+}
+
+.verify-card,
+.verify-match {
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--social-bg);
+  box-shadow: var(--shadow);
+}
+
+.verify-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.verify-card strong,
+.verify-match h2 {
+  color: var(--text-h);
+}
+
+.verify-card input {
+  width: 100%;
+}
+
+.verify-card code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.verify-success {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.verify-warning {
+  color: #ca8a04;
+  font-weight: 700;
+}
+
+.verify-match {
+  margin-top: 1.5rem;
 }

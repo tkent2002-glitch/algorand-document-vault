@@ -1,0 +1,14 @@
+﻿.ui-page-header {
+  max-width: 800px;
+  margin: 0 auto 1.5rem;
+  text-align: center;
+}
+
+.ui-page-eyebrow {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
