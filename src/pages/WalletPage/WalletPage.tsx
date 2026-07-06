@@ -8,19 +8,38 @@ function WalletPage() {
     status: "disconnected",
   });
 
+  const [message, setMessage] = useState<string>("Wallet not connected.");
+
   useEffect(() => {
-    WalletService.reconnect().then(setConnection);
+    WalletService.reconnect().then((result) => {
+      setConnection(result);
+      setMessage(
+        result.status === "connected"
+          ? "Existing Pera Wallet session restored."
+          : "Wallet not connected."
+      );
+    });
   }, []);
 
   async function handleConnect() {
     setConnection({ status: "connecting" });
+    setMessage("Opening Pera Wallet connection...");
+
     const result = await WalletService.connect();
+
     setConnection(result);
+    setMessage(
+      result.status === "connected"
+        ? "Pera Wallet connected successfully."
+        : "Pera Wallet connection was not completed."
+    );
   }
 
   async function handleDisconnect() {
     const result = await WalletService.disconnect();
+
     setConnection(result);
+    setMessage("Pera Wallet disconnected.");
   }
 
   const isConnected = connection.status === "connected";
@@ -28,11 +47,15 @@ function WalletPage() {
   return (
     <section className="page">
       <h2>Wallet Status</h2>
-      <p>Connect your Pera Wallet to begin notarizing documents.</p>
+      <p>Connect your Pera Wallet to prepare for Algorand notarization.</p>
 
       <div className="wallet-panel">
         <p>
           <strong>Status:</strong> {connection.status}
+        </p>
+
+        <p>
+          <strong>Message:</strong> {message}
         </p>
 
         {connection.address && (
