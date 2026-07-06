@@ -1,4 +1,4 @@
-import {
+﻿import {
   DocumentValidationService,
   EvidenceRecordService,
   EvidenceRecordStoreService,
@@ -16,6 +16,7 @@ export type NotarizationWorkflowResult = {
   documentHash: DocumentHash | null;
   proof: NotarizationProof | null;
   evidenceRecord: EvidenceRecord | null;
+  duplicateRecord: EvidenceRecord | null;
   serializedProofPayload: string;
   errors: string[];
 };
@@ -31,12 +32,14 @@ export class NotarizationWorkflow {
         documentHash: null,
         proof: null,
         evidenceRecord: null,
+        duplicateRecord: null,
         serializedProofPayload: "",
         errors: validation.errors,
       };
     }
 
     const hashValue = await HashService.sha256FromFile(file);
+    const duplicateRecord = EvidenceRecordStoreService.findByHash(hashValue);
 
     const documentHash: DocumentHash = {
       algorithm: "SHA-256",
@@ -55,6 +58,7 @@ export class NotarizationWorkflow {
       documentHash,
       proof,
       evidenceRecord,
+      duplicateRecord,
       serializedProofPayload,
       errors: [],
     };
