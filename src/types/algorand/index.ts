@@ -4,3 +4,4 @@ export type { AlgorandProofTransactionDraft } from "./AlgorandProofTransactionDr
 export type { AlgorandUnsignedProofTransaction } from "./AlgorandUnsignedProofTransaction";
 export type { AlgorandSignedProofTransaction } from "./AlgorandSignedProofTransaction";
 export type { AlgorandTransactionInspection } from "./AlgorandTransactionInspection";
+export type { AlgorandSubmissionResult } from "./AlgorandSubmissionResult";

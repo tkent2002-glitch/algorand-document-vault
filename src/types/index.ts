@@ -28,6 +28,7 @@ export type {
   AlgorandUnsignedProofTransaction,
   AlgorandSignedProofTransaction,
   AlgorandTransactionInspection,
+  AlgorandSubmissionResult,
 } from "./algorand";
 
 export { DEFAULT_ALGORAND_NETWORK_CONFIG } from "./algorand";
