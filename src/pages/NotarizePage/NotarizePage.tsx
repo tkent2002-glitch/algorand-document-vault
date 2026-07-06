@@ -1,10 +1,16 @@
 import { useState } from "react";
-import { DocumentValidationService, HashService } from "../../services";
+import type { NotarizationProof } from "../../types";
+import {
+  DocumentValidationService,
+  HashService,
+  NotarizationService,
+} from "../../services";
 import "./NotarizePage.css";
 
 function NotarizePage() {
   const [fileName, setFileName] = useState<string>("");
   const [fileHash, setFileHash] = useState<string>("");
+  const [proof, setProof] = useState<NotarizationProof | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -13,14 +19,24 @@ function NotarizePage() {
 
     setErrors(result.errors);
     setFileHash("");
+    setProof(null);
     setFileName(file?.name ?? "");
 
     if (!result.valid || !file) {
       return;
     }
 
-    const hash = await HashService.sha256FromFile(file);
-    setFileHash(hash);
+    const hashValue = await HashService.sha256FromFile(file);
+
+    const documentHash = {
+      algorithm: "SHA-256" as const,
+      value: hashValue,
+    };
+
+    const notarizationProof = NotarizationService.createProof(documentHash);
+
+    setFileHash(hashValue);
+    setProof(notarizationProof);
   }
 
   return (
@@ -50,6 +66,15 @@ function NotarizePage() {
           <div className="notarize-result">
             <strong>SHA-256 Hash:</strong>
             <code>{fileHash}</code>
+          </div>
+        )}
+
+        {proof && (
+          <div className="notarize-result">
+            <strong>Proof Status:</strong>
+            <p>{proof.status}</p>
+            <strong>Proof Created:</strong>
+            <p>{proof.createdAt}</p>
           </div>
         )}
       </div>
