@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NotarizationWorkflow } from "../../core";
-import { WalletService } from "../../services";
-import type { NotarizationProof } from "../../types";
+import { AlgorandProofTransactionDraftService, WalletService } from "../../services";
+import type { AlgorandProofTransactionDraft, NotarizationProof } from "../../types";
 import type { WalletConnection } from "../../types/wallet";
 import "./NotarizePage.css";
 
@@ -9,6 +9,8 @@ function NotarizePage() {
   const [fileName, setFileName] = useState<string>("");
   const [fileHash, setFileHash] = useState<string>("");
   const [proof, setProof] = useState<NotarizationProof | null>(null);
+  const [transactionDraft, setTransactionDraft] =
+    useState<AlgorandProofTransactionDraft | null>(null);
   const [serializedProofPayload, setSerializedProofPayload] =
     useState<string>("");
   const [errors, setErrors] = useState<string[]>([]);
@@ -29,6 +31,17 @@ function NotarizePage() {
     setProof(result.proof);
     setSerializedProofPayload(result.serializedProofPayload);
     setErrors(result.errors);
+
+    if (result.proof && wallet.address) {
+      const draft = AlgorandProofTransactionDraftService.createDraft(
+        result.proof,
+        wallet.address
+      );
+
+      setTransactionDraft(draft);
+    } else {
+      setTransactionDraft(null);
+    }
   }
 
   const walletReady = wallet.status === "connected";
@@ -89,6 +102,16 @@ function NotarizePage() {
             <pre>
               <code>{serializedProofPayload}</code>
             </pre>
+          </div>
+        )}
+
+        {transactionDraft && (
+          <div className="notarize-result">
+            <strong>Algorand Transaction Draft:</strong>
+            <p>Sender: {transactionDraft.senderAddress}</p>
+            <p>Receiver: {transactionDraft.receiverAddress}</p>
+            <p>Note bytes: {transactionDraft.noteByteLength}</p>
+            <p>Minimum fee: {transactionDraft.minimumFeeMicroAlgos} microAlgos</p>
           </div>
         )}
       </div>
