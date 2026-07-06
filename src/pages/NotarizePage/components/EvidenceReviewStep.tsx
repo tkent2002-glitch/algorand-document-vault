@@ -1,4 +1,6 @@
-﻿type EvidenceReviewStepProps = {
+﻿import EvidenceSummaryCard from "../../../components/cards/EvidenceSummaryCard";
+
+type EvidenceReviewStepProps = {
   prettyPayload: string;
 };
 
@@ -9,11 +11,7 @@ function EvidenceReviewStep({ prettyPayload }: EvidenceReviewStepProps) {
 
   return (
     <div className="notarize-result">
-      <strong>Blockchain Proof Payload Preview</strong>
-      <p>This is the only document proof data prepared for Algorand.</p>
-      <pre>
-        <code>{prettyPayload}</code>
-      </pre>
+      <EvidenceSummaryCard payloadJson={prettyPayload} />
     </div>
   );
 }
