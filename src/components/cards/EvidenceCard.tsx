@@ -1,9 +1,10 @@
-import type { EvidenceRecord } from "../../services";
+﻿import type { EvidenceRecord } from "../../services";
 import StatusBadge from "../status/StatusBadge";
 import "./EvidenceCard.css";
 
 type EvidenceCardProps = {
   record: EvidenceRecord;
+  onViewDetails?: (record: EvidenceRecord) => void;
 };
 
 function shortenHash(hash: string): string {
@@ -14,7 +15,7 @@ function shortenHash(hash: string): string {
   return `${hash.slice(0, 10)}...${hash.slice(-8)}`;
 }
 
-function EvidenceCard({ record }: EvidenceCardProps) {
+function EvidenceCard({ record, onViewDetails }: EvidenceCardProps) {
   return (
     <article className="evidence-card">
       <div className="evidence-card-header">
@@ -56,7 +57,9 @@ function EvidenceCard({ record }: EvidenceCardProps) {
       )}
 
       <div className="evidence-card-actions">
-        <button type="button">View Details</button>
+        <button type="button" onClick={() => onViewDetails?.(record)}>
+          View Details
+        </button>
         <button type="button">Verify</button>
       </div>
     </article>

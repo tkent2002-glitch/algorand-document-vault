@@ -1,5 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import EvidenceCard from "../../components/cards/EvidenceCard";
+import EvidenceDetailsPanel from "../../components/evidence/EvidenceDetailsPanel";
 import { EvidenceRecordStoreService } from "../../services";
 import type { EvidenceRecord } from "../../services";
 import "./VaultPage.css";
@@ -41,6 +42,7 @@ function VaultPage() {
   const [records, setRecords] = useState<EvidenceRecord[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<VaultStatusFilter>("all");
+  const [selectedRecord, setSelectedRecord] = useState<EvidenceRecord | null>(null);
 
   useEffect(() => {
     setRecords(EvidenceRecordStoreService.list());
@@ -120,6 +122,13 @@ function VaultPage() {
         </select>
       </div>
 
+      {selectedRecord && (
+        <EvidenceDetailsPanel
+          record={selectedRecord}
+          onClose={() => setSelectedRecord(null)}
+        />
+      )}
+
       {records.length === 0 ? (
         <div className="vault-empty">
           <strong>No evidence records yet.</strong>
@@ -140,7 +149,10 @@ function VaultPage() {
                 <p>Evidence records for this fingerprint: {item.records.length}</p>
               </div>
 
-              <EvidenceCard record={item.latestRecord} />
+              <EvidenceCard
+                record={item.latestRecord}
+                onViewDetails={setSelectedRecord}
+              />
             </div>
           ))}
         </div>
