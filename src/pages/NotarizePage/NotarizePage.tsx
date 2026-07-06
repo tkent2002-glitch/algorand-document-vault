@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DocumentPipeline } from "../../core";
+import { NotarizationWorkflow } from "../../core";
 import type { NotarizationProof } from "../../types";
 import "./NotarizePage.css";
 
@@ -11,7 +11,7 @@ function NotarizePage() {
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
-    const result = await DocumentPipeline.prepareNotarization(file);
+    const result = await NotarizationWorkflow.execute(file);
 
     setFileName(result.fileName);
     setFileHash(result.hashValue);
