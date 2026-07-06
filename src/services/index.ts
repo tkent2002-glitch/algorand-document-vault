@@ -1,3 +1,4 @@
+export { AlgorandService } from "./algorand";
 export { HashService } from "./crypto";
 export { DocumentValidationService } from "./documents";
 export { NotarizationService } from "./notarization";
