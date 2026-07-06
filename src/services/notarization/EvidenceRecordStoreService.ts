@@ -1,4 +1,4 @@
-import type { EvidenceRecord } from "./EvidenceRecordService";
+﻿import type { EvidenceRecord } from "./EvidenceRecordService";
 
 const STORAGE_KEY = "algorand-document-vault:evidence-records";
 
@@ -11,6 +11,12 @@ export class EvidenceRecordStoreService {
     }
 
     return JSON.parse(raw) as EvidenceRecord[];
+  }
+
+  static findByHash(hashValue: string): EvidenceRecord | null {
+    const records = this.list();
+
+    return records.find((record) => record.hashValue === hashValue) ?? null;
   }
 
   static save(record: EvidenceRecord): void {
