@@ -1,0 +1,77 @@
+.evidence-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: left;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--social-bg);
+  box-shadow: var(--shadow);
+}
+
+.evidence-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.evidence-card-eyebrow {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.25rem;
+}
+
+.evidence-card h3 {
+  color: var(--text-h);
+  margin: 0;
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
+}
+
+.evidence-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.evidence-card-grid div,
+.evidence-card-transaction {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.evidence-card span {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.evidence-card strong {
+  color: var(--text-h);
+}
+
+.evidence-card code {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.evidence-card-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.evidence-card-actions button {
+  cursor: pointer;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 700;
+}

@@ -1,4 +1,13 @@
-.page {
-  padding: 40px;
-  text-align: center;
+.vault-empty {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--social-bg);
+}
+
+.vault-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
 }

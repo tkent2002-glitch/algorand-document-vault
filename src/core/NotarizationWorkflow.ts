@@ -1,6 +1,7 @@
 import {
   DocumentValidationService,
   EvidenceRecordService,
+  EvidenceRecordStoreService,
   HashService,
   NotarizationService,
   ProofPayloadSerializer,
@@ -44,6 +45,8 @@ export class NotarizationWorkflow {
 
     const proof = NotarizationService.createProof(documentHash);
     const evidenceRecord = EvidenceRecordService.createDraft(file.name, proof);
+    EvidenceRecordStoreService.save(evidenceRecord);
+
     const serializedProofPayload = ProofPayloadSerializer.serialize(proof);
 
     return {

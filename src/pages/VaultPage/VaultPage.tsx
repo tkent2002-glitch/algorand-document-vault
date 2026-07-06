@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import EvidenceCard from "../../components/cards/EvidenceCard";
 import { EvidenceRecordStoreService } from "../../services";
 import type { EvidenceRecord } from "../../services";
 import "./VaultPage.css";
@@ -23,17 +24,7 @@ function VaultPage() {
       ) : (
         <div className="vault-list">
           {records.map((record) => (
-            <div className="vault-card" key={record.id}>
-              <strong>{record.documentName}</strong>
-              <p>Status: {record.status}</p>
-              <p>Algorithm: {record.hashAlgorithm}</p>
-              <p>Hash:</p>
-              <code>{record.hashValue}</code>
-              <p>Created: {record.createdAt}</p>
-              {record.algorandTransactionId && (
-                <p>Transaction: {record.algorandTransactionId}</p>
-              )}
-            </div>
+            <EvidenceCard record={record} key={record.id} />
           ))}
         </div>
       )}
