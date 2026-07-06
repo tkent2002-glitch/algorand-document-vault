@@ -10,6 +10,7 @@ import type {
   AlgorandSignedProofTransaction,
   NotarizationProof,
 } from "../../types";
+import type { EvidenceRecord } from "../../services";
 import type { WalletConnection } from "../../types/wallet";
 import "./NotarizePage.css";
 
@@ -17,6 +18,7 @@ function NotarizePage() {
   const [fileName, setFileName] = useState<string>("");
   const [fileHash, setFileHash] = useState<string>("");
   const [proof, setProof] = useState<NotarizationProof | null>(null);
+  const [evidenceRecord, setEvidenceRecord] = useState<EvidenceRecord | null>(null);
   const [transactionDraft, setTransactionDraft] =
     useState<AlgorandProofTransactionDraft | null>(null);
   const [signedTransaction, setSignedTransaction] =
@@ -40,6 +42,7 @@ function NotarizePage() {
     setFileName(result.fileName);
     setFileHash(result.hashValue);
     setProof(result.proof);
+    setEvidenceRecord(result.evidenceRecord);
     setSerializedProofPayload(result.serializedProofPayload);
     setErrors(result.errors);
     setSignedTransaction(null);
@@ -97,6 +100,7 @@ function NotarizePage() {
           <p>{fileName ? "? Document selected" : "? Document selected"}</p>
           <p>{fileHash ? "? SHA-256 hash generated" : "? SHA-256 hash generated"}</p>
           <p>{proof ? "? Proof created" : "? Proof created"}</p>
+          <p>{evidenceRecord ? "? Evidence record created" : "? Evidence record created"}</p>
           <p>{serializedProofPayload ? "? Payload prepared" : "? Payload prepared"}</p>
           <p>{walletReady ? "? Wallet connected" : "? Wallet connected"}</p>
           <p>{transactionDraft ? "? Transaction draft prepared" : "? Transaction draft prepared"}</p>
@@ -144,6 +148,16 @@ function NotarizePage() {
           <div className="notarize-result">
             <strong>SHA-256 Hash:</strong>
             <code>{fileHash}</code>
+          </div>
+        )}
+
+        {evidenceRecord && (
+          <div className="notarize-result">
+            <strong>Evidence Record Preview</strong>
+            <p>Record ID: {evidenceRecord.id}</p>
+            <p>Status: {evidenceRecord.status}</p>
+            <p>Document Name: {evidenceRecord.documentName}</p>
+            <p>Created At: {evidenceRecord.createdAt}</p>
           </div>
         )}
 
