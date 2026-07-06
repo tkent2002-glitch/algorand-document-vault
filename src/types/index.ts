@@ -21,4 +21,10 @@ export type {
   WalletConnectionStatus,
 } from "./wallet";
 
-export type { AlgorandProofTransactionDraft } from "./algorand";
+export type {
+  AlgorandNetwork,
+  AlgorandNetworkConfig,
+  AlgorandProofTransactionDraft,
+} from "./algorand";
+
+export { DEFAULT_ALGORAND_NETWORK_CONFIG } from "./algorand";
