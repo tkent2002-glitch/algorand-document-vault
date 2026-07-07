@@ -1,4 +1,4 @@
-import algosdk from "algosdk";
+﻿import algosdk from "algosdk";
 import type {
   AlgorandSignedProofTransaction,
   NotarizationProof,
@@ -32,6 +32,7 @@ export class AlgorandTransactionSigningService {
 
     return {
       txId: transaction.txID(),
+      signedTransaction,
       signedTransactionByteLength: signedTransaction.byteLength,
       signedAt: new Date().toISOString(),
     };

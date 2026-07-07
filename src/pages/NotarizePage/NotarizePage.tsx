@@ -2,12 +2,14 @@
 import { NotarizationWorkflow } from "../../core";
 import {
   AlgorandProofTransactionDraftService,
+  AlgorandSubmissionService,
   AlgorandTransactionSigningService,
   WalletService,
 } from "../../services";
 import type {
   AlgorandProofTransactionDraft,
   AlgorandSignedProofTransaction,
+  AlgorandSubmissionResult,
   NotarizationProof,
 } from "../../types";
 import type { EvidenceRecord } from "../../services";
@@ -32,9 +34,12 @@ function NotarizePage() {
     useState<AlgorandProofTransactionDraft | null>(null);
   const [signedTransaction, setSignedTransaction] =
     useState<AlgorandSignedProofTransaction | null>(null);
+  const [submissionResult, setSubmissionResult] =
+    useState<AlgorandSubmissionResult | null>(null);
   const [serializedProofPayload, setSerializedProofPayload] = useState<string>("");
   const [errors, setErrors] = useState<string[]>([]);
   const [signingMessage, setSigningMessage] = useState<string>("");
+  const [submissionMessage, setSubmissionMessage] = useState<string>("");
   const [wallet, setWallet] = useState<WalletConnection>({
     status: "disconnected",
   });
@@ -55,7 +60,9 @@ function NotarizePage() {
     setSerializedProofPayload(result.serializedProofPayload);
     setErrors(result.errors);
     setSignedTransaction(null);
+    setSubmissionResult(null);
     setSigningMessage("");
+    setSubmissionMessage("");
 
     if (result.proof && wallet.address) {
       const draft = AlgorandProofTransactionDraftService.createDraft(
@@ -90,6 +97,27 @@ function NotarizePage() {
     } catch (error) {
       console.error("Transaction signing failed:", error);
       setSigningMessage("Transaction signing failed or was rejected.");
+    }
+  }
+
+  async function handleSubmitTransaction() {
+    if (!signedTransaction) {
+      setSubmissionMessage("A signed transaction is required before submission.");
+      return;
+    }
+
+    try {
+      setSubmissionMessage("Submitting signed transaction to Algorand TestNet...");
+
+      const result = await AlgorandSubmissionService.submitSignedTransaction(
+        signedTransaction.signedTransaction
+      );
+
+      setSubmissionResult(result);
+      setSubmissionMessage("Transaction submitted to Algorand TestNet.");
+    } catch (error) {
+      console.error("Transaction submission failed:", error);
+      setSubmissionMessage("Transaction submission failed.");
     }
   }
 
@@ -134,8 +162,11 @@ function NotarizePage() {
         <SignSubmitStep
           readyForSignature={readyForSignature}
           signingMessage={signingMessage}
+          submissionMessage={submissionMessage}
           signedTransaction={signedTransaction}
+          submissionResult={submissionResult}
           onSignTransaction={handleSignTransaction}
+          onSubmitTransaction={handleSubmitTransaction}
         />
 
         <ProgressTimeline

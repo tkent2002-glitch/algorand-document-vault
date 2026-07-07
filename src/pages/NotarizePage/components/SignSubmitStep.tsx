@@ -1,22 +1,32 @@
-﻿import type { AlgorandSignedProofTransaction } from "../../../types";
+﻿import type {
+  AlgorandSignedProofTransaction,
+  AlgorandSubmissionResult,
+} from "../../../types";
 
 type SignSubmitStepProps = {
   readyForSignature: boolean;
   signingMessage: string;
+  submissionMessage: string;
   signedTransaction: AlgorandSignedProofTransaction | null;
+  submissionResult: AlgorandSubmissionResult | null;
   onSignTransaction: () => void;
+  onSubmitTransaction: () => void;
 };
 
 function SignSubmitStep({
   readyForSignature,
   signingMessage,
+  submissionMessage,
   signedTransaction,
+  submissionResult,
   onSignTransaction,
+  onSubmitTransaction,
 }: SignSubmitStepProps) {
   return (
     <>
       <div className="notarize-result">
         <strong>Signature Readiness</strong>
+
         <p>
           {readyForSignature
             ? "Ready for Pera Wallet signature."
@@ -38,9 +48,21 @@ function SignSubmitStep({
           <p>Signed Bytes: {signedTransaction.signedTransactionByteLength}</p>
           <p>Signed At: {signedTransaction.signedAt}</p>
           <p>Status: Signed but not submitted to Algorand.</p>
-          <p>Next step: submit this signed transaction to Algorand TestNet.</p>
 
-          <button disabled>Submit to Algorand Coming Next</button>
+          {submissionMessage && <p>{submissionMessage}</p>}
+
+          <button onClick={onSubmitTransaction} disabled={Boolean(submissionResult)}>
+            Submit to Algorand TestNet
+          </button>
+        </div>
+      )}
+
+      {submissionResult && (
+        <div className="notarize-result">
+          <strong>Submitted to Algorand</strong>
+          <p>Transaction ID: {submissionResult.transactionId}</p>
+          <p>Submitted At: {submissionResult.submittedAt}</p>
+          <p>Status: Submitted. Confirmation pending.</p>
         </div>
       )}
     </>
