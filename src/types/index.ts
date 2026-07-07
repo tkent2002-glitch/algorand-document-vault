@@ -1,4 +1,4 @@
-export type { DocumentId, VaultDocument } from "./Document";
+﻿export type { DocumentId, VaultDocument } from "./Document";
 export type { HashAlgorithm, DocumentHash } from "./Hash";
 export type {
   NotarizationRecord,
@@ -29,6 +29,7 @@ export type {
   AlgorandSignedProofTransaction,
   AlgorandTransactionInspection,
   AlgorandSubmissionResult,
+  AlgorandConfirmationResult,
 } from "./algorand";
 
 export { DEFAULT_ALGORAND_NETWORK_CONFIG } from "./algorand";

@@ -1,4 +1,5 @@
-export {
+﻿export {
+  AlgorandConfirmationService,
   AlgorandProofNoteService,
   AlgorandProofTransactionDraftService,
   AlgorandService,

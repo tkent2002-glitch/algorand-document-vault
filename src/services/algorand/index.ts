@@ -1,3 +1,4 @@
+﻿export { AlgorandConfirmationService } from "./AlgorandConfirmationService";
 export { AlgorandProofNoteService } from "./AlgorandProofNoteService";
 export { AlgorandProofTransactionDraftService } from "./AlgorandProofTransactionDraftService";
 export { AlgorandService } from "./AlgorandService";
