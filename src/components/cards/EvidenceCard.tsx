@@ -60,7 +60,9 @@ function EvidenceCard({ record, onViewDetails }: EvidenceCardProps) {
         <button type="button" onClick={() => onViewDetails?.(record)}>
           View Details
         </button>
-        <button type="button">Verify</button>
+        <button type="button" disabled>
+          Verify Coming Soon
+        </button>
       </div>
     </article>
   );

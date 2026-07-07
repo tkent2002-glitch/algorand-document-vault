@@ -4,10 +4,9 @@ import "./EvidenceDetailsPanel.css";
 
 type EvidenceDetailsPanelProps = {
   record: EvidenceRecord | null;
-  onClose: () => void;
 };
 
-function EvidenceDetailsPanel({ record, onClose }: EvidenceDetailsPanelProps) {
+function EvidenceDetailsPanel({ record }: EvidenceDetailsPanelProps) {
   if (!record) {
     return null;
   }
@@ -20,15 +19,13 @@ function EvidenceDetailsPanel({ record, onClose }: EvidenceDetailsPanelProps) {
           <h2>{record.documentName}</h2>
         </div>
 
-        <button type="button" onClick={onClose}>
-          Close
-        </button>
+        <StatusBadge status={record.status} />
       </div>
 
       <div className="evidence-details-grid">
         <div>
           <span>Status</span>
-          <StatusBadge status={record.status} />
+          <strong>{record.status}</strong>
         </div>
 
         <div>
@@ -57,6 +54,21 @@ function EvidenceDetailsPanel({ record, onClose }: EvidenceDetailsPanelProps) {
         <p>Network: Algorand TestNet</p>
         <p>Transaction: {record.algorandTransactionId ?? "Pending"}</p>
         <p>Submitted At: {record.submittedAt ?? "Pending"}</p>
+      </div>
+
+      <div className="evidence-details-section">
+        <h3>Available Actions</h3>
+        <div className="evidence-details-actions">
+          <button type="button" disabled>
+            Verify Coming Soon
+          </button>
+          <button type="button" disabled>
+            Export Report Coming Soon
+          </button>
+          <button type="button" disabled>
+            Explorer Link Pending
+          </button>
+        </div>
       </div>
 
       <div className="evidence-details-section">

@@ -158,8 +158,9 @@ function VaultPage() {
                 onClick={() => setSelectedHash(item.hashValue)}
               >
                 <strong>{item.documentName}</strong>
-                <span>{item.latestRecord.status}</span>
-                <span>{item.records.length} records</span>
+                <span>Status: {item.latestRecord.status}</span>
+                <span>{item.records.length} evidence records</span>
+                <span>Last Updated: {new Date(item.latestRecord.createdAt).toLocaleDateString()}</span>
                 <code>{shorten(item.hashValue)}</code>
               </button>
             ))}
@@ -175,10 +176,7 @@ function VaultPage() {
                   <code>{selectedItem.hashValue}</code>
                 </div>
 
-                <EvidenceDetailsPanel
-                  record={selectedItem.latestRecord}
-                  onClose={() => setSelectedHash("")}
-                />
+                <EvidenceDetailsPanel record={selectedItem.latestRecord} />
 
                 <div className="evidence-history">
                   <h3>Evidence History</h3>

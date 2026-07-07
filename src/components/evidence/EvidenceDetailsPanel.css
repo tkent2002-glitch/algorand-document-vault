@@ -83,3 +83,22 @@
     flex-direction: column;
   }
 }
+.evidence-details-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.evidence-details-actions button {
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.evidence-details-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
