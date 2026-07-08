@@ -18,7 +18,6 @@ export { HashService } from "./crypto";
 export { DocumentValidationService } from "./documents";
 export {
   EvidenceRecordService,
-  EvidenceRecordStoreService,
   NotarizationService,
   ProofPayloadSerializer,
 } from "./notarization";
