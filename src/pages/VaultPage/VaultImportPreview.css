@@ -41,3 +41,40 @@
 .vault-import-change-preview strong {
   color: var(--text-h);
 }
+.vault-backup-actions,
+.vault-import-preview {
+  border-left: 4px solid var(--accent);
+}
+
+.vault-backup-actions p,
+.vault-import-preview p {
+  max-width: 760px;
+}
+
+.vault-backup-actions::after {
+  content: "Backup files contain evidence records only. They do not contain your original documents.";
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.vault-import-preview::after {
+  content: "Only import backup files you trust. Invalid or conflicting records are blocked before they can modify the Vault.";
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.vault-import-change-preview button {
+  width: fit-content;
+  cursor: pointer;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.vault-import-change-preview button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
