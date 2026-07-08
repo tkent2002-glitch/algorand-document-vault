@@ -54,17 +54,49 @@ function EvidenceDetailsPanel({ record }: EvidenceDetailsPanelProps) {
         <code>{record.hashValue}</code>
       </div>
 
-      <div className="evidence-details-section">
-        <h3>Blockchain Status</h3>
-        <p>Network: Algorand TestNet</p>
-        <p>Transaction: {record.algorandTransactionId ?? "Pending"}</p>
-        <p>Submitted At: {record.submittedAt ?? "Pending"}</p>
-        <p>Confirmed Round: {record.confirmedRound ?? "Pending"}</p>
-        <p>Confirmed At: {record.confirmedAt ?? "Pending"}</p>
+      <div className="evidence-details-section blockchain-section">
+        <h3>Blockchain Evidence</h3>
+
+        <div className="blockchain-metadata-grid">
+          <div>
+            <span>Network</span>
+            <strong>Algorand TestNet</strong>
+          </div>
+
+          <div>
+            <span>Status</span>
+            <strong>{record.status}</strong>
+          </div>
+
+          <div>
+            <span>Transaction ID</span>
+            <code>{record.algorandTransactionId ?? "Pending"}</code>
+          </div>
+
+          <div>
+            <span>Submitted At</span>
+            <strong>{record.submittedAt ?? "Pending"}</strong>
+          </div>
+
+          <div>
+            <span>Confirmed Round</span>
+            <strong>{record.confirmedRound ?? "Pending"}</strong>
+          </div>
+
+          <div>
+            <span>Confirmed At</span>
+            <strong>{record.confirmedAt ?? "Pending"}</strong>
+          </div>
+        </div>
 
         {explorerUrl && (
-          <a href={explorerUrl} target="_blank" rel="noreferrer">
-            View on Pera Explorer
+          <a
+            className="explorer-link"
+            href={explorerUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            View transaction on Pera Explorer
           </a>
         )}
       </div>
