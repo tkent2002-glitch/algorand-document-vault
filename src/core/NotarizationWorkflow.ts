@@ -1,7 +1,7 @@
-﻿import {
+﻿import { EvidenceRepository } from "../repositories";
+import {
   DocumentValidationService,
   EvidenceRecordService,
-  EvidenceRecordStoreService,
   HashService,
   NotarizationService,
   ProofPayloadSerializer,
@@ -39,7 +39,7 @@ export class NotarizationWorkflow {
     }
 
     const hashValue = await HashService.sha256FromFile(file);
-    const duplicateRecord = EvidenceRecordStoreService.findByHash(hashValue);
+    const duplicateRecord = EvidenceRepository.findByHash(hashValue);
 
     const documentHash: DocumentHash = {
       algorithm: "SHA-256",
@@ -48,7 +48,8 @@ export class NotarizationWorkflow {
 
     const proof = NotarizationService.createProof(documentHash);
     const evidenceRecord = EvidenceRecordService.createDraft(file.name, proof);
-    EvidenceRecordStoreService.save(evidenceRecord);
+
+    EvidenceRepository.save(evidenceRecord);
 
     const serializedProofPayload = ProofPayloadSerializer.serialize(proof);
 

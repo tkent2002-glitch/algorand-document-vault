@@ -1,9 +1,9 @@
 ﻿import { useState } from "react";
+import { EvidenceRepository } from "../../repositories";
 import {
   EvidenceBackupImportPreviewService,
   EvidenceBackupImportService,
   EvidenceBackupValidationService,
-  EvidenceRecordStoreService,
   type EvidenceBackupFile,
   type EvidenceBackupImportPreview,
   type EvidenceBackupImportResult,
@@ -47,7 +47,7 @@ function VaultImportPreview({ onImportComplete }: VaultImportPreviewProps) {
 
       if (result.valid) {
         const validBackup = parsed as EvidenceBackupFile;
-        const currentRecords = EvidenceRecordStoreService.list();
+        const currentRecords = EvidenceRepository.list();
         const changePreview = EvidenceBackupImportPreviewService.preview(
           validBackup,
           currentRecords
@@ -78,13 +78,13 @@ function VaultImportPreview({ onImportComplete }: VaultImportPreviewProps) {
       return;
     }
 
-    const currentRecords = EvidenceRecordStoreService.list();
+    const currentRecords = EvidenceRepository.list();
     const result = EvidenceBackupImportService.importNewRecords(
       backup,
       currentRecords
     );
 
-    EvidenceRecordStoreService.saveAll(result.records);
+    EvidenceRepository.saveAll(result.records);
     setImportResult(result);
     onImportComplete();
   }
