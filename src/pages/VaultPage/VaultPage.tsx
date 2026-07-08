@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import EvidenceDetailsPanel from "../../components/evidence/EvidenceDetailsPanel";
-import { EvidenceRecordStoreService } from "../../services";
+import { EvidenceRepository } from "../../repositories";
 import type { EvidenceRecord } from "../../services";
 import VaultBackupActions from "./VaultBackupActions";
 import VaultImportPreview from "./VaultImportPreview";
@@ -53,11 +53,13 @@ function VaultPage() {
   const [selectedHash, setSelectedHash] = useState<string>("");
 
   function reloadRecords() {
-    setRecords(EvidenceRecordStoreService.list());
+    setRecords(EvidenceRepository.list());
   }
 
   useEffect(() => {
     reloadRecords();
+
+    return EvidenceRepository.subscribe(setRecords);
   }, []);
 
   const evidenceIndex = useMemo(() => buildEvidenceIndex(records), [records]);
