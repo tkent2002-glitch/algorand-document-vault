@@ -3,6 +3,7 @@ import EvidenceDetailsPanel from "../../components/evidence/EvidenceDetailsPanel
 import { EvidenceRecordStoreService } from "../../services";
 import type { EvidenceRecord } from "../../services";
 import VaultBackupActions from "./VaultBackupActions";
+import VaultImportPreview from "./VaultImportPreview";
 import "./VaultPage.css";
 
 type VaultStatusFilter = "all" | "draft" | "signed" | "submitted" | "confirmed" | "failed";
@@ -51,8 +52,12 @@ function VaultPage() {
   const [statusFilter, setStatusFilter] = useState<VaultStatusFilter>("all");
   const [selectedHash, setSelectedHash] = useState<string>("");
 
-  useEffect(() => {
+  function reloadRecords() {
     setRecords(EvidenceRecordStoreService.list());
+  }
+
+  useEffect(() => {
+    reloadRecords();
   }, []);
 
   const evidenceIndex = useMemo(() => buildEvidenceIndex(records), [records]);
@@ -88,6 +93,7 @@ function VaultPage() {
       </div>
 
       <VaultBackupActions />
+      <VaultImportPreview onImportComplete={reloadRecords} />
 
       <div className="vault-stats">
         <div>
