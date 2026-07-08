@@ -30,3 +30,14 @@
   margin: 0;
   padding-left: 1.25rem;
 }
+.vault-import-change-preview {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.vault-import-change-preview strong {
+  color: var(--text-h);
+}

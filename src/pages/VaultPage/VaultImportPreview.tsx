@@ -1,7 +1,10 @@
 ﻿import { useState } from "react";
 import {
+  EvidenceBackupImportPreviewService,
   EvidenceBackupValidationService,
+  EvidenceRecordStoreService,
   type EvidenceBackupFile,
+  type EvidenceBackupImportPreview,
   type EvidenceBackupValidationResult,
 } from "../../services";
 import "./VaultImportPreview.css";
@@ -11,6 +14,8 @@ function VaultImportPreview() {
   const [backup, setBackup] = useState<EvidenceBackupFile | null>(null);
   const [validation, setValidation] =
     useState<EvidenceBackupValidationResult | null>(null);
+  const [preview, setPreview] =
+    useState<EvidenceBackupImportPreview | null>(null);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
@@ -18,6 +23,7 @@ function VaultImportPreview() {
     setFileName(file?.name ?? "");
     setBackup(null);
     setValidation(null);
+    setPreview(null);
 
     if (!file) {
       return;
@@ -31,7 +37,15 @@ function VaultImportPreview() {
       setValidation(result);
 
       if (result.valid) {
-        setBackup(parsed as EvidenceBackupFile);
+        const validBackup = parsed as EvidenceBackupFile;
+        const currentRecords = EvidenceRecordStoreService.list();
+        const changePreview = EvidenceBackupImportPreviewService.preview(
+          validBackup,
+          currentRecords
+        );
+
+        setBackup(validBackup);
+        setPreview(changePreview);
       }
     } catch {
       setValidation({
@@ -60,6 +74,17 @@ function VaultImportPreview() {
               <p>Exported At: {backup.exportedAt}</p>
               <p>Records: {backup.recordCount}</p>
             </>
+          )}
+
+          {preview && (
+            <div className="vault-import-change-preview">
+              <strong>Import Change Preview</strong>
+              <p>Total Records: {preview.totalRecords}</p>
+              <p>New Records: {preview.newRecords}</p>
+              <p>Existing Records: {preview.existingRecords}</p>
+              <p>Duplicate Fingerprints: {preview.duplicateFingerprints}</p>
+              <p>Conflicting Record IDs: {preview.conflictingRecordIds}</p>
+            </div>
           )}
 
           {validation.errors.length > 0 && (
