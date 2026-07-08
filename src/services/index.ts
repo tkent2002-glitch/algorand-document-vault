@@ -10,6 +10,7 @@
   AlgorandTransactionSigningService,
 } from "./algorand";
 export {
+  EvidenceBackupImportPreviewService,
   EvidenceBackupValidationService,
 } from "./backup";
 export { HashService } from "./crypto";
@@ -25,6 +26,7 @@ export { WalletService } from "./wallet";
 
 export type {
   EvidenceBackupFile,
+  EvidenceBackupImportPreview,
   EvidenceBackupValidationResult,
 } from "./backup";
 export type { DocumentValidationResult } from "./documents";
