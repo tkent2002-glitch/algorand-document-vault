@@ -1,0 +1,32 @@
+﻿.vault-import-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--social-bg);
+  box-shadow: var(--shadow);
+}
+
+.vault-import-preview strong {
+  color: var(--text-h);
+}
+
+.vault-import-preview input {
+  width: fit-content;
+}
+
+.vault-import-result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.vault-import-result ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
