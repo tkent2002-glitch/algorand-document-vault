@@ -10,7 +10,12 @@ export class EvidenceRecordStoreService {
       return [];
     }
 
-    return JSON.parse(raw) as EvidenceRecord[];
+    try {
+      return JSON.parse(raw) as EvidenceRecord[];
+    } catch (error) {
+      console.error("Failed to read evidence records from local storage:", error);
+      return [];
+    }
   }
 
   static findByHash(hashValue: string): EvidenceRecord | null {
@@ -29,6 +34,14 @@ export class EvidenceRecordStoreService {
       records.unshift(record);
     }
 
+    this.saveAll(records);
+  }
+
+  static saveAll(records: EvidenceRecord[]): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  }
+
+  static clear(): void {
+    localStorage.removeItem(STORAGE_KEY);
   }
 }
