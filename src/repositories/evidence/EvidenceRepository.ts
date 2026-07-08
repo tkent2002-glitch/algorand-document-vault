@@ -1,5 +1,5 @@
 ﻿import type { EvidenceRecord } from "../../services";
-import { EvidenceRecordStoreService } from "../../services";
+import { EvidenceRecordStoreService } from "../../services/notarization/EvidenceRecordStoreService";
 
 type EvidenceRepositoryListener = (records: EvidenceRecord[]) => void;
 
