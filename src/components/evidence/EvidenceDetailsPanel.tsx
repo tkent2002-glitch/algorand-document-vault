@@ -1,4 +1,5 @@
-﻿import type { EvidenceRecord } from "../../services";
+﻿import { AlgorandExplorerService } from "../../services";
+import type { EvidenceRecord } from "../../services";
 import StatusBadge from "../status/StatusBadge";
 import "./EvidenceDetailsPanel.css";
 
@@ -10,6 +11,10 @@ function EvidenceDetailsPanel({ record }: EvidenceDetailsPanelProps) {
   if (!record) {
     return null;
   }
+
+  const explorerUrl = record.algorandTransactionId
+    ? AlgorandExplorerService.getTransactionUrl(record.algorandTransactionId)
+    : "";
 
   return (
     <section className="evidence-details-panel">
@@ -54,6 +59,14 @@ function EvidenceDetailsPanel({ record }: EvidenceDetailsPanelProps) {
         <p>Network: Algorand TestNet</p>
         <p>Transaction: {record.algorandTransactionId ?? "Pending"}</p>
         <p>Submitted At: {record.submittedAt ?? "Pending"}</p>
+        <p>Confirmed Round: {record.confirmedRound ?? "Pending"}</p>
+        <p>Confirmed At: {record.confirmedAt ?? "Pending"}</p>
+
+        {explorerUrl && (
+          <a href={explorerUrl} target="_blank" rel="noreferrer">
+            View on Pera Explorer
+          </a>
+        )}
       </div>
 
       <div className="evidence-details-section">
@@ -64,9 +77,6 @@ function EvidenceDetailsPanel({ record }: EvidenceDetailsPanelProps) {
           </button>
           <button type="button" disabled>
             Export Report Coming Soon
-          </button>
-          <button type="button" disabled>
-            Explorer Link Pending
           </button>
         </div>
       </div>
