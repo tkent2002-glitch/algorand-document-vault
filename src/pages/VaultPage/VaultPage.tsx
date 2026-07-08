@@ -2,6 +2,7 @@
 import EvidenceDetailsPanel from "../../components/evidence/EvidenceDetailsPanel";
 import { EvidenceRecordStoreService } from "../../services";
 import type { EvidenceRecord } from "../../services";
+import VaultBackupActions from "./VaultBackupActions";
 import "./VaultPage.css";
 
 type VaultStatusFilter = "all" | "draft" | "signed" | "submitted" | "confirmed" | "failed";
@@ -85,6 +86,8 @@ function VaultPage() {
           Documents are not stored here.
         </p>
       </div>
+
+      <VaultBackupActions />
 
       <div className="vault-stats">
         <div>
