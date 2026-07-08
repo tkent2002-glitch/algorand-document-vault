@@ -5,6 +5,8 @@ import {
   AlgorandProofTransactionDraftService,
   AlgorandSubmissionService,
   AlgorandTransactionSigningService,
+  EvidenceRecordService,
+  EvidenceRecordStoreService,
   WalletService,
 } from "../../services";
 import type {
@@ -117,6 +119,11 @@ function NotarizePage() {
       return;
     }
 
+    if (!evidenceRecord) {
+      setSubmissionMessage("An evidence record is required before submission.");
+      return;
+    }
+
     try {
       setSubmissionMessage("Submitting signed transaction to Algorand TestNet...");
 
@@ -124,6 +131,13 @@ function NotarizePage() {
         signedTransaction.signedTransaction
       );
 
+      const submittedRecord = EvidenceRecordService.markSubmitted(
+        evidenceRecord,
+        submission
+      );
+
+      EvidenceRecordStoreService.save(submittedRecord);
+      setEvidenceRecord(submittedRecord);
       setSubmissionResult(submission);
       setSubmissionMessage("Transaction submitted to Algorand TestNet.");
       setConfirmationMessage("Waiting for Algorand confirmation...");
@@ -132,6 +146,13 @@ function NotarizePage() {
         submission.transactionId
       );
 
+      const confirmedRecord = EvidenceRecordService.markConfirmed(
+        submittedRecord,
+        confirmation
+      );
+
+      EvidenceRecordStoreService.save(confirmedRecord);
+      setEvidenceRecord(confirmedRecord);
       setConfirmationResult(confirmation);
       setConfirmationMessage("Transaction confirmed on Algorand TestNet.");
     } catch (error) {
