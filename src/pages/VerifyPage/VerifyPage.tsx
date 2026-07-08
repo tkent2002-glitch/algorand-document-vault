@@ -1,6 +1,7 @@
 ﻿import { useState } from "react";
 import EvidenceCard from "../../components/cards/EvidenceCard";
-import { EvidenceRecordStoreService, HashService } from "../../services";
+import { EvidenceRepository } from "../../repositories";
+import { HashService } from "../../services";
 import type { EvidenceRecord } from "../../services";
 import "./VerifyPage.css";
 
@@ -23,7 +24,7 @@ function VerifyPage() {
     }
 
     const hash = await HashService.sha256FromFile(file);
-    const records = EvidenceRecordStoreService.list();
+    const records = EvidenceRepository.list();
     const matchingRecord =
       records.find((record) => record.hashValue === hash) ?? null;
 
@@ -105,3 +106,5 @@ function VerifyPage() {
 }
 
 export default VerifyPage;
+
+

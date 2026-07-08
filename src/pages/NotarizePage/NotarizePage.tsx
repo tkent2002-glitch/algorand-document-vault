@@ -1,12 +1,12 @@
 ﻿import { useEffect, useState } from "react";
 import { NotarizationWorkflow } from "../../core";
+import { EvidenceRepository } from "../../repositories";
 import {
   AlgorandConfirmationService,
   AlgorandProofTransactionDraftService,
   AlgorandSubmissionService,
   AlgorandTransactionSigningService,
   EvidenceRecordService,
-  EvidenceRecordStoreService,
   WalletService,
 } from "../../services";
 import type {
@@ -136,7 +136,7 @@ function NotarizePage() {
         submission
       );
 
-      EvidenceRecordStoreService.save(submittedRecord);
+      EvidenceRepository.save(submittedRecord);
       setEvidenceRecord(submittedRecord);
       setSubmissionResult(submission);
       setSubmissionMessage("Transaction submitted to Algorand TestNet.");
@@ -151,7 +151,7 @@ function NotarizePage() {
         confirmation
       );
 
-      EvidenceRecordStoreService.save(confirmedRecord);
+      EvidenceRepository.save(confirmedRecord);
       setEvidenceRecord(confirmedRecord);
       setConfirmationResult(confirmation);
       setConfirmationMessage("Transaction confirmed on Algorand TestNet.");
@@ -227,3 +227,5 @@ function NotarizePage() {
 }
 
 export default NotarizePage;
+
+

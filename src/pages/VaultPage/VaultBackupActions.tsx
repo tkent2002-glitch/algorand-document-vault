@@ -1,9 +1,9 @@
-﻿import { EvidenceRecordStoreService } from "../../services";
+﻿import { EvidenceRepository } from "../../repositories";
 import "./VaultBackupActions.css";
 
 function VaultBackupActions() {
   function handleExport() {
-    const records = EvidenceRecordStoreService.list();
+    const records = EvidenceRepository.list();
 
     const backup = {
       schema: "adv-evidence-backup-v1",
@@ -38,3 +38,4 @@ function VaultBackupActions() {
 }
 
 export default VaultBackupActions;
+
