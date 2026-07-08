@@ -1,4 +1,5 @@
 ﻿import type {
+  AlgorandConfirmationResult,
   AlgorandSignedProofTransaction,
   AlgorandSubmissionResult,
 } from "../../../types";
@@ -7,8 +8,10 @@ type SignSubmitStepProps = {
   readyForSignature: boolean;
   signingMessage: string;
   submissionMessage: string;
+  confirmationMessage: string;
   signedTransaction: AlgorandSignedProofTransaction | null;
   submissionResult: AlgorandSubmissionResult | null;
+  confirmationResult: AlgorandConfirmationResult | null;
   onSignTransaction: () => void;
   onSubmitTransaction: () => void;
 };
@@ -17,8 +20,10 @@ function SignSubmitStep({
   readyForSignature,
   signingMessage,
   submissionMessage,
+  confirmationMessage,
   signedTransaction,
   submissionResult,
+  confirmationResult,
   onSignTransaction,
   onSubmitTransaction,
 }: SignSubmitStepProps) {
@@ -47,7 +52,6 @@ function SignSubmitStep({
           <p>Transaction ID: {signedTransaction.txId}</p>
           <p>Signed Bytes: {signedTransaction.signedTransactionByteLength}</p>
           <p>Signed At: {signedTransaction.signedAt}</p>
-          <p>Status: Signed but not submitted to Algorand.</p>
 
           {submissionMessage && <p>{submissionMessage}</p>}
 
@@ -62,7 +66,21 @@ function SignSubmitStep({
           <strong>Submitted to Algorand</strong>
           <p>Transaction ID: {submissionResult.transactionId}</p>
           <p>Submitted At: {submissionResult.submittedAt}</p>
-          <p>Status: Submitted. Confirmation pending.</p>
+          <p>Status: Submitted. Waiting for confirmation.</p>
+        </div>
+      )}
+
+      {confirmationMessage && (
+        <div className="notarize-result">
+          <strong>Confirmation Status</strong>
+          <p>{confirmationMessage}</p>
+
+          {confirmationResult && (
+            <>
+              <p>Confirmed Round: {confirmationResult.confirmedRound}</p>
+              <p>Confirmed At: {confirmationResult.confirmedAt}</p>
+            </>
+          )}
         </div>
       )}
     </>

@@ -1,12 +1,14 @@
 ﻿import { useEffect, useState } from "react";
 import { NotarizationWorkflow } from "../../core";
 import {
+  AlgorandConfirmationService,
   AlgorandProofTransactionDraftService,
   AlgorandSubmissionService,
   AlgorandTransactionSigningService,
   WalletService,
 } from "../../services";
 import type {
+  AlgorandConfirmationResult,
   AlgorandProofTransactionDraft,
   AlgorandSignedProofTransaction,
   AlgorandSubmissionResult,
@@ -36,10 +38,13 @@ function NotarizePage() {
     useState<AlgorandSignedProofTransaction | null>(null);
   const [submissionResult, setSubmissionResult] =
     useState<AlgorandSubmissionResult | null>(null);
+  const [confirmationResult, setConfirmationResult] =
+    useState<AlgorandConfirmationResult | null>(null);
   const [serializedProofPayload, setSerializedProofPayload] = useState<string>("");
   const [errors, setErrors] = useState<string[]>([]);
   const [signingMessage, setSigningMessage] = useState<string>("");
   const [submissionMessage, setSubmissionMessage] = useState<string>("");
+  const [confirmationMessage, setConfirmationMessage] = useState<string>("");
   const [wallet, setWallet] = useState<WalletConnection>({
     status: "disconnected",
   });
@@ -61,8 +66,10 @@ function NotarizePage() {
     setErrors(result.errors);
     setSignedTransaction(null);
     setSubmissionResult(null);
+    setConfirmationResult(null);
     setSigningMessage("");
     setSubmissionMessage("");
+    setConfirmationMessage("");
 
     if (result.proof && wallet.address) {
       const draft = AlgorandProofTransactionDraftService.createDraft(
@@ -91,9 +98,13 @@ function NotarizePage() {
       );
 
       setSignedTransaction(signed);
+      setSubmissionResult(null);
+      setConfirmationResult(null);
       setSigningMessage(
         "Transaction signed successfully. It has not been submitted to Algorand yet."
       );
+      setSubmissionMessage("");
+      setConfirmationMessage("");
     } catch (error) {
       console.error("Transaction signing failed:", error);
       setSigningMessage("Transaction signing failed or was rejected.");
@@ -109,15 +120,23 @@ function NotarizePage() {
     try {
       setSubmissionMessage("Submitting signed transaction to Algorand TestNet...");
 
-      const result = await AlgorandSubmissionService.submitSignedTransaction(
+      const submission = await AlgorandSubmissionService.submitSignedTransaction(
         signedTransaction.signedTransaction
       );
 
-      setSubmissionResult(result);
+      setSubmissionResult(submission);
       setSubmissionMessage("Transaction submitted to Algorand TestNet.");
+      setConfirmationMessage("Waiting for Algorand confirmation...");
+
+      const confirmation = await AlgorandConfirmationService.waitForConfirmation(
+        submission.transactionId
+      );
+
+      setConfirmationResult(confirmation);
+      setConfirmationMessage("Transaction confirmed on Algorand TestNet.");
     } catch (error) {
-      console.error("Transaction submission failed:", error);
-      setSubmissionMessage("Transaction submission failed.");
+      console.error("Transaction submission or confirmation failed:", error);
+      setConfirmationMessage("Transaction confirmation failed or timed out.");
     }
   }
 
@@ -163,8 +182,10 @@ function NotarizePage() {
           readyForSignature={readyForSignature}
           signingMessage={signingMessage}
           submissionMessage={submissionMessage}
+          confirmationMessage={confirmationMessage}
           signedTransaction={signedTransaction}
           submissionResult={submissionResult}
+          confirmationResult={confirmationResult}
           onSignTransaction={handleSignTransaction}
           onSubmitTransaction={handleSubmitTransaction}
         />
