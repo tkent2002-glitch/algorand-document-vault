@@ -1,4 +1,5 @@
-import type {
+﻿import type {
+  AlgorandConfirmationResult,
   AlgorandSubmissionResult,
   NotarizationProof,
 } from "../../types";
@@ -19,6 +20,8 @@ export type EvidenceRecord = {
   proof: NotarizationProof;
   algorandTransactionId?: string;
   submittedAt?: string;
+  confirmedRound?: number;
+  confirmedAt?: string;
   createdAt: string;
 };
 
@@ -47,6 +50,19 @@ export class EvidenceRecordService {
       status: "submitted",
       algorandTransactionId: submission.transactionId,
       submittedAt: submission.submittedAt,
+    };
+  }
+
+  static markConfirmed(
+    record: EvidenceRecord,
+    confirmation: AlgorandConfirmationResult
+  ): EvidenceRecord {
+    return {
+      ...record,
+      status: "confirmed",
+      algorandTransactionId: confirmation.transactionId,
+      confirmedRound: confirmation.confirmedRound,
+      confirmedAt: confirmation.confirmedAt,
     };
   }
 }
