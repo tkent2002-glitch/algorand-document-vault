@@ -1,4 +1,8 @@
 ﻿export {
+  BackupIntegrityService,
+} from "./BackupIntegrityService";
+
+export {
   EvidenceBackupImportService,
 } from "./EvidenceBackupImportService";
 
@@ -9,6 +13,10 @@ export {
 export {
   EvidenceBackupValidationService,
 } from "./EvidenceBackupValidationService";
+
+export type {
+  BackupIntegrityMetadata,
+} from "./BackupIntegrityService";
 
 export type {
   EvidenceBackupImportResult,
