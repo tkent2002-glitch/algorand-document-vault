@@ -1,15 +1,23 @@
 ﻿import { EvidenceRepository } from "../../repositories";
+import { BackupIntegrityService } from "../../services";
 import "./VaultBackupActions.css";
 
 function VaultBackupActions() {
-  function handleExport() {
+  async function handleExport() {
     const records = EvidenceRepository.list();
 
-    const backup = {
+    const backupPayload = {
       schema: "adv-evidence-backup-v1",
       exportedAt: new Date().toISOString(),
       recordCount: records.length,
       records,
+    };
+
+    const integrity = await BackupIntegrityService.createIntegrity(backupPayload);
+
+    const backup = {
+      ...backupPayload,
+      integrity,
     };
 
     const blob = new Blob([JSON.stringify(backup, null, 2)], {
@@ -38,4 +46,3 @@ function VaultBackupActions() {
 }
 
 export default VaultBackupActions;
-
