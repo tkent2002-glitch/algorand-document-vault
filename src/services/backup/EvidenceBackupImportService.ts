@@ -1,8 +1,6 @@
 ﻿import type { EvidenceRecord } from "../notarization";
-import type { BackupIntegrityMetadata } from "./BackupIntegrityService";
-import { BackupIntegrityService } from "./BackupIntegrityService";
-import type { EvidenceBackupFile } from "./EvidenceBackupValidationService";
-import { EvidenceBackupValidationService } from "./EvidenceBackupValidationService";
+import { BackupTrustService } from "./BackupTrustService";
+import type { TrustedEvidenceBackupFile } from "./BackupTrustService";
 
 export type EvidenceBackupImportResult = {
   importedRecords: number;
@@ -10,37 +8,17 @@ export type EvidenceBackupImportResult = {
   blockedConflictingRecords: number;
 };
 
-type IntegrityProtectedBackup = EvidenceBackupFile & {
-  integrity?: BackupIntegrityMetadata;
-};
-
-function removeIntegrity(backup: IntegrityProtectedBackup): EvidenceBackupFile {
-  const { integrity: _integrity, ...payload } = backup;
-  return payload;
-}
-
 export class EvidenceBackupImportService {
   static async importNewRecords(
-    backup: IntegrityProtectedBackup,
+    backup: TrustedEvidenceBackupFile,
     existingRecords: EvidenceRecord[]
   ): Promise<EvidenceBackupImportResult & { records: EvidenceRecord[] }> {
-    const validation = EvidenceBackupValidationService.validate(backup);
+    const trustResult = await BackupTrustService.evaluate(backup);
 
-    if (!validation.valid) {
-      throw new Error("Cannot import invalid evidence backup.");
-    }
-
-    if (!backup.integrity) {
-      throw new Error("Backup integrity metadata is missing.");
-    }
-
-    const integrityValid = await BackupIntegrityService.verifyIntegrity(
-      removeIntegrity(backup),
-      backup.integrity
-    );
-
-    if (!integrityValid) {
-      throw new Error("Backup integrity verification failed.");
+    if (!trustResult.trusted) {
+      throw new Error(
+        trustResult.errors.join(" ") || "Cannot import untrusted evidence backup."
+      );
     }
 
     const existingIds = new Set(existingRecords.map((record) => record.id));
