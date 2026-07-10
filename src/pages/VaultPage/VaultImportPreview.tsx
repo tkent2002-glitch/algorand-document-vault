@@ -4,10 +4,10 @@ import {
   EvidenceBackupImportPreviewService,
   EvidenceBackupImportService,
   EvidenceBackupValidationService,
-  type EvidenceBackupFile,
   type EvidenceBackupImportPreview,
   type EvidenceBackupImportResult,
   type EvidenceBackupValidationResult,
+  type TrustedEvidenceBackupFile,
 } from "../../services";
 import "./VaultImportPreview.css";
 
@@ -17,7 +17,8 @@ type VaultImportPreviewProps = {
 
 function VaultImportPreview({ onImportComplete }: VaultImportPreviewProps) {
   const [fileName, setFileName] = useState<string>("");
-  const [backup, setBackup] = useState<EvidenceBackupFile | null>(null);
+  const [backup, setBackup] =
+    useState<TrustedEvidenceBackupFile | null>(null);
   const [validation, setValidation] =
     useState<EvidenceBackupValidationResult | null>(null);
   const [preview, setPreview] =
@@ -25,7 +26,9 @@ function VaultImportPreview({ onImportComplete }: VaultImportPreviewProps) {
   const [importResult, setImportResult] =
     useState<EvidenceBackupImportResult | null>(null);
 
-  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
     const file = event.target.files?.[0] ?? null;
 
     setFileName(file?.name ?? "");
@@ -46,12 +49,14 @@ function VaultImportPreview({ onImportComplete }: VaultImportPreviewProps) {
       setValidation(result);
 
       if (result.valid) {
-        const validBackup = parsed as EvidenceBackupFile;
+        const validBackup = parsed as TrustedEvidenceBackupFile;
         const currentRecords = EvidenceRepository.list();
-        const changePreview = EvidenceBackupImportPreviewService.preview(
-          validBackup,
-          currentRecords
-        );
+
+        const changePreview =
+          EvidenceBackupImportPreviewService.preview(
+            validBackup,
+            currentRecords
+          );
 
         setBackup(validBackup);
         setPreview(changePreview);
@@ -64,7 +69,7 @@ function VaultImportPreview({ onImportComplete }: VaultImportPreviewProps) {
     }
   }
 
-  function handleImport() {
+  async function handleImport() {
     if (!backup || !validation?.valid || !preview) {
       return;
     }
@@ -79,10 +84,12 @@ function VaultImportPreview({ onImportComplete }: VaultImportPreviewProps) {
     }
 
     const currentRecords = EvidenceRepository.list();
-    const result = EvidenceBackupImportService.importNewRecords(
-      backup,
-      currentRecords
-    );
+
+    const result =
+      await EvidenceBackupImportService.importNewRecords(
+        backup,
+        currentRecords
+      );
 
     EvidenceRepository.saveAll(result.records);
     setImportResult(result);
@@ -96,15 +103,23 @@ function VaultImportPreview({ onImportComplete }: VaultImportPreviewProps) {
   return (
     <div className="vault-import-preview">
       <strong>Backup Import Preview</strong>
-      <p>Select an Evidence Vault backup file to validate before importing.</p>
+      <p>
+        Select an Evidence Vault backup file to validate before importing.
+      </p>
 
-      <input type="file" accept="application/json" onChange={handleFileChange} />
+      <input
+        type="file"
+        accept="application/json"
+        onChange={handleFileChange}
+      />
 
       {fileName && <p>Selected Backup: {fileName}</p>}
 
       {validation && (
         <div className="vault-import-result">
-          <strong>{validation.valid ? "Backup Valid" : "Backup Invalid"}</strong>
+          <strong>
+            {validation.valid ? "Backup Valid" : "Backup Invalid"}
+          </strong>
 
           {backup && (
             <>
@@ -120,10 +135,20 @@ function VaultImportPreview({ onImportComplete }: VaultImportPreviewProps) {
               <p>Total Records: {preview.totalRecords}</p>
               <p>New Records: {preview.newRecords}</p>
               <p>Existing Records: {preview.existingRecords}</p>
-              <p>Duplicate Fingerprints: {preview.duplicateFingerprints}</p>
-              <p>Conflicting Record IDs: {preview.conflictingRecordIds}</p>
+              <p>
+                Duplicate Fingerprints:{" "}
+                {preview.duplicateFingerprints}
+              </p>
+              <p>
+                Conflicting Record IDs:{" "}
+                {preview.conflictingRecordIds}
+              </p>
 
-              <button type="button" onClick={handleImport} disabled={!canImport}>
+              <button
+                type="button"
+                onClick={handleImport}
+                disabled={!canImport}
+              >
                 Import New Records
               </button>
             </div>
@@ -132,9 +157,17 @@ function VaultImportPreview({ onImportComplete }: VaultImportPreviewProps) {
           {importResult && (
             <div className="vault-import-change-preview">
               <strong>Import Result</strong>
-              <p>Imported Records: {importResult.importedRecords}</p>
-              <p>Skipped Existing Records: {importResult.skippedExistingRecords}</p>
-              <p>Blocked Conflicting Records: {importResult.blockedConflictingRecords}</p>
+              <p>
+                Imported Records: {importResult.importedRecords}
+              </p>
+              <p>
+                Skipped Existing Records:{" "}
+                {importResult.skippedExistingRecords}
+              </p>
+              <p>
+                Blocked Conflicting Records:{" "}
+                {importResult.blockedConflictingRecords}
+              </p>
             </div>
           )}
 

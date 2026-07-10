@@ -12,6 +12,7 @@
 
 export {
   BackupIntegrityService,
+  BackupTrustService,
   EvidenceBackupImportPreviewService,
   EvidenceBackupImportService,
   EvidenceBackupValidationService,
@@ -26,15 +27,23 @@ export {
   ProofPayloadSerializer,
 } from "./notarization";
 
+export {
+  BackupEncryptionService,
+  KeyDerivationService,
+  SecureRandomService,
+} from "./security";
+
 export { VerificationService } from "./verification";
 export { WalletService } from "./wallet";
 
 export type {
   BackupIntegrityMetadata,
+  BackupTrustResult,
   EvidenceBackupFile,
   EvidenceBackupImportPreview,
   EvidenceBackupImportResult,
   EvidenceBackupValidationResult,
+  TrustedEvidenceBackupFile,
 } from "./backup";
 
 export type { DocumentValidationResult } from "./documents";
@@ -43,3 +52,5 @@ export type {
   EvidenceRecord,
   EvidenceRecordStatus,
 } from "./notarization";
+
+export type { DerivedKeyResult } from "./security";

@@ -1,4 +1,5 @@
 ﻿import { describe, expect, it } from "vitest";
+import { BackupIntegrityService } from "../../src/services/backup/BackupIntegrityService";
 import { EvidenceBackupImportService } from "../../src/services/backup/EvidenceBackupImportService";
 import type { EvidenceRecord } from "../../src/services";
 
@@ -32,16 +33,25 @@ function createRecord(id: string, hashValue: string): EvidenceRecord {
   };
 }
 
-describe("EvidenceBackupImportService", () => {
-  it("imports new records", () => {
-    const backup = {
-      schema: "adv-evidence-backup-v1" as const,
-      exportedAt: "2026-07-08T00:00:00.000Z",
-      recordCount: 1,
-      records: [createRecord("record-1", hashA)],
-    };
+async function createTrustedBackup(records: EvidenceRecord[]) {
+  const payload = {
+    schema: "adv-evidence-backup-v1" as const,
+    exportedAt: "2026-07-08T00:00:00.000Z",
+    recordCount: records.length,
+    records,
+  };
 
-    const result = EvidenceBackupImportService.importNewRecords(backup, []);
+  return {
+    ...payload,
+    integrity: await BackupIntegrityService.createIntegrity(payload),
+  };
+}
+
+describe("EvidenceBackupImportService", () => {
+  it("imports new records", async () => {
+    const backup = await createTrustedBackup([createRecord("record-1", hashA)]);
+
+    const result = await EvidenceBackupImportService.importNewRecords(backup, []);
 
     expect(result.importedRecords).toBe(1);
     expect(result.skippedExistingRecords).toBe(0);
@@ -49,17 +59,13 @@ describe("EvidenceBackupImportService", () => {
     expect(result.records).toHaveLength(1);
   });
 
-  it("skips existing records with the same id", () => {
+  it("skips existing records with the same id", async () => {
     const existing = createRecord("record-1", hashA);
+    const backup = await createTrustedBackup([existing]);
 
-    const backup = {
-      schema: "adv-evidence-backup-v1" as const,
-      exportedAt: "2026-07-08T00:00:00.000Z",
-      recordCount: 1,
-      records: [existing],
-    };
-
-    const result = EvidenceBackupImportService.importNewRecords(backup, [existing]);
+    const result = await EvidenceBackupImportService.importNewRecords(backup, [
+      existing,
+    ]);
 
     expect(result.importedRecords).toBe(0);
     expect(result.skippedExistingRecords).toBe(1);
@@ -67,22 +73,31 @@ describe("EvidenceBackupImportService", () => {
     expect(result.records).toHaveLength(1);
   });
 
-  it("blocks conflicting records with same id but different hash", () => {
+  it("blocks conflicting records with same id but different hash", async () => {
     const existing = createRecord("record-1", hashA);
     const conflicting = createRecord("record-1", hashB);
+    const backup = await createTrustedBackup([conflicting]);
 
-    const backup = {
-      schema: "adv-evidence-backup-v1" as const,
-      exportedAt: "2026-07-08T00:00:00.000Z",
-      recordCount: 1,
-      records: [conflicting],
-    };
-
-    const result = EvidenceBackupImportService.importNewRecords(backup, [existing]);
+    const result = await EvidenceBackupImportService.importNewRecords(backup, [
+      existing,
+    ]);
 
     expect(result.importedRecords).toBe(0);
     expect(result.skippedExistingRecords).toBe(0);
     expect(result.blockedConflictingRecords).toBe(1);
     expect(result.records).toEqual([existing]);
+  });
+
+  it("rejects backups without integrity metadata", async () => {
+    const backup = {
+      schema: "adv-evidence-backup-v1" as const,
+      exportedAt: "2026-07-08T00:00:00.000Z",
+      recordCount: 1,
+      records: [createRecord("record-1", hashA)],
+    };
+
+    await expect(
+      EvidenceBackupImportService.importNewRecords(backup, [])
+    ).rejects.toThrow("Backup integrity metadata is missing.");
   });
 });

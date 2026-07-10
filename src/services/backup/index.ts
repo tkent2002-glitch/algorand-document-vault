@@ -3,6 +3,10 @@
 } from "./BackupIntegrityService";
 
 export {
+  BackupTrustService,
+} from "./BackupTrustService";
+
+export {
   EvidenceBackupImportService,
 } from "./EvidenceBackupImportService";
 
@@ -17,6 +21,11 @@ export {
 export type {
   BackupIntegrityMetadata,
 } from "./BackupIntegrityService";
+
+export type {
+  BackupTrustResult,
+  TrustedEvidenceBackupFile,
+} from "./BackupTrustService";
 
 export type {
   EvidenceBackupImportResult,
