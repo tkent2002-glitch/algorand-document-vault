@@ -1,7 +1,14 @@
 ﻿import type { EvidenceRecord } from "../../services";
 import { EvidenceRecordStoreService } from "../../services/notarization/EvidenceRecordStoreService";
-import { LocalStorageEvidenceStore } from "../../storage";
-import type { EvidenceStore } from "../../storage";
+import {
+  EvidenceStoreMigrationService,
+  IndexedDbEvidenceStore,
+  LocalStorageEvidenceStore,
+} from "../../storage";
+import type {
+  EvidenceStore,
+  EvidenceStoreMigrationResult,
+} from "../../storage";
 
 type EvidenceRepositoryListener = (records: EvidenceRecord[]) => void;
 
@@ -11,11 +18,23 @@ export class EvidenceRepository {
   private static store: EvidenceStore =
     new LocalStorageEvidenceStore();
 
+  private static initializationPromise:
+    Promise<EvidenceStoreMigrationResult> | null = null;
+
+  static initializeDurableStorage(): Promise<EvidenceStoreMigrationResult> {
+    if (!EvidenceRepository.initializationPromise) {
+      EvidenceRepository.initializationPromise =
+        EvidenceRepository.migrateAndActivateIndexedDb();
+    }
+
+    return EvidenceRepository.initializationPromise;
+  }
+
   /*
    * Temporary synchronous compatibility API.
    *
-   * These methods remain only while existing callers are migrated.
-   * They must be removed before switching the repository backend to IndexedDB.
+   * These methods remain only until the final compatibility cleanup.
+   * All active application callers should use the async API.
    */
 
   static list(): EvidenceRecord[] {
@@ -81,6 +100,28 @@ export class EvidenceRepository {
           (currentListener) => currentListener !== listener
         );
     };
+  }
+
+  private static async migrateAndActivateIndexedDb():
+    Promise<EvidenceStoreMigrationResult> {
+    const localStorageStore = new LocalStorageEvidenceStore();
+    const indexedDbStore = new IndexedDbEvidenceStore();
+
+    const migration =
+      await EvidenceStoreMigrationService.migrate(
+        localStorageStore,
+        indexedDbStore
+      );
+
+    if (migration.blockedConflictingRecords > 0) {
+      throw new Error(
+        `IndexedDB activation blocked because ${migration.blockedConflictingRecords} conflicting evidence record(s) were detected.`
+      );
+    }
+
+    EvidenceRepository.store = indexedDbStore;
+
+    return migration;
   }
 
   private static notifySync(): void {
