@@ -9,6 +9,9 @@ import type {
   EvidenceStoreMigrationResult,
 } from "../../storage";
 
+const MIGRATION_MARKER_KEY =
+  "algorand-document-vault:evidence-storage-migrated-v1";
+
 type EvidenceRepositoryListener = (records: EvidenceRecord[]) => void;
 
 export class EvidenceRepository {
@@ -23,7 +26,7 @@ export class EvidenceRepository {
   static initializeDurableStorage(): Promise<EvidenceStoreMigrationResult> {
     if (!EvidenceRepository.initializationPromise) {
       EvidenceRepository.initializationPromise =
-        EvidenceRepository.migrateAndActivateIndexedDb();
+        EvidenceRepository.initializeIndexedDbStorage();
     }
 
     return EvidenceRepository.initializationPromise;
@@ -67,10 +70,39 @@ export class EvidenceRepository {
     };
   }
 
-  private static async migrateAndActivateIndexedDb():
+  private static async initializeIndexedDbStorage():
     Promise<EvidenceStoreMigrationResult> {
     const localStorageStore = new LocalStorageEvidenceStore();
     const indexedDbStore = new IndexedDbEvidenceStore();
+
+    const migrationCompleted =
+      localStorage.getItem(MIGRATION_MARKER_KEY) === "complete";
+
+    if (migrationCompleted) {
+      const indexedDbRecords = await indexedDbStore.list();
+      const localStorageRecords = await localStorageStore.list();
+
+      const indexedDbUnexpectedlyEmpty =
+        indexedDbRecords.length === 0 &&
+        localStorageRecords.length > 0;
+
+      if (!indexedDbUnexpectedlyEmpty) {
+        EvidenceRepository.store = indexedDbStore;
+
+        return {
+          sourceRecords: localStorageRecords.length,
+          existingTargetRecords: indexedDbRecords.length,
+          migratedRecords: 0,
+          skippedExistingRecords: 0,
+          blockedConflictingRecords: 0,
+          finalTargetRecords: indexedDbRecords.length,
+        };
+      }
+
+      console.warn(
+        "IndexedDB was empty after a completed migration. Recovery migration will run."
+      );
+    }
 
     const migration =
       await EvidenceStoreMigrationService.migrate(
@@ -85,6 +117,7 @@ export class EvidenceRepository {
     }
 
     EvidenceRepository.store = indexedDbStore;
+    localStorage.setItem(MIGRATION_MARKER_KEY, "complete");
 
     return migration;
   }
