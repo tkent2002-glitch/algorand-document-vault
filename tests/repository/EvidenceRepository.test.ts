@@ -7,9 +7,15 @@ function installLocalStorageMock() {
 
   vi.stubGlobal("localStorage", {
     getItem: (key: string) => store.get(key) ?? null,
-    setItem: (key: string, value: string) => store.set(key, value),
-    removeItem: (key: string) => store.delete(key),
-    clear: () => store.clear(),
+    setItem: (key: string, value: string) => {
+      store.set(key, value);
+    },
+    removeItem: (key: string) => {
+      store.delete(key);
+    },
+    clear: () => {
+      store.clear();
+    },
   });
 }
 
@@ -43,64 +49,79 @@ const hashA =
 const hashB =
   "486ea46224d1bb4fb680f34f7c9ad96a8f24ec88be73ea8e5a6c65260e9cb8a7";
 
-describe("EvidenceRepository", () => {
-  beforeEach(() => {
+describe("EvidenceRepository async API", () => {
+  beforeEach(async () => {
     installLocalStorageMock();
-    EvidenceRepository.clear();
+    await EvidenceRepository.clearAsync();
   });
 
-  it("saves and lists evidence records", () => {
+  it("saves and lists evidence records", async () => {
     const record = createRecord("record-1", hashA);
 
-    EvidenceRepository.save(record);
+    await EvidenceRepository.saveAsync(record);
 
-    expect(EvidenceRepository.list()).toEqual([record]);
+    expect(await EvidenceRepository.listAsync()).toEqual([record]);
   });
 
-  it("finds a record by hash", () => {
+  it("finds a record by hash", async () => {
     const recordA = createRecord("record-1", hashA);
     const recordB = createRecord("record-2", hashB);
 
-    EvidenceRepository.save(recordA);
-    EvidenceRepository.save(recordB);
+    await EvidenceRepository.saveAsync(recordA);
+    await EvidenceRepository.saveAsync(recordB);
 
-    expect(EvidenceRepository.findByHash(hashB)).toEqual(recordB);
+    expect(await EvidenceRepository.findByHashAsync(hashB)).toEqual(recordB);
   });
 
-  it("replaces repository contents with saveAll", () => {
+  it("returns null when a hash does not exist", async () => {
+    expect(await EvidenceRepository.findByHashAsync(hashA)).toBeNull();
+  });
+
+  it("replaces repository contents with saveAllAsync", async () => {
     const recordA = createRecord("record-1", hashA);
     const recordB = createRecord("record-2", hashB);
 
-    EvidenceRepository.save(recordA);
-    EvidenceRepository.saveAll([recordB]);
+    await EvidenceRepository.saveAsync(recordA);
+    await EvidenceRepository.saveAllAsync([recordB]);
 
-    expect(EvidenceRepository.list()).toEqual([recordB]);
+    expect(await EvidenceRepository.listAsync()).toEqual([recordB]);
   });
 
-  it("clears all records", () => {
-    EvidenceRepository.save(createRecord("record-1", hashA));
+  it("clears all records", async () => {
+    await EvidenceRepository.saveAsync(
+      createRecord("record-1", hashA)
+    );
 
-    EvidenceRepository.clear();
+    await EvidenceRepository.clearAsync();
 
-    expect(EvidenceRepository.list()).toEqual([]);
+    expect(await EvidenceRepository.listAsync()).toEqual([]);
   });
 
-  it("notifies subscribers when records change", () => {
+  it("notifies subscribers when records change", async () => {
     const listener = vi.fn();
+    const unsubscribe = EvidenceRepository.subscribe(listener);
 
-    EvidenceRepository.subscribe(listener);
-    EvidenceRepository.save(createRecord("record-1", hashA));
+    await EvidenceRepository.saveAsync(
+      createRecord("record-1", hashA)
+    );
 
     expect(listener).toHaveBeenCalledTimes(1);
-    expect(listener).toHaveBeenCalledWith(EvidenceRepository.list());
+    expect(listener).toHaveBeenCalledWith(
+      await EvidenceRepository.listAsync()
+    );
+
+    unsubscribe();
   });
 
-  it("stops notifying unsubscribed listeners", () => {
+  it("stops notifying unsubscribed listeners", async () => {
     const listener = vi.fn();
     const unsubscribe = EvidenceRepository.subscribe(listener);
 
     unsubscribe();
-    EvidenceRepository.save(createRecord("record-1", hashA));
+
+    await EvidenceRepository.saveAsync(
+      createRecord("record-1", hashA)
+    );
 
     expect(listener).not.toHaveBeenCalled();
   });
