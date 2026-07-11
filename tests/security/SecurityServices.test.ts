@@ -104,6 +104,7 @@ describe("BackupEncryptionService foundation", () => {
   it("declares the selected encryption architecture", () => {
     expect(BackupEncryptionService.algorithm).toBe("AES-GCM");
     expect(BackupEncryptionService.keyDerivation).toBe("PBKDF2-SHA-256");
-    expect(BackupEncryptionService.status).toBe("foundation-only");
+    expect(BackupEncryptionService.iterations).toBe(250000);
   });
 });
+

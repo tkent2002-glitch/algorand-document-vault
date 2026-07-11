@@ -53,4 +53,10 @@ export type {
   EvidenceRecordStatus,
 } from "./notarization";
 
-export type { DerivedKeyResult } from "./security";
+export type {
+  BackupKeyDerivationAlgorithm,
+  DerivedKeyResult,
+  EncryptedBackupAlgorithm,
+  EncryptedBackupMetadata,
+  EncryptedEvidenceBackupFile,
+} from "./security";
