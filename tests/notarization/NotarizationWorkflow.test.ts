@@ -1,4 +1,4 @@
-﻿import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NotarizationWorkflow } from "../../src/core/NotarizationWorkflow";
 import { EvidenceRepository } from "../../src/repositories";
 
@@ -14,9 +14,9 @@ function installLocalStorageMock() {
 }
 
 describe("NotarizationWorkflow", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     installLocalStorageMock();
-    EvidenceRepository.clear();
+    await EvidenceRepository.clearAsync();
   });
 
   it("rejects a missing file", async () => {

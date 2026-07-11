@@ -1,5 +1,4 @@
 ﻿import type { EvidenceRecord } from "../../services";
-import { EvidenceRecordStoreService } from "../../services/notarization/EvidenceRecordStoreService";
 import {
   EvidenceStoreMigrationService,
   IndexedDbEvidenceStore,
@@ -29,40 +28,6 @@ export class EvidenceRepository {
 
     return EvidenceRepository.initializationPromise;
   }
-
-  /*
-   * Temporary synchronous compatibility API.
-   *
-   * These methods remain only until the final compatibility cleanup.
-   * All active application callers should use the async API.
-   */
-
-  static list(): EvidenceRecord[] {
-    return EvidenceRecordStoreService.list();
-  }
-
-  static findByHash(hashValue: string): EvidenceRecord | null {
-    return EvidenceRecordStoreService.findByHash(hashValue);
-  }
-
-  static save(record: EvidenceRecord): void {
-    EvidenceRecordStoreService.save(record);
-    EvidenceRepository.notifySync();
-  }
-
-  static saveAll(records: EvidenceRecord[]): void {
-    EvidenceRecordStoreService.saveAll(records);
-    EvidenceRepository.notifySync();
-  }
-
-  static clear(): void {
-    EvidenceRecordStoreService.clear();
-    EvidenceRepository.notifySync();
-  }
-
-  /*
-   * Durable-storage-compatible asynchronous API.
-   */
 
   static async listAsync(): Promise<EvidenceRecord[]> {
     return EvidenceRepository.store.list();
@@ -122,14 +87,6 @@ export class EvidenceRepository {
     EvidenceRepository.store = indexedDbStore;
 
     return migration;
-  }
-
-  private static notifySync(): void {
-    const records = EvidenceRepository.list();
-
-    for (const listener of EvidenceRepository.listeners) {
-      listener(records);
-    }
   }
 
   private static async notifyAsync(): Promise<void> {
