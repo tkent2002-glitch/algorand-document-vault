@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import EvidenceCard from "../../components/cards/EvidenceCard";
 import { EvidenceRepository } from "../../repositories";
 import { HashService } from "../../services";
@@ -24,7 +24,7 @@ function VerifyPage() {
     }
 
     const hash = await HashService.sha256FromFile(file);
-    const records = EvidenceRepository.list();
+    const records = await EvidenceRepository.listAsync();
     const matchingRecord =
       records.find((record) => record.hashValue === hash) ?? null;
 

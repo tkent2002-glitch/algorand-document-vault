@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import EvidenceDetailsPanel from "../../components/evidence/EvidenceDetailsPanel";
 import { EvidenceRepository } from "../../repositories";
 import type { EvidenceRecord } from "../../services";
@@ -52,14 +52,34 @@ function VaultPage() {
   const [statusFilter, setStatusFilter] = useState<VaultStatusFilter>("all");
   const [selectedHash, setSelectedHash] = useState<string>("");
 
-  function reloadRecords() {
-    setRecords(EvidenceRepository.list());
+  async function reloadRecords(): Promise<void> {
+    const repositoryRecords = await EvidenceRepository.listAsync();
+    setRecords(repositoryRecords);
   }
 
   useEffect(() => {
-    reloadRecords();
+    let mounted = true;
 
-    return EvidenceRepository.subscribe(setRecords);
+    async function loadInitialRecords(): Promise<void> {
+      const repositoryRecords = await EvidenceRepository.listAsync();
+
+      if (mounted) {
+        setRecords(repositoryRecords);
+      }
+    }
+
+    void loadInitialRecords();
+
+    const unsubscribe = EvidenceRepository.subscribe((repositoryRecords) => {
+      if (mounted) {
+        setRecords(repositoryRecords);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
   }, []);
 
   const evidenceIndex = useMemo(() => buildEvidenceIndex(records), [records]);
