@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { NotarizationWorkflow } from "../../core";
 import { EvidenceRepository } from "../../repositories";
 import {
@@ -136,7 +136,7 @@ function NotarizePage() {
         submission
       );
 
-      EvidenceRepository.save(submittedRecord);
+      await EvidenceRepository.saveAsync(submittedRecord);
       setEvidenceRecord(submittedRecord);
       setSubmissionResult(submission);
       setSubmissionMessage("Transaction submitted to Algorand TestNet.");
@@ -151,7 +151,7 @@ function NotarizePage() {
         confirmation
       );
 
-      EvidenceRepository.save(confirmedRecord);
+      await EvidenceRepository.saveAsync(confirmedRecord);
       setEvidenceRecord(confirmedRecord);
       setConfirmationResult(confirmation);
       setConfirmationMessage("Transaction confirmed on Algorand TestNet.");
