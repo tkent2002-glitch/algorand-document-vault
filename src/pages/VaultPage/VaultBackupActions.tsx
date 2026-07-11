@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { EvidenceRepository } from "../../repositories";
 import {
   BackupEncryptionService,
@@ -24,7 +24,7 @@ function downloadJsonFile(fileName: string, data: unknown): void {
 }
 
 async function createTrustedBackupPayload() {
-  const records = EvidenceRepository.list();
+  const records = await EvidenceRepository.listAsync();
 
   const payload = {
     schema: "adv-evidence-backup-v1" as const,
