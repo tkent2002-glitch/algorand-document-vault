@@ -4,6 +4,8 @@
   LocalStorageEvidenceStore,
 } from "./evidence";
 
+export { StorageConfiguration } from "./StorageConfiguration";
+
 export type {
   EvidenceStore,
   EvidenceStoreMigrationResult,

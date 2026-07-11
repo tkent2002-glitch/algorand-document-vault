@@ -1,6 +1,8 @@
-﻿import type { EvidenceRecord } from "./EvidenceRecordService";
+import { StorageConfiguration } from "../../storage/StorageConfiguration";
+import type { EvidenceRecord } from "./EvidenceRecordService";
 
-const STORAGE_KEY = "algorand-document-vault:evidence-records";
+const STORAGE_KEY =
+  StorageConfiguration.legacy.evidenceStorageKey;
 
 export class EvidenceRecordStoreService {
   static list(): EvidenceRecord[] {

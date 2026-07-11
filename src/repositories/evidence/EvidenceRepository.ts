@@ -1,4 +1,4 @@
-﻿import type { EvidenceRecord } from "../../services";
+import type { EvidenceRecord } from "../../services";
 import {
   EvidenceStoreMigrationService,
   IndexedDbEvidenceStore,
@@ -8,9 +8,10 @@ import type {
   EvidenceStore,
   EvidenceStoreMigrationResult,
 } from "../../storage";
+import { StorageConfiguration } from "../../storage/StorageConfiguration";
 
 const MIGRATION_MARKER_KEY =
-  "algorand-document-vault:evidence-storage-migrated-v1";
+  StorageConfiguration.migration.evidenceStorageMarkerKey;
 
 type EvidenceRepositoryListener = (records: EvidenceRecord[]) => void;
 

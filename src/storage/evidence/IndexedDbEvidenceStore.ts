@@ -1,10 +1,18 @@
-﻿import type { EvidenceRecord } from "../../services";
+import type { EvidenceRecord } from "../../services";
+import { StorageConfiguration } from "../StorageConfiguration";
 import type { EvidenceStore } from "./EvidenceStore";
 
-const DATABASE_NAME = "algorand-document-vault";
-const DATABASE_VERSION = 1;
-const OBJECT_STORE_NAME = "evidence-records";
-const HASH_INDEX_NAME = "hash-value";
+const DATABASE_NAME =
+  StorageConfiguration.indexedDb.databaseName;
+
+const DATABASE_VERSION =
+  StorageConfiguration.indexedDb.databaseVersion;
+
+const OBJECT_STORE_NAME =
+  StorageConfiguration.indexedDb.evidenceObjectStoreName;
+
+const HASH_INDEX_NAME =
+  StorageConfiguration.indexedDb.evidenceHashIndexName;
 
 function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
   return new Promise<T>((resolve, reject) => {
