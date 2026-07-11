@@ -7,8 +7,8 @@ import {
   ProofPayloadSerializer,
 } from "../services";
 
-import type { DocumentHash, NotarizationProof } from "../types";
 import type { EvidenceRecord } from "../services";
+import type { DocumentHash, NotarizationProof } from "../types";
 
 export type NotarizationWorkflowResult = {
   fileName: string;
@@ -39,7 +39,9 @@ export class NotarizationWorkflow {
     }
 
     const hashValue = await HashService.sha256FromFile(file);
-    const duplicateRecord = EvidenceRepository.findByHash(hashValue);
+
+    const duplicateRecord =
+      await EvidenceRepository.findByHashAsync(hashValue);
 
     const documentHash: DocumentHash = {
       algorithm: "SHA-256",
@@ -47,11 +49,15 @@ export class NotarizationWorkflow {
     };
 
     const proof = NotarizationService.createProof(documentHash);
-    const evidenceRecord = EvidenceRecordService.createDraft(file.name, proof);
+    const evidenceRecord = EvidenceRecordService.createDraft(
+      file.name,
+      proof
+    );
 
-    EvidenceRepository.save(evidenceRecord);
+    await EvidenceRepository.saveAsync(evidenceRecord);
 
-    const serializedProofPayload = ProofPayloadSerializer.serialize(proof);
+    const serializedProofPayload =
+      ProofPayloadSerializer.serialize(proof);
 
     return {
       fileName: file.name,
