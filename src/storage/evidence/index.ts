@@ -1,1 +1,2 @@
-﻿export type { EvidenceStore } from "./EvidenceStore";
+﻿export { IndexedDbEvidenceStore } from "./IndexedDbEvidenceStore";
+export type { EvidenceStore } from "./EvidenceStore";
