@@ -1,0 +1,18 @@
+﻿C:\Projects\algorand-document-vault\src\core\NotarizationWorkflow.ts:42: const duplicateRecord = EvidenceRepository.findByHash(hashValue);
+C:\Projects\algorand-document-vault\src\core\NotarizationWorkflow.ts:52: EvidenceRepository.save(evidenceRecord);
+C:\Projects\algorand-document-vault\src\pages\NotarizePage\NotarizePage.tsx:139: EvidenceRepository.save(submittedRecord);
+C:\Projects\algorand-document-vault\src\pages\NotarizePage\NotarizePage.tsx:154: EvidenceRepository.save(confirmedRecord);
+C:\Projects\algorand-document-vault\src\pages\VaultPage\VaultBackupActions.tsx:27: const records = EvidenceRepository.list();
+C:\Projects\algorand-document-vault\src\pages\VaultPage\VaultImportPreview.tsx:62: const currentRecords = EvidenceRepository.list();
+C:\Projects\algorand-document-vault\src\pages\VaultPage\VaultImportPreview.tsx:198: const currentRecords = EvidenceRepository.list();
+C:\Projects\algorand-document-vault\src\pages\VaultPage\VaultImportPreview.tsx:206: EvidenceRepository.saveAll(result.records);
+C:\Projects\algorand-document-vault\src\pages\VaultPage\VaultPage.tsx:56: setRecords(EvidenceRepository.list());
+C:\Projects\algorand-document-vault\src\pages\VaultPage\VaultPage.tsx:62: return EvidenceRepository.subscribe(setRecords);
+C:\Projects\algorand-document-vault\src\pages\VerifyPage\VerifyPage.tsx:27: const records = EvidenceRepository.list();
+C:\Projects\algorand-document-vault\src\repositories\evidence\EvidenceRepository.ts:19: EvidenceRepository.notify();
+C:\Projects\algorand-document-vault\src\repositories\evidence\EvidenceRepository.ts:24: EvidenceRepository.notify();
+C:\Projects\algorand-document-vault\src\repositories\evidence\EvidenceRepository.ts:29: EvidenceRepository.notify();
+C:\Projects\algorand-document-vault\src\repositories\evidence\EvidenceRepository.ts:33: EvidenceRepository.listeners.push(listener);
+C:\Projects\algorand-document-vault\src\repositories\evidence\EvidenceRepository.ts:36: EvidenceRepository.listeners = EvidenceRepository.listeners.filter(
+C:\Projects\algorand-document-vault\src\repositories\evidence\EvidenceRepository.ts:43: const records = EvidenceRepository.list();
+C:\Projects\algorand-document-vault\src\repositories\evidence\EvidenceRepository.ts:45: for (const listener of EvidenceRepository.listeners) {
