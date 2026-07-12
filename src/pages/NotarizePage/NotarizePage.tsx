@@ -1,25 +1,52 @@
 import { useEffect, useState } from "react";
 import { NotarizationWorkflow } from "../../core";
+import { EvidenceRepository } from "../../repositories";
 import {
+  AlgorandConfirmationService,
   AlgorandProofTransactionDraftService,
+  AlgorandSubmissionService,
+  AlgorandTransactionSigningService,
+  EvidenceRecordService,
   WalletService,
 } from "../../services";
 import type {
+  AlgorandConfirmationResult,
   AlgorandProofTransactionDraft,
+  AlgorandSignedProofTransaction,
+  AlgorandSubmissionResult,
   NotarizationProof,
 } from "../../types";
+import type { EvidenceRecord } from "../../services";
 import type { WalletConnection } from "../../types/wallet";
+import BlockchainPreparationStep from "./components/BlockchainPreparationStep";
+import DocumentSummaryStep from "./components/DocumentSummaryStep";
+import DuplicateEvidenceWarning from "./components/DuplicateEvidenceWarning";
+import EvidenceRecordPreview from "./components/EvidenceRecordPreview";
+import EvidenceReviewStep from "./components/EvidenceReviewStep";
+import ProgressTimeline from "./components/ProgressTimeline";
+import SignSubmitStep from "./components/SignSubmitStep";
+import UploadStep from "./components/UploadStep";
 import "./NotarizePage.css";
 
 function NotarizePage() {
   const [fileName, setFileName] = useState<string>("");
   const [fileHash, setFileHash] = useState<string>("");
   const [proof, setProof] = useState<NotarizationProof | null>(null);
+  const [evidenceRecord, setEvidenceRecord] = useState<EvidenceRecord | null>(null);
+  const [duplicateRecord, setDuplicateRecord] = useState<EvidenceRecord | null>(null);
   const [transactionDraft, setTransactionDraft] =
     useState<AlgorandProofTransactionDraft | null>(null);
-  const [serializedProofPayload, setSerializedProofPayload] =
-    useState<string>("");
+  const [signedTransaction, setSignedTransaction] =
+    useState<AlgorandSignedProofTransaction | null>(null);
+  const [submissionResult, setSubmissionResult] =
+    useState<AlgorandSubmissionResult | null>(null);
+  const [confirmationResult, setConfirmationResult] =
+    useState<AlgorandConfirmationResult | null>(null);
+  const [serializedProofPayload, setSerializedProofPayload] = useState<string>("");
   const [errors, setErrors] = useState<string[]>([]);
+  const [signingMessage, setSigningMessage] = useState<string>("");
+  const [submissionMessage, setSubmissionMessage] = useState<string>("");
+  const [confirmationMessage, setConfirmationMessage] = useState<string>("");
   const [wallet, setWallet] = useState<WalletConnection>({
     status: "disconnected",
   });
@@ -35,8 +62,16 @@ function NotarizePage() {
     setFileName(result.fileName);
     setFileHash(result.hashValue);
     setProof(result.proof);
+    setEvidenceRecord(result.evidenceRecord);
+    setDuplicateRecord(result.duplicateRecord);
     setSerializedProofPayload(result.serializedProofPayload);
     setErrors(result.errors);
+    setSignedTransaction(null);
+    setSubmissionResult(null);
+    setConfirmationResult(null);
+    setSigningMessage("");
+    setSubmissionMessage("");
+    setConfirmationMessage("");
 
     if (result.proof && wallet.address) {
       const draft = AlgorandProofTransactionDraftService.createDraft(
@@ -50,6 +85,82 @@ function NotarizePage() {
     }
   }
 
+  async function handleSignTransaction() {
+    if (!proof || !wallet.address) {
+      setSigningMessage("Proof and connected wallet are required before signing.");
+      return;
+    }
+
+    try {
+      setSigningMessage("Opening Pera Wallet for signature approval...");
+
+      const signed = await AlgorandTransactionSigningService.signProofTransaction(
+        proof,
+        wallet.address
+      );
+
+      setSignedTransaction(signed);
+      setSubmissionResult(null);
+      setConfirmationResult(null);
+      setSigningMessage(
+        "Transaction signed successfully. It has not been submitted to Algorand yet."
+      );
+      setSubmissionMessage("");
+      setConfirmationMessage("");
+    } catch (error) {
+      console.error("Transaction signing failed:", error);
+      setSigningMessage("Transaction signing failed or was rejected.");
+    }
+  }
+
+  async function handleSubmitTransaction() {
+    if (!signedTransaction) {
+      setSubmissionMessage("A signed transaction is required before submission.");
+      return;
+    }
+
+    if (!evidenceRecord) {
+      setSubmissionMessage("An evidence record is required before submission.");
+      return;
+    }
+
+    try {
+      setSubmissionMessage("Submitting signed transaction to Algorand TestNet...");
+
+      const submission = await AlgorandSubmissionService.submitSignedTransaction(
+        signedTransaction.signedTransaction
+      );
+
+      const submittedRecord = EvidenceRecordService.markSubmitted(
+        evidenceRecord,
+        submission
+      );
+
+      await EvidenceRepository.saveAsync(submittedRecord);
+      setEvidenceRecord(submittedRecord);
+      setSubmissionResult(submission);
+      setSubmissionMessage("Transaction submitted to Algorand TestNet.");
+      setConfirmationMessage("Waiting for Algorand confirmation...");
+
+      const confirmation = await AlgorandConfirmationService.waitForConfirmation(
+        submission.transactionId
+      );
+
+      const confirmedRecord = EvidenceRecordService.markConfirmed(
+        submittedRecord,
+        confirmation
+      );
+
+      await EvidenceRepository.saveAsync(confirmedRecord);
+      setEvidenceRecord(confirmedRecord);
+      setConfirmationResult(confirmation);
+      setConfirmationMessage("Transaction confirmed on Algorand TestNet.");
+    } catch (error) {
+      console.error("Transaction submission or confirmation failed:", error);
+      setConfirmationMessage("Transaction confirmation failed or timed out.");
+    }
+  }
+
   const walletReady = wallet.status === "connected";
   const readyForSignature = Boolean(walletReady && proof && transactionDraft);
 
@@ -58,98 +169,63 @@ function NotarizePage() {
     : "";
 
   return (
-    <section className="page">
-      <h2>Notarize Document</h2>
-      <p>Upload a document, inspect its proof, then prepare for Algorand notarization.</p>
+    <section className="page notarize-page">
+      <div className="notarize-header">
+        <h2>Notarize Document</h2>
+        <p>
+          Create cryptographic evidence for one document and prepare it for
+          Algorand notarization.
+        </p>
+      </div>
 
-      <div className="notarize-panel">
-        <div className="notarize-result">
-          <strong>Notarization Progress</strong>
-          <p>{fileName ? "? Document selected" : "? Document selected"}</p>
-          <p>{fileHash ? "? SHA-256 hash generated" : "? SHA-256 hash generated"}</p>
-          <p>{proof ? "? Proof created" : "? Proof created"}</p>
-          <p>{serializedProofPayload ? "? Payload prepared" : "? Payload prepared"}</p>
-          <p>{walletReady ? "? Wallet connected" : "? Wallet connected"}</p>
-          <p>{transactionDraft ? "? Transaction draft prepared" : "? Transaction draft prepared"}</p>
-          <p>{readyForSignature ? "? Ready for signature" : "? Ready for signature"}</p>
+      <div className="notarize-workspace">
+        <div className="notarize-row">
+          <div className="notarize-section">
+            <UploadStep onFileChange={handleFileChange} />
+          </div>
+
+          <div className="notarize-section">
+            <DocumentSummaryStep
+              fileName={fileName}
+              fileHash={fileHash}
+              errors={errors}
+            />
+            <DuplicateEvidenceWarning duplicateRecord={duplicateRecord} />
+            <EvidenceRecordPreview evidenceRecord={evidenceRecord} />
+          </div>
         </div>
 
-        <div className="notarize-result">
-          <strong>Wallet Status</strong>
-          <p>{walletReady ? "Pera Wallet connected." : "No Pera Wallet connected."}</p>
+        <BlockchainPreparationStep transactionDraft={transactionDraft} />
 
-          {!walletReady && (
-            <p>
-              To continue, install or open Pera Wallet, connect it on the Wallet page,
-              then return here.
-            </p>
-          )}
+        <EvidenceReviewStep prettyPayload={prettyPayload} />
 
-          {wallet.address && (
-            <p>
-              <strong>Wallet Address:</strong> {wallet.address}
-            </p>
-          )}
-        </div>
+        <SignSubmitStep
+          readyForSignature={readyForSignature}
+          signingMessage={signingMessage}
+          submissionMessage={submissionMessage}
+          confirmationMessage={confirmationMessage}
+          signedTransaction={signedTransaction}
+          submissionResult={submissionResult}
+          confirmationResult={confirmationResult}
+          onSignTransaction={handleSignTransaction}
+          onSubmitTransaction={handleSubmitTransaction}
+        />
 
-        <input type="file" onChange={handleFileChange} />
-
-        {errors.length > 0 && (
-          <div className="notarize-errors">
-            {errors.map((error) => (
-              <p key={error}>{error}</p>
-            ))}
-          </div>
-        )}
-
-        {fileName && (
-          <div className="notarize-result">
-            <strong>Selected File:</strong>
-            <p>{fileName}</p>
-          </div>
-        )}
-
-        {fileHash && (
-          <div className="notarize-result">
-            <strong>SHA-256 Hash:</strong>
-            <code>{fileHash}</code>
-          </div>
-        )}
-
-        {prettyPayload && (
-          <div className="notarize-result">
-            <strong>Blockchain Proof Payload Preview</strong>
-            <p>This is the only document proof data prepared for Algorand.</p>
-            <pre>
-              <code>{prettyPayload}</code>
-            </pre>
-          </div>
-        )}
-
-        {transactionDraft && (
-          <div className="notarize-result">
-            <strong>Transaction Review</strong>
-            <p>Network: TestNet</p>
-            <p>Transaction Type: Payment transaction with proof note</p>
-            <p>Amount: 0 ALGO</p>
-            <p>Estimated Minimum Fee: 0.001 ALGO</p>
-            <p>Sender: {transactionDraft.senderAddress}</p>
-            <p>Receiver: {transactionDraft.receiverAddress}</p>
-            <p>Note Size: {transactionDraft.noteByteLength} bytes</p>
-          </div>
-        )}
-
-        <div className="notarize-result">
-          <strong>Signature Readiness</strong>
-          <p>
-            {readyForSignature
-              ? "Ready for Pera Wallet signature."
-              : "Not ready for signature."}
-          </p>
-        </div>
+        <ProgressTimeline
+          fileName={fileName}
+          fileHash={fileHash}
+          proof={proof}
+          evidenceRecord={evidenceRecord}
+          serializedProofPayload={serializedProofPayload}
+          walletReady={walletReady}
+          transactionDraft={transactionDraft}
+          signedTransaction={signedTransaction}
+        />
       </div>
     </section>
   );
 }
 
 export default NotarizePage;
+
+

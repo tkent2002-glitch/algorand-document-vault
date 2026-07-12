@@ -1,0 +1,764 @@
+﻿
+==================================================
+src\services\algorand\AlgorandService.ts
+==================================================
+import algosdk from "algosdk";
+import type { AlgorandNetworkConfig, NotarizationProof } from "../../types";
+import { DEFAULT_ALGORAND_NETWORK_CONFIG } from "../../types";
+
+export type AlgorandNodeStatus = {
+  connected: boolean;
+  network: string;
+  message: string;
+};
+
+export class AlgorandService {
+  private static readonly config: AlgorandNetworkConfig =
+    DEFAULT_ALGORAND_NETWORK_CONFIG;
+
+  static getNetworkConfig(): AlgorandNetworkConfig {
+    return AlgorandService.config;
+  }
+
+  static createAlgodClient(): algosdk.Algodv2 {
+    return new algosdk.Algodv2(
+      AlgorandService.config.algodToken,
+      AlgorandService.config.algodServer,
+      AlgorandService.config.algodPort
+    );
+  }
+
+  static async checkNodeStatus(): Promise<AlgorandNodeStatus> {
+    try {
+      const client = AlgorandService.createAlgodClient();
+      await client.status().do();
+
+      return {
+        connected: true,
+        network: AlgorandService.config.network,
+        message: "Connected to Algorand node.",
+      };
+    } catch (error) {
+      console.error("Algorand node status check failed:", error);
+
+      return {
+        connected: false,
+        network: AlgorandService.config.network,
+        message: "Unable to connect to Algorand node.",
+      };
+    }
+  }
+
+  static getSdkStatus(): string {
+    return typeof algosdk === "object"
+      ? "Algorand SDK loaded"
+      : "Algorand SDK unavailable";
+  }
+
+  static createTestAccountAddress(): string {
+    const account = algosdk.generateAccount();
+    return account.addr.toString();
+  }
+
+  static async submitProof(
+    proof: NotarizationProof
+  ): Promise<NotarizationProof> {
+    console.log("Algorand submission placeholder", proof);
+
+    return {
+      ...proof,
+      status: "pending_wallet_signature",
+    };
+  }
+}
+
+==================================================
+src\services\algorand\AlgorandProofNoteService.ts
+==================================================
+import type { NotarizationProof } from "../../types";
+import { ProofPayloadSerializer } from "../notarization";
+
+const MAX_ALGORAND_NOTE_BYTES = 1024;
+
+export class AlgorandProofNoteService {
+  static createNote(proof: NotarizationProof): Uint8Array {
+    const serializedPayload = ProofPayloadSerializer.serialize(proof);
+    const note = new TextEncoder().encode(serializedPayload);
+
+    if (note.byteLength > MAX_ALGORAND_NOTE_BYTES) {
+      throw new Error("Proof payload exceeds Algorand note size limit.");
+    }
+
+    return note;
+  }
+
+  static createPreview(proof: NotarizationProof): string {
+    return ProofPayloadSerializer.serialize(proof);
+  }
+}
+
+==================================================
+src\services\algorand\AlgorandProofTransactionDraftService.ts
+==================================================
+import type {
+  AlgorandProofTransactionDraft,
+  NotarizationProof,
+} from "../../types";
+import { AlgorandProofNoteService } from "./AlgorandProofNoteService";
+
+const MINIMUM_ALGORAND_FEE_MICROALGOS = 1000;
+
+export class AlgorandProofTransactionDraftService {
+  static createDraft(
+    proof: NotarizationProof,
+    senderAddress: string
+  ): AlgorandProofTransactionDraft {
+    const note = AlgorandProofNoteService.createNote(proof);
+    const notePreview = AlgorandProofNoteService.createPreview(proof);
+
+    return {
+      senderAddress,
+      receiverAddress: senderAddress,
+      notePreview,
+      noteByteLength: note.byteLength,
+      minimumFeeMicroAlgos: MINIMUM_ALGORAND_FEE_MICROALGOS,
+    };
+  }
+}
+
+==================================================
+src\services\algorand\AlgorandTransactionBuilderService.ts
+==================================================
+import algosdk from "algosdk";
+import type {
+  AlgorandUnsignedProofTransaction,
+  NotarizationProof,
+} from "../../types";
+import { AlgorandProofNoteService } from "./AlgorandProofNoteService";
+import { AlgorandService } from "./AlgorandService";
+
+const PROOF_TRANSACTION_AMOUNT_MICROALGOS = 0;
+
+export class AlgorandTransactionBuilderService {
+  static async buildUnsignedProofTransaction(
+    proof: NotarizationProof,
+    senderAddress: string
+  ): Promise<AlgorandUnsignedProofTransaction> {
+    const client = AlgorandService.createAlgodClient();
+    const suggestedParams = await client.getTransactionParams().do();
+
+    const note = AlgorandProofNoteService.createNote(proof);
+    const notePreview = AlgorandProofNoteService.createPreview(proof);
+
+    const transaction = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+      sender: senderAddress,
+      receiver: senderAddress,
+      amount: PROOF_TRANSACTION_AMOUNT_MICROALGOS,
+      note,
+      suggestedParams,
+    } as any);
+
+    return {
+      txId: transaction.txID(),
+      senderAddress,
+      receiverAddress: senderAddress,
+      amountMicroAlgos: PROOF_TRANSACTION_AMOUNT_MICROALGOS,
+      notePreview,
+      noteByteLength: note.byteLength,
+    };
+  }
+}
+
+==================================================
+src\services\algorand\AlgorandTransactionSigningService.ts
+==================================================
+import algosdk from "algosdk";
+import type {
+  AlgorandSignedProofTransaction,
+  NotarizationProof,
+} from "../../types";
+import { WalletService } from "../wallet/WalletService";
+import { AlgorandProofNoteService } from "./AlgorandProofNoteService";
+import { AlgorandService } from "./AlgorandService";
+
+const PROOF_TRANSACTION_AMOUNT_MICROALGOS = 0;
+
+export class AlgorandTransactionSigningService {
+  static async signProofTransaction(
+    proof: NotarizationProof,
+    senderAddress: string
+  ): Promise<AlgorandSignedProofTransaction> {
+    const client = AlgorandService.createAlgodClient();
+    const suggestedParams = await client.getTransactionParams().do();
+
+    const note = AlgorandProofNoteService.createNote(proof);
+
+    const transaction = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+      sender: senderAddress,
+      receiver: senderAddress,
+      amount: PROOF_TRANSACTION_AMOUNT_MICROALGOS,
+      note,
+      suggestedParams,
+    } as any);
+
+    const signedTransaction =
+      await WalletService.signSingleTransaction(transaction);
+
+    return {
+      txId: transaction.txID(),
+      signedTransaction,
+      signedTransactionByteLength: signedTransaction.byteLength,
+      signedAt: new Date().toISOString(),
+    };
+  }
+}
+
+==================================================
+src\services\algorand\AlgorandSubmissionService.ts
+==================================================
+import type { AlgorandSubmissionResult } from "../../types";
+import { AlgorandService } from "./AlgorandService";
+
+export class AlgorandSubmissionService {
+  static async submitSignedTransaction(
+    signedTransaction: Uint8Array
+  ): Promise<AlgorandSubmissionResult> {
+    const client = AlgorandService.createAlgodClient();
+    const response = await client.sendRawTransaction(signedTransaction).do();
+
+    return {
+      transactionId: response.txid,
+      submittedAt: new Date().toISOString(),
+    };
+  }
+}
+
+==================================================
+src\services\algorand\AlgorandConfirmationService.ts
+==================================================
+import algosdk from "algosdk";
+import type { AlgorandConfirmationResult } from "../../types";
+import { AlgorandService } from "./AlgorandService";
+
+const CONFIRMATION_WAIT_ROUNDS = 10;
+
+export class AlgorandConfirmationService {
+  static async waitForConfirmation(
+    transactionId: string
+  ): Promise<AlgorandConfirmationResult> {
+    const client = AlgorandService.createAlgodClient();
+
+    const confirmation = await algosdk.waitForConfirmation(
+      client,
+      transactionId,
+      CONFIRMATION_WAIT_ROUNDS
+    );
+
+    return {
+      transactionId,
+      confirmedRound: Number(confirmation.confirmedRound),
+      confirmedAt: new Date().toISOString(),
+    };
+  }
+}
+
+==================================================
+src\services\algorand\AlgorandTransactionInspectionService.ts
+==================================================
+import type {
+  AlgorandProofTransactionDraft,
+  AlgorandTransactionInspection,
+} from "../../types";
+import { DEFAULT_ALGORAND_NETWORK_CONFIG } from "../../types";
+
+export class AlgorandTransactionInspectionService {
+  static inspectDraft(
+    draft: AlgorandProofTransactionDraft
+  ): AlgorandTransactionInspection {
+    return {
+      network: DEFAULT_ALGORAND_NETWORK_CONFIG.network,
+      transactionType: "Payment transaction with document-integrity proof note",
+      amountAlgos: "0",
+      estimatedFeeAlgos: "0.001",
+      senderAddress: draft.senderAddress,
+      receiverAddress: draft.receiverAddress,
+      noteByteLength: draft.noteByteLength,
+      payloadPreview: draft.notePreview,
+      readiness: "ready_for_signature",
+    };
+  }
+}
+
+==================================================
+src\services\algorand\AlgorandExplorerService.ts
+==================================================
+import { DEFAULT_ALGORAND_NETWORK_CONFIG } from "../../types";
+
+export class AlgorandExplorerService {
+  static getTransactionUrl(transactionId: string): string {
+    const network = DEFAULT_ALGORAND_NETWORK_CONFIG.network;
+
+    if (network === "testnet") {
+      return `https://testnet.explorer.perawallet.app/tx/${transactionId}`;
+    }
+
+    return `https://explorer.perawallet.app/tx/${transactionId}`;
+  }
+}
+
+==================================================
+src\services\algorand\index.ts
+==================================================
+export { AlgorandConfirmationService } from "./AlgorandConfirmationService";
+export { AlgorandExplorerService } from "./AlgorandExplorerService";
+export { AlgorandProofNoteService } from "./AlgorandProofNoteService";
+export { AlgorandProofTransactionDraftService } from "./AlgorandProofTransactionDraftService";
+export { AlgorandService } from "./AlgorandService";
+export { AlgorandSubmissionService } from "./AlgorandSubmissionService";
+export { AlgorandTransactionBuilderService } from "./AlgorandTransactionBuilderService";
+export { AlgorandTransactionInspectionService } from "./AlgorandTransactionInspectionService";
+export { AlgorandTransactionSigningService } from "./AlgorandTransactionSigningService";
+
+==================================================
+src\services\wallet\WalletService.ts
+==================================================
+import { PeraWalletConnect } from "@perawallet/connect";
+import type { Transaction } from "algosdk";
+import type { WalletConnection } from "../../types/wallet";
+
+export class WalletService {
+  private static readonly pera = new PeraWalletConnect({
+    shouldShowSignTxnToast: false,
+  });
+
+  static async reconnect(): Promise<WalletConnection> {
+    const accounts = await WalletService.pera.reconnectSession();
+
+    if (accounts.length > 0) {
+      return {
+        status: "connected",
+        address: accounts[0],
+      };
+    }
+
+    return {
+      status: "disconnected",
+    };
+  }
+
+  static async connect(): Promise<WalletConnection> {
+    try {
+      const accounts = await WalletService.pera.connect();
+
+      if (accounts.length > 0) {
+        return {
+          status: "connected",
+          address: accounts[0],
+        };
+      }
+
+      return {
+        status: "disconnected",
+      };
+    } catch (error) {
+      console.error("Pera Wallet connection failed:", error);
+
+      return {
+        status: "error",
+      };
+    }
+  }
+
+  static async disconnect(): Promise<WalletConnection> {
+    await WalletService.pera.disconnect();
+
+    return {
+      status: "disconnected",
+    };
+  }
+
+  static isConnected(): boolean {
+    return WalletService.pera.isConnected;
+  }
+
+  static async signSingleTransaction(
+    transaction: Transaction
+  ): Promise<Uint8Array> {
+    const signedTransactions = await WalletService.pera.signTransaction([
+      [{ txn: transaction }],
+    ]);
+
+    return signedTransactions[0];
+  }
+}
+
+==================================================
+src\services\wallet\index.ts
+==================================================
+export { WalletService } from "./WalletService";
+
+==================================================
+src\pages\WalletPage\WalletPage.tsx
+==================================================
+import { useEffect, useState } from "react";
+import { WalletService } from "../../services";
+import type { WalletConnection } from "../../types/wallet";
+import "./WalletPage.css";
+
+function WalletPage() {
+  const [connection, setConnection] = useState<WalletConnection>({
+    status: "disconnected",
+  });
+
+  const [message, setMessage] = useState<string>("Wallet not connected.");
+
+  useEffect(() => {
+    WalletService.reconnect().then((result) => {
+      setConnection(result);
+      setMessage(
+        result.status === "connected"
+          ? "Existing Pera Wallet session restored."
+          : "Wallet not connected."
+      );
+    });
+  }, []);
+
+  async function handleConnect() {
+    setConnection({ status: "connecting" });
+    setMessage("Opening Pera Wallet connection...");
+
+    const result = await WalletService.connect();
+
+    setConnection(result);
+    setMessage(
+      result.status === "connected"
+        ? "Pera Wallet connected successfully."
+        : "Pera Wallet connection was not completed."
+    );
+  }
+
+  async function handleDisconnect() {
+    const result = await WalletService.disconnect();
+
+    setConnection(result);
+    setMessage("Pera Wallet disconnected.");
+  }
+
+  const isConnected = connection.status === "connected";
+
+  return (
+    <section className="page">
+      <h2>Wallet Status</h2>
+      <p>Connect your Pera Wallet to prepare for Algorand notarization.</p>
+
+      <div className="wallet-panel">
+        <p>
+          <strong>Status:</strong> {connection.status}
+        </p>
+
+        <p>
+          <strong>Message:</strong> {message}
+        </p>
+
+        {connection.address && (
+          <p>
+            <strong>Address:</strong> {connection.address}
+          </p>
+        )}
+
+        <button onClick={isConnected ? handleDisconnect : handleConnect}>
+          {isConnected ? "Disconnect Pera Wallet" : "Connect Pera Wallet"}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+export default WalletPage;
+
+==================================================
+src\pages\NotarizePage\NotarizePage.tsx
+==================================================
+import { useEffect, useState } from "react";
+import { NotarizationWorkflow } from "../../core";
+import { EvidenceRepository } from "../../repositories";
+import {
+  AlgorandConfirmationService,
+  AlgorandProofTransactionDraftService,
+  AlgorandSubmissionService,
+  AlgorandTransactionSigningService,
+  EvidenceRecordService,
+  WalletService,
+} from "../../services";
+import type {
+  AlgorandConfirmationResult,
+  AlgorandProofTransactionDraft,
+  AlgorandSignedProofTransaction,
+  AlgorandSubmissionResult,
+  NotarizationProof,
+} from "../../types";
+import type { EvidenceRecord } from "../../services";
+import type { WalletConnection } from "../../types/wallet";
+import BlockchainPreparationStep from "./components/BlockchainPreparationStep";
+import DocumentSummaryStep from "./components/DocumentSummaryStep";
+import DuplicateEvidenceWarning from "./components/DuplicateEvidenceWarning";
+import EvidenceRecordPreview from "./components/EvidenceRecordPreview";
+import EvidenceReviewStep from "./components/EvidenceReviewStep";
+import ProgressTimeline from "./components/ProgressTimeline";
+import SignSubmitStep from "./components/SignSubmitStep";
+import UploadStep from "./components/UploadStep";
+import "./NotarizePage.css";
+
+function NotarizePage() {
+  const [fileName, setFileName] = useState<string>("");
+  const [fileHash, setFileHash] = useState<string>("");
+  const [proof, setProof] = useState<NotarizationProof | null>(null);
+  const [evidenceRecord, setEvidenceRecord] = useState<EvidenceRecord | null>(null);
+  const [duplicateRecord, setDuplicateRecord] = useState<EvidenceRecord | null>(null);
+  const [transactionDraft, setTransactionDraft] =
+    useState<AlgorandProofTransactionDraft | null>(null);
+  const [signedTransaction, setSignedTransaction] =
+    useState<AlgorandSignedProofTransaction | null>(null);
+  const [submissionResult, setSubmissionResult] =
+    useState<AlgorandSubmissionResult | null>(null);
+  const [confirmationResult, setConfirmationResult] =
+    useState<AlgorandConfirmationResult | null>(null);
+  const [serializedProofPayload, setSerializedProofPayload] = useState<string>("");
+  const [errors, setErrors] = useState<string[]>([]);
+  const [signingMessage, setSigningMessage] = useState<string>("");
+  const [submissionMessage, setSubmissionMessage] = useState<string>("");
+  const [confirmationMessage, setConfirmationMessage] = useState<string>("");
+  const [wallet, setWallet] = useState<WalletConnection>({
+    status: "disconnected",
+  });
+
+  useEffect(() => {
+    WalletService.reconnect().then(setWallet);
+  }, []);
+
+  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    const result = await NotarizationWorkflow.execute(file);
+
+    setFileName(result.fileName);
+    setFileHash(result.hashValue);
+    setProof(result.proof);
+    setEvidenceRecord(result.evidenceRecord);
+    setDuplicateRecord(result.duplicateRecord);
+    setSerializedProofPayload(result.serializedProofPayload);
+    setErrors(result.errors);
+    setSignedTransaction(null);
+    setSubmissionResult(null);
+    setConfirmationResult(null);
+    setSigningMessage("");
+    setSubmissionMessage("");
+    setConfirmationMessage("");
+
+    if (result.proof && wallet.address) {
+      const draft = AlgorandProofTransactionDraftService.createDraft(
+        result.proof,
+        wallet.address
+      );
+
+      setTransactionDraft(draft);
+    } else {
+      setTransactionDraft(null);
+    }
+  }
+
+  async function handleSignTransaction() {
+    if (!proof || !wallet.address) {
+      setSigningMessage("Proof and connected wallet are required before signing.");
+      return;
+    }
+
+    try {
+      setSigningMessage("Opening Pera Wallet for signature approval...");
+
+      const signed = await AlgorandTransactionSigningService.signProofTransaction(
+        proof,
+        wallet.address
+      );
+
+      setSignedTransaction(signed);
+      setSubmissionResult(null);
+      setConfirmationResult(null);
+      setSigningMessage(
+        "Transaction signed successfully. It has not been submitted to Algorand yet."
+      );
+      setSubmissionMessage("");
+      setConfirmationMessage("");
+    } catch (error) {
+      console.error("Transaction signing failed:", error);
+      setSigningMessage("Transaction signing failed or was rejected.");
+    }
+  }
+
+  async function handleSubmitTransaction() {
+    if (!signedTransaction) {
+      setSubmissionMessage("A signed transaction is required before submission.");
+      return;
+    }
+
+    if (!evidenceRecord) {
+      setSubmissionMessage("An evidence record is required before submission.");
+      return;
+    }
+
+    try {
+      setSubmissionMessage("Submitting signed transaction to Algorand TestNet...");
+
+      const submission = await AlgorandSubmissionService.submitSignedTransaction(
+        signedTransaction.signedTransaction
+      );
+
+      const submittedRecord = EvidenceRecordService.markSubmitted(
+        evidenceRecord,
+        submission
+      );
+
+      await EvidenceRepository.saveAsync(submittedRecord);
+      setEvidenceRecord(submittedRecord);
+      setSubmissionResult(submission);
+      setSubmissionMessage("Transaction submitted to Algorand TestNet.");
+      setConfirmationMessage("Waiting for Algorand confirmation...");
+
+      const confirmation = await AlgorandConfirmationService.waitForConfirmation(
+        submission.transactionId
+      );
+
+      const confirmedRecord = EvidenceRecordService.markConfirmed(
+        submittedRecord,
+        confirmation
+      );
+
+      await EvidenceRepository.saveAsync(confirmedRecord);
+      setEvidenceRecord(confirmedRecord);
+      setConfirmationResult(confirmation);
+      setConfirmationMessage("Transaction confirmed on Algorand TestNet.");
+    } catch (error) {
+      console.error("Transaction submission or confirmation failed:", error);
+      setConfirmationMessage("Transaction confirmation failed or timed out.");
+    }
+  }
+
+  const walletReady = wallet.status === "connected";
+  const readyForSignature = Boolean(walletReady && proof && transactionDraft);
+
+  const prettyPayload = serializedProofPayload
+    ? JSON.stringify(JSON.parse(serializedProofPayload), null, 2)
+    : "";
+
+  return (
+    <section className="page notarize-page">
+      <div className="notarize-header">
+        <h2>Notarize Document</h2>
+        <p>
+          Create cryptographic evidence for one document and prepare it for
+          Algorand notarization.
+        </p>
+      </div>
+
+      <div className="notarize-workspace">
+        <div className="notarize-row">
+          <div className="notarize-section">
+            <UploadStep onFileChange={handleFileChange} />
+          </div>
+
+          <div className="notarize-section">
+            <DocumentSummaryStep
+              fileName={fileName}
+              fileHash={fileHash}
+              errors={errors}
+            />
+            <DuplicateEvidenceWarning duplicateRecord={duplicateRecord} />
+            <EvidenceRecordPreview evidenceRecord={evidenceRecord} />
+          </div>
+        </div>
+
+        <BlockchainPreparationStep transactionDraft={transactionDraft} />
+
+        <EvidenceReviewStep prettyPayload={prettyPayload} />
+
+        <SignSubmitStep
+          readyForSignature={readyForSignature}
+          signingMessage={signingMessage}
+          submissionMessage={submissionMessage}
+          confirmationMessage={confirmationMessage}
+          signedTransaction={signedTransaction}
+          submissionResult={submissionResult}
+          confirmationResult={confirmationResult}
+          onSignTransaction={handleSignTransaction}
+          onSubmitTransaction={handleSubmitTransaction}
+        />
+
+        <ProgressTimeline
+          fileName={fileName}
+          fileHash={fileHash}
+          proof={proof}
+          evidenceRecord={evidenceRecord}
+          serializedProofPayload={serializedProofPayload}
+          walletReady={walletReady}
+          transactionDraft={transactionDraft}
+          signedTransaction={signedTransaction}
+        />
+      </div>
+    </section>
+  );
+}
+
+export default NotarizePage;
+
+
+
+==================================================
+ALGOSDK IMPORT AUDIT
+==================================================
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandConfirmationService.ts:1: import algosdk from "algosdk";
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandConfirmationService.ts:13: const confirmation = await algosdk.waitForConfirmation(
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandService.ts:1: import algosdk from "algosdk";
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandService.ts:19: static createAlgodClient(): algosdk.Algodv2 {
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandService.ts:20: return new algosdk.Algodv2(
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandService.ts:49: return typeof algosdk === "object"
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandService.ts:55: const account = algosdk.generateAccount();
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandTransactionBuilderService.ts:1: import algosdk from "algosdk";
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandTransactionBuilderService.ts:22: const transaction = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandTransactionSigningService.ts:1: import algosdk from "algosdk";
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandTransactionSigningService.ts:22: const transaction = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+C:\Projects\algorand-document-vault\src\services\wallet\WalletService.ts:2: import type { Transaction } from "algosdk";
+
+==================================================
+PERA WALLET IMPORT AUDIT
+==================================================
+C:\Projects\algorand-document-vault\src\services\wallet\WalletService.ts:1: import { PeraWalletConnect } from "@perawallet/connect";
+C:\Projects\algorand-document-vault\src\services\wallet\WalletService.ts:6: private static readonly pera = new PeraWalletConnect({
+
+==================================================
+NETWORK AND ENDPOINT AUDIT
+==================================================
+C:\Projects\algorand-document-vault\src\components\evidence\EvidenceDetailsPanel.tsx:63: <strong>Algorand TestNet</strong>
+C:\Projects\algorand-document-vault\src\pages\NotarizePage\components\BlockchainPreparationStep.tsx:17: <p>Network: TestNet</p>
+C:\Projects\algorand-document-vault\src\pages\NotarizePage\components\SignSubmitStep.tsx:59: Submit to Algorand TestNet
+C:\Projects\algorand-document-vault\src\pages\NotarizePage\NotarizePage.tsx:128: setSubmissionMessage("Submitting signed transaction to Algorand TestNet...");
+C:\Projects\algorand-document-vault\src\pages\NotarizePage\NotarizePage.tsx:142: setSubmissionMessage("Transaction submitted to Algorand TestNet.");
+C:\Projects\algorand-document-vault\src\pages\NotarizePage\NotarizePage.tsx:157: setConfirmationMessage("Transaction confirmed on Algorand TestNet.");
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandConfirmationService.ts:11: const client = AlgorandService.createAlgodClient();
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandExplorerService.ts:7: if (network === "testnet") {
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandExplorerService.ts:8: return `https://testnet.explorer.perawallet.app/tx/${transactionId}`;
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandService.ts:19: static createAlgodClient(): algosdk.Algodv2 {
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandService.ts:20: return new algosdk.Algodv2(
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandService.ts:21: AlgorandService.config.algodToken,
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandService.ts:22: AlgorandService.config.algodServer,
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandService.ts:23: AlgorandService.config.algodPort
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandService.ts:29: const client = AlgorandService.createAlgodClient();
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandSubmissionService.ts:8: const client = AlgorandService.createAlgodClient();
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandTransactionBuilderService.ts:16: const client = AlgorandService.createAlgodClient();
+C:\Projects\algorand-document-vault\src\services\algorand\AlgorandTransactionSigningService.ts:17: const client = AlgorandService.createAlgodClient();
+C:\Projects\algorand-document-vault\src\types\algorand\AlgorandNetworkConfig.ts:1: export type AlgorandNetwork = "testnet" | "mainnet";
+C:\Projects\algorand-document-vault\src\types\algorand\AlgorandNetworkConfig.ts:5: algodServer: string;
+C:\Projects\algorand-document-vault\src\types\algorand\AlgorandNetworkConfig.ts:6: algodPort: string;
+C:\Projects\algorand-document-vault\src\types\algorand\AlgorandNetworkConfig.ts:7: algodToken: string;
+C:\Projects\algorand-document-vault\src\types\algorand\AlgorandNetworkConfig.ts:11: network: "testnet",
+C:\Projects\algorand-document-vault\src\types\algorand\AlgorandNetworkConfig.ts:12: algodServer: "https://testnet-api.algonode.cloud",
+C:\Projects\algorand-document-vault\src\types\algorand\AlgorandNetworkConfig.ts:13: algodPort: "",
+C:\Projects\algorand-document-vault\src\types\algorand\AlgorandNetworkConfig.ts:14: algodToken: "",

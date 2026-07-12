@@ -1,0 +1,143 @@
+﻿.evidence-details-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--social-bg);
+  box-shadow: var(--shadow);
+}
+
+.evidence-details-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.evidence-details-eyebrow {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.evidence-details-header h2 {
+  margin: 0.25rem 0 0;
+  color: var(--text-h);
+}
+
+.evidence-details-header button {
+  cursor: pointer;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.evidence-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.evidence-details-grid div,
+.evidence-details-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.evidence-details-grid span {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.evidence-details-grid strong,
+.evidence-details-section h3 {
+  color: var(--text-h);
+}
+
+.evidence-details-section {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.evidence-details-section code,
+.evidence-details-grid code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 700px) {
+  .evidence-details-header,
+  .evidence-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .evidence-details-header {
+    flex-direction: column;
+  }
+}
+.evidence-details-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.evidence-details-actions button {
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.evidence-details-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.blockchain-metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.blockchain-metadata-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.blockchain-metadata-grid span {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.blockchain-metadata-grid strong {
+  color: var(--text-h);
+}
+
+.explorer-link {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 1rem;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 700px) {
+  .blockchain-metadata-grid {
+    grid-template-columns: 1fr;
+  }
+}

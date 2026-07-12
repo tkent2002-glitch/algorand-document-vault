@@ -1,15 +1,38 @@
-import { StrictMode } from "react";
+﻿import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { ApplicationManager } from "./core";
 import App from "./App";
+import { ApplicationManager } from "./core";
+import { EvidenceRepository } from "./repositories";
 
 import "./index.css";
 
-ApplicationManager.initialize();
+async function bootstrap(): Promise<void> {
+  ApplicationManager.initialize();
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
-);
+  try {
+    const migration =
+      await EvidenceRepository.initializeDurableStorage();
+
+    console.info("Evidence storage initialized.", migration);
+  } catch (error) {
+    console.error(
+      "IndexedDB initialization failed. Continuing with localStorage fallback.",
+      error
+    );
+  }
+
+  const rootElement = document.getElementById("root");
+
+  if (!rootElement) {
+    throw new Error("Application root element was not found.");
+  }
+
+  createRoot(rootElement).render(
+    <StrictMode>
+      <App />
+    </StrictMode>
+  );
+}
+
+void bootstrap();
