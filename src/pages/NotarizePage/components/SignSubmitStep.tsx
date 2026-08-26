@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   AlgorandConfirmationResult,
   AlgorandSignedProofTransaction,
   AlgorandSubmissionResult,
@@ -35,31 +35,57 @@ function SignSubmitStep({
   onSignTransaction,
   onSubmitTransaction,
 }: SignSubmitStepProps) {
-  let readinessMessage =
-    "Choose a document to begin notarization.";
+  let signGuidance =
+    "Choose a document before requesting a wallet signature.";
 
   if (hasDocument && !walletReady) {
-    readinessMessage =
-      "Document proof is ready. Connect Pera Wallet before signing.";
+    signGuidance =
+      "Connect Pera Wallet before requesting a signature.";
   } else if (
     hasDocument &&
     walletReady &&
     !transactionPrepared
   ) {
-    readinessMessage =
-      "Wallet connected. Preparing the Algorand transaction.";
+    signGuidance =
+      "The wallet is connected, but the transaction is not prepared yet.";
   } else if (readyForSignature) {
-    readinessMessage =
-      "Everything is ready. Review and approve the transaction in Pera Wallet.";
-  } else if (processing) {
-    readinessMessage =
-      "A blockchain operation is currently in progress.";
+    signGuidance =
+      "The transaction is ready. Review it carefully in Pera Wallet before approving.";
+  } else if (processing && !signedTransaction) {
+    signGuidance =
+      "Waiting for the wallet operation to complete.";
+  }
+
+  const signDisabled =
+    !readyForSignature || processing;
+
+  const submitDisabled =
+    !signedTransaction ||
+    Boolean(submissionResult) ||
+    processing;
+
+  let submitGuidance =
+    "Sign the transaction before it can be submitted.";
+
+  if (signedTransaction && !submissionResult && !processing) {
+    submitGuidance =
+      "The transaction is signed but still local. Submitting it will send it to Algorand TestNet.";
+  } else if (
+    signedTransaction &&
+    processing &&
+    !submissionResult
+  ) {
+    submitGuidance =
+      "Submission or confirmation is currently in progress.";
+  } else if (submissionResult) {
+    submitGuidance =
+      "This transaction has already been submitted. Another submission is not allowed from this action.";
   }
 
   return (
     <>
       <div className="notarize-result">
-        <strong>Signature Readiness</strong>
+        <strong>Step 1 — Sign Transaction</strong>
 
         <p>
           Wallet:{" "}
@@ -73,57 +99,87 @@ function SignSubmitStep({
             : "Not prepared"}
         </p>
 
-        <p>{readinessMessage}</p>
+        <p>{signGuidance}</p>
 
-        {signingMessage && <p>{signingMessage}</p>}
+        {signingMessage && (
+          <p>
+            <strong>Signing Status:</strong>{" "}
+            {signingMessage}
+          </p>
+        )}
 
         <button
           type="button"
           onClick={onSignTransaction}
-          disabled={!readyForSignature || processing}
+          disabled={signDisabled}
         >
           {processing && !signedTransaction
-            ? "Waiting for Wallet..."
-            : "Sign with Pera Wallet"}
+            ? "Waiting for Pera Wallet..."
+            : signedTransaction
+              ? "Transaction Signed"
+              : "Sign with Pera Wallet"}
         </button>
       </div>
 
-      {signedTransaction && (
-        <div className="notarize-result">
-          <strong>Submission Readiness</strong>
+      <div className="notarize-result">
+        <strong>Step 2 — Submit Transaction</strong>
 
-          <p>Transaction signed successfully.</p>
+        <p>{submitGuidance}</p>
+
+        {signedTransaction ? (
+          <>
+            <p>
+              Transaction ID:{" "}
+              <code>{signedTransaction.txId}</code>
+            </p>
+
+            <p>
+              Signed Bytes:{" "}
+              {signedTransaction.signedTransactionByteLength}
+            </p>
+
+            <p>
+              Signed At:{" "}
+              {signedTransaction.signedAt}
+            </p>
+          </>
+        ) : (
+          <p>No signed transaction is available yet.</p>
+        )}
+
+        {submissionMessage && (
           <p>
-            The transaction has not been submitted until you explicitly
-            select the submit action below.
+            <strong>Submission Status:</strong>{" "}
+            {submissionMessage}
           </p>
+        )}
 
-          <p>Transaction ID: {signedTransaction.txId}</p>
-          <p>
-            Signed Bytes:{" "}
-            {signedTransaction.signedTransactionByteLength}
-          </p>
-          <p>Signed At: {signedTransaction.signedAt}</p>
-
-          {submissionMessage && <p>{submissionMessage}</p>}
-
-          <button
-            type="button"
-            onClick={onSubmitTransaction}
-            disabled={Boolean(submissionResult) || processing}
-          >
-            {processing && !submissionResult
-              ? "Submitting..."
+        <button
+          type="button"
+          onClick={onSubmitTransaction}
+          disabled={submitDisabled}
+        >
+          {processing && signedTransaction && !submissionResult
+            ? "Processing Algorand Transaction..."
+            : submissionResult
+              ? "Transaction Submitted"
               : "Submit to Algorand TestNet"}
-          </button>
-        </div>
-      )}
+        </button>
+      </div>
 
       {submissionResult && (
         <div className="notarize-result">
-          <strong>Submitted to Algorand</strong>
-          <p>Transaction ID: {submissionResult.transactionId}</p>
-          <p>Submitted At: {submissionResult.submittedAt}</p>
+          <strong>Algorand Submission</strong>
+
+          <p>
+            Transaction ID:{" "}
+            <code>{submissionResult.transactionId}</code>
+          </p>
+
+          <p>
+            Submitted At:{" "}
+            {submissionResult.submittedAt}
+          </p>
 
           <p>
             {confirmationResult
@@ -136,6 +192,7 @@ function SignSubmitStep({
       {confirmationMessage && (
         <div className="notarize-result">
           <strong>Confirmation Status</strong>
+
           <p>{confirmationMessage}</p>
 
           {confirmationResult && (
@@ -144,6 +201,7 @@ function SignSubmitStep({
                 Confirmed Round:{" "}
                 {confirmationResult.confirmedRound}
               </p>
+
               <p>
                 Confirmed At:{" "}
                 {confirmationResult.confirmedAt}
