@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { NotarizationWorkflow } from "../../core";
 import { EvidenceRepository } from "../../repositories";
 import {
@@ -487,6 +487,10 @@ function NotarizePage() {
         )}
 
         <SignSubmitStep
+          hasDocument={Boolean(proof)}
+          walletReady={walletReady}
+          transactionPrepared={Boolean(transactionDraft)}
+          processing={processing}
           readyForSignature={readyForSignature}
           signingMessage={signingMessage}
           submissionMessage={submissionMessage}
@@ -507,6 +511,8 @@ function NotarizePage() {
           walletReady={walletReady}
           transactionDraft={transactionDraft}
           signedTransaction={signedTransaction}
+          submissionResult={submissionResult}
+          confirmationResult={confirmationResult}
         />
       </div>
     </section>

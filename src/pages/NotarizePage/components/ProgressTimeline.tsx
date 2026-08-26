@@ -1,6 +1,8 @@
-﻿import type {
+import type {
+  AlgorandConfirmationResult,
   AlgorandProofTransactionDraft,
   AlgorandSignedProofTransaction,
+  AlgorandSubmissionResult,
   NotarizationProof,
 } from "../../../types";
 import type { EvidenceRecord } from "../../../services";
@@ -14,7 +16,16 @@ type ProgressTimelineProps = {
   walletReady: boolean;
   transactionDraft: AlgorandProofTransactionDraft | null;
   signedTransaction: AlgorandSignedProofTransaction | null;
+  submissionResult: AlgorandSubmissionResult | null;
+  confirmationResult: AlgorandConfirmationResult | null;
 };
+
+function formatStep(
+  complete: boolean,
+  label: string
+): string {
+  return `${complete ? "Complete" : "Pending"}: ${label}`;
+}
 
 function ProgressTimeline({
   fileName,
@@ -25,20 +36,73 @@ function ProgressTimeline({
   walletReady,
   transactionDraft,
   signedTransaction,
+  submissionResult,
+  confirmationResult,
 }: ProgressTimelineProps) {
   return (
     <div className="notarize-result">
       <strong>Notarization Progress</strong>
-      <p>{fileName ? "Complete: Document selected" : "Pending: Document selected"}</p>
-      <p>{fileHash ? "Complete: SHA-256 hash generated" : "Pending: SHA-256 hash generated"}</p>
-      <p>{proof ? "Complete: Proof created" : "Pending: Proof created"}</p>
-      <p>{evidenceRecord ? "Complete: Evidence record created" : "Pending: Evidence record created"}</p>
-      <p>{serializedProofPayload ? "Complete: Payload prepared" : "Pending: Payload prepared"}</p>
-      <p>{walletReady ? "Complete: Wallet connected" : "Pending: Wallet connected"}</p>
-      <p>{transactionDraft ? "Complete: Transaction draft prepared" : "Pending: Transaction draft prepared"}</p>
-      <p>{signedTransaction ? "Complete: Transaction signed" : "Pending: Transaction signed"}</p>
-      <p>Pending: Transaction submitted</p>
-      <p>Pending: Confirmation received</p>
+
+      <p>
+        {formatStep(Boolean(fileName), "Document selected")}
+      </p>
+
+      <p>
+        {formatStep(
+          Boolean(fileHash),
+          "SHA-256 hash generated"
+        )}
+      </p>
+
+      <p>
+        {formatStep(Boolean(proof), "Proof created")}
+      </p>
+
+      <p>
+        {formatStep(
+          Boolean(evidenceRecord),
+          "Evidence record created"
+        )}
+      </p>
+
+      <p>
+        {formatStep(
+          Boolean(serializedProofPayload),
+          "Proof payload prepared"
+        )}
+      </p>
+
+      <p>
+        {formatStep(walletReady, "Pera Wallet connected")}
+      </p>
+
+      <p>
+        {formatStep(
+          Boolean(transactionDraft),
+          "Algorand transaction prepared"
+        )}
+      </p>
+
+      <p>
+        {formatStep(
+          Boolean(signedTransaction),
+          "Transaction signed"
+        )}
+      </p>
+
+      <p>
+        {formatStep(
+          Boolean(submissionResult),
+          "Transaction submitted"
+        )}
+      </p>
+
+      <p>
+        {formatStep(
+          Boolean(confirmationResult),
+          "Blockchain confirmation received"
+        )}
+      </p>
     </div>
   );
 }
