@@ -5,6 +5,11 @@ import {
   AlgorandNotarizationLifecycleService,
 } from "../../services/algorand/AlgorandNotarizationLifecycleService";
 import {
+  TransactionFailureClassificationService,
+  type TransactionFailureStage,
+} from "../../services/algorand/TransactionFailureClassificationService";
+import { TransactionRetryPolicyService } from "../../services/algorand/TransactionRetryPolicyService";
+import {
   AlgorandProofTransactionDraftService,
   AlgorandTransactionSigningService,
   WalletService,
@@ -52,6 +57,10 @@ function NotarizePage() {
     useState<string>("");
   const [confirmationMessage, setConfirmationMessage] =
     useState<string>("");
+  const [recoveryMessage, setRecoveryMessage] =
+    useState<string>("");
+  const [unsafeResubmissionBlocked, setUnsafeResubmissionBlocked] =
+    useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
   const [wallet, setWallet] = useState<WalletConnection>({
     status: "disconnected",
@@ -84,12 +93,15 @@ function NotarizePage() {
     setDuplicateRecord(result.duplicateRecord);
     setSerializedProofPayload(result.serializedProofPayload);
     setErrors(result.errors);
+
     setSignedTransaction(null);
     setSubmissionResult(null);
     setConfirmationResult(null);
     setSigningMessage("");
     setSubmissionMessage("");
     setConfirmationMessage("");
+    setRecoveryMessage("");
+    setUnsafeResubmissionBlocked(false);
 
     if (result.proof && wallet.address) {
       const draft =
@@ -114,6 +126,7 @@ function NotarizePage() {
 
     try {
       setProcessing(true);
+      setRecoveryMessage("");
       setSigningMessage(
         "Opening Pera Wallet for signature approval..."
       );
@@ -127,15 +140,32 @@ function NotarizePage() {
       setSignedTransaction(signed);
       setSubmissionResult(null);
       setConfirmationResult(null);
+      setUnsafeResubmissionBlocked(false);
+
       setSigningMessage(
         "Transaction signed successfully. It has not been submitted yet."
       );
+
       setSubmissionMessage("");
       setConfirmationMessage("");
     } catch (error) {
       console.error("Transaction signing failed:", error);
-      setSigningMessage(
-        "Transaction signing failed, was rejected, or was cancelled."
+
+      const failure =
+        TransactionFailureClassificationService.classify(
+          error,
+          { stage: "signing" }
+        );
+
+      const policy =
+        TransactionRetryPolicyService.evaluate(failure);
+
+      setSigningMessage(failure.userMessage);
+      setRecoveryMessage(policy.userMessage);
+
+      setUnsafeResubmissionBlocked(
+        policy.transactionMayHaveBeenSubmitted &&
+          !policy.canRetryImmediately
       );
     } finally {
       setProcessing(false);
@@ -143,6 +173,13 @@ function NotarizePage() {
   }
 
   async function handleSubmitTransaction() {
+    if (unsafeResubmissionBlocked) {
+      setRecoveryMessage(
+        "Submission is blocked until the existing transaction status has been reviewed."
+      );
+      return;
+    }
+
     if (!signedTransaction) {
       setSubmissionMessage(
         "A signed transaction is required before submission."
@@ -159,6 +196,7 @@ function NotarizePage() {
 
     try {
       setProcessing(true);
+      setRecoveryMessage("");
       setSubmissionResult(null);
       setConfirmationResult(null);
 
@@ -167,11 +205,17 @@ function NotarizePage() {
           signedTransaction,
           evidenceRecord,
           onProgress: ({ stage, message }) => {
-            if (stage === "submitting" || stage === "submitted") {
+            if (
+              stage === "submitting" ||
+              stage === "submitted"
+            ) {
               setSubmissionMessage(message);
             }
 
-            if (stage === "confirming" || stage === "confirmed") {
+            if (
+              stage === "confirming" ||
+              stage === "confirmed"
+            ) {
               setConfirmationMessage(message);
             }
           },
@@ -180,30 +224,59 @@ function NotarizePage() {
       setSubmissionResult(result.submissionResult);
       setConfirmationResult(result.confirmationResult);
       setEvidenceRecord(result.confirmedRecord);
+      setUnsafeResubmissionBlocked(false);
+      setRecoveryMessage("");
     } catch (error) {
       console.error(
         "End-to-end Algorand notarization failed:",
         error
       );
 
-      if (error instanceof AlgorandNotarizationLifecycleError) {
-        if (
-          error.stage === "submitting" ||
-          error.stage === "submitted"
-        ) {
-          setSubmissionMessage(
-            "Transaction submission failed. The signed transaction was not confirmed."
-          );
-        } else {
-          setConfirmationMessage(
-            "Transaction confirmation failed or timed out. Check the transaction status before retrying."
-          );
-        }
-      } else {
-        setConfirmationMessage(
-          "Algorand notarization failed unexpectedly."
-        );
+      const lifecycleStage =
+        error instanceof AlgorandNotarizationLifecycleError
+          ? error.stage
+          : "unknown";
+
+      const sourceError =
+        error instanceof AlgorandNotarizationLifecycleError
+          ? error.causeValue
+          : error;
+
+      let stage: TransactionFailureStage = "unknown";
+
+      if (
+        lifecycleStage === "submitting" ||
+        lifecycleStage === "submitted"
+      ) {
+        stage = "submitting";
+      } else if (
+        lifecycleStage === "confirming" ||
+        lifecycleStage === "confirmed"
+      ) {
+        stage = "confirming";
       }
+
+      const failure =
+        TransactionFailureClassificationService.classify(
+          sourceError,
+          { stage }
+        );
+
+      const policy =
+        TransactionRetryPolicyService.evaluate(failure);
+
+      if (stage === "submitting") {
+        setSubmissionMessage(failure.userMessage);
+      } else {
+        setConfirmationMessage(failure.userMessage);
+      }
+
+      setRecoveryMessage(policy.userMessage);
+
+      setUnsafeResubmissionBlocked(
+        policy.transactionMayHaveBeenSubmitted &&
+          !policy.canRetryImmediately
+      );
     } finally {
       setProcessing(false);
     }
@@ -264,6 +337,23 @@ function NotarizePage() {
         />
 
         <EvidenceReviewStep prettyPayload={prettyPayload} />
+
+        {recoveryMessage && (
+          <div
+            className="notarize-recovery-message"
+            role="alert"
+          >
+            <strong>Transaction Recovery Guidance</strong>
+            <p>{recoveryMessage}</p>
+
+            {unsafeResubmissionBlocked && (
+              <p>
+                Automatic resubmission is disabled because the previous
+                transaction may already have reached the Algorand network.
+              </p>
+            )}
+          </div>
+        )}
 
         <SignSubmitStep
           readyForSignature={readyForSignature}
