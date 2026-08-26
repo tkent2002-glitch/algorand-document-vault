@@ -12,6 +12,7 @@ import {
 import { TransactionRetryPolicyService } from "../../services/algorand/TransactionRetryPolicyService";
 import { TransactionRecoveryDecisionService } from "../../services/algorand/TransactionRecoveryDecisionService";
 import {
+  AlgorandExplorerService,
   AlgorandProofTransactionDraftService,
   AlgorandTransactionSigningService,
   WalletService,
@@ -392,6 +393,12 @@ function NotarizePage() {
       )
     : "";
 
+  const recoveryExplorerUrl = recoveryTransactionId
+    ? AlgorandExplorerService.getTransactionUrl(
+        recoveryTransactionId
+      )
+    : null;
+
   return (
     <section className="page notarize-page">
       <div className="notarize-header">
@@ -462,6 +469,16 @@ function NotarizePage() {
                         ? "Checking Transaction Status..."
                         : "Check Transaction Status"}
                     </button>
+
+                    {recoveryExplorerUrl && (
+                      <a
+                        href={recoveryExplorerUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View Transaction in Explorer
+                      </a>
+                    )}
                   </div>
                 )}
               </>
@@ -497,6 +514,7 @@ function NotarizePage() {
 }
 
 export default NotarizePage;
+
 
 
 
