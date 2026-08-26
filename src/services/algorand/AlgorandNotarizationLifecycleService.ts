@@ -38,16 +38,20 @@ export type AlgorandNotarizationLifecycleResult = {
 export class AlgorandNotarizationLifecycleError extends Error {
   readonly stage: AlgorandNotarizationLifecycleStage;
   readonly causeValue: unknown;
+  readonly transactionId: string | null;
 
   constructor(
     stage: AlgorandNotarizationLifecycleStage,
     message: string,
-    causeValue: unknown
+    causeValue: unknown,
+    transactionId: string | null = null
   ) {
     super(message);
+
     this.name = "AlgorandNotarizationLifecycleError";
     this.stage = stage;
     this.causeValue = causeValue;
+    this.transactionId = transactionId;
   }
 }
 
@@ -57,6 +61,8 @@ export class AlgorandNotarizationLifecycleService {
   ): Promise<AlgorandNotarizationLifecycleResult> {
     let currentStage: AlgorandNotarizationLifecycleStage =
       "submitting";
+
+    let transactionId: string | null = null;
 
     const report = (
       stage: AlgorandNotarizationLifecycleStage,
@@ -77,10 +83,13 @@ export class AlgorandNotarizationLifecycleService {
           input.signedTransaction.signedTransaction
         );
 
-      const submittedRecord = EvidenceRecordService.markSubmitted(
-        input.evidenceRecord,
-        submissionResult
-      );
+      transactionId = submissionResult.transactionId;
+
+      const submittedRecord =
+        EvidenceRecordService.markSubmitted(
+          input.evidenceRecord,
+          submissionResult
+        );
 
       await EvidenceRepository.saveAsync(submittedRecord);
 
@@ -99,10 +108,11 @@ export class AlgorandNotarizationLifecycleService {
           submissionResult.transactionId
         );
 
-      const confirmedRecord = EvidenceRecordService.markConfirmed(
-        submittedRecord,
-        confirmationResult
-      );
+      const confirmedRecord =
+        EvidenceRecordService.markConfirmed(
+          submittedRecord,
+          confirmationResult
+        );
 
       await EvidenceRepository.saveAsync(confirmedRecord);
 
@@ -121,7 +131,8 @@ export class AlgorandNotarizationLifecycleService {
       throw new AlgorandNotarizationLifecycleError(
         currentStage,
         `Algorand notarization failed during the ${currentStage} stage.`,
-        error
+        error,
+        transactionId
       );
     }
   }

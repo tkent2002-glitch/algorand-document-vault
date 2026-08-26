@@ -1,5 +1,6 @@
 ﻿import { useEffect, useState } from "react";
 import { NotarizationWorkflow } from "../../core";
+import { EvidenceRepository } from "../../repositories";
 import {
   AlgorandNotarizationLifecycleError,
   AlgorandNotarizationLifecycleService,
@@ -9,6 +10,7 @@ import {
   type TransactionFailureStage,
 } from "../../services/algorand/TransactionFailureClassificationService";
 import { TransactionRetryPolicyService } from "../../services/algorand/TransactionRetryPolicyService";
+import { TransactionRecoveryDecisionService } from "../../services/algorand/TransactionRecoveryDecisionService";
 import {
   AlgorandProofTransactionDraftService,
   AlgorandTransactionSigningService,
@@ -61,6 +63,10 @@ function NotarizePage() {
     useState<string>("");
   const [unsafeResubmissionBlocked, setUnsafeResubmissionBlocked] =
     useState<boolean>(false);
+  const [recoveryTransactionId, setRecoveryTransactionId] =
+    useState<string | null>(null);
+  const [checkingTransactionStatus, setCheckingTransactionStatus] =
+    useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
   const [wallet, setWallet] = useState<WalletConnection>({
     status: "disconnected",
@@ -102,6 +108,7 @@ function NotarizePage() {
     setConfirmationMessage("");
     setRecoveryMessage("");
     setUnsafeResubmissionBlocked(false);
+    setRecoveryTransactionId(null);
 
     if (result.proof && wallet.address) {
       const draft =
@@ -242,6 +249,13 @@ function NotarizePage() {
           ? error.causeValue
           : error;
 
+      const failedTransactionId =
+        error instanceof AlgorandNotarizationLifecycleError
+          ? error.transactionId
+          : null;
+
+      setRecoveryTransactionId(failedTransactionId);
+
       let stage: TransactionFailureStage = "unknown";
 
       if (
@@ -279,6 +293,85 @@ function NotarizePage() {
       );
     } finally {
       setProcessing(false);
+    }
+  }
+
+  async function handleCheckTransactionStatus() {
+    if (!recoveryTransactionId) {
+      setRecoveryMessage(
+        "No transaction ID is available for status verification."
+      );
+      return;
+    }
+
+    try {
+      setCheckingTransactionStatus(true);
+
+      const recoveryFailure =
+        TransactionFailureClassificationService.classify(
+          new Error("Transaction confirmation status is uncertain."),
+          { stage: "confirming" }
+        );
+
+      const recovery =
+        await TransactionRecoveryDecisionService.evaluate({
+          failure: recoveryFailure,
+          transactionId: recoveryTransactionId,
+        });
+
+      setRecoveryMessage(recovery.userMessage);
+
+      if (
+        recovery.decision === "confirmed" &&
+        recovery.statusResult?.confirmedRound
+      ) {
+        const confirmedAt = new Date().toISOString();
+
+        setConfirmationResult({
+          transactionId: recoveryTransactionId,
+          confirmedRound:
+            recovery.statusResult.confirmedRound,
+          confirmedAt,
+        });
+
+        if (evidenceRecord) {
+          const recoveredRecord = {
+            ...evidenceRecord,
+            status: "confirmed" as const,
+            algorandTransactionId: recoveryTransactionId,
+            confirmedRound:
+              recovery.statusResult.confirmedRound,
+            confirmedAt,
+          };
+
+          await EvidenceRepository.saveAsync(recoveredRecord);
+          setEvidenceRecord(recoveredRecord);
+        }
+
+        setUnsafeResubmissionBlocked(false);
+        setConfirmationMessage(
+          "Transaction confirmation recovered successfully."
+        );
+
+        return;
+      }
+
+      setUnsafeResubmissionBlocked(
+        recovery.decision !== "safe_to_retry"
+      );
+    } catch (error) {
+      console.error(
+        "Transaction recovery status check failed:",
+        error
+      );
+
+      setRecoveryMessage(
+        "Transaction status could not be verified. Do not resubmit until the transaction state can be confirmed."
+      );
+
+      setUnsafeResubmissionBlocked(true);
+    } finally {
+      setCheckingTransactionStatus(false);
     }
   }
 
@@ -347,10 +440,31 @@ function NotarizePage() {
             <p>{recoveryMessage}</p>
 
             {unsafeResubmissionBlocked && (
-              <p>
-                Automatic resubmission is disabled because the previous
-                transaction may already have reached the Algorand network.
-              </p>
+              <>
+                <p>
+                  Automatic resubmission is disabled because the previous
+                  transaction may already have reached the Algorand network.
+                </p>
+
+                {recoveryTransactionId && (
+                  <div className="notarize-recovery-actions">
+                    <p>
+                      Transaction ID:{" "}
+                      <code>{recoveryTransactionId}</code>
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={handleCheckTransactionStatus}
+                      disabled={checkingTransactionStatus}
+                    >
+                      {checkingTransactionStatus
+                        ? "Checking Transaction Status..."
+                        : "Check Transaction Status"}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
@@ -383,3 +497,12 @@ function NotarizePage() {
 }
 
 export default NotarizePage;
+
+
+
+
+
+
+
+
+
