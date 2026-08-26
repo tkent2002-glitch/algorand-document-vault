@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { NotarizationWorkflow } from "../../core";
 import { EvidenceRepository } from "../../repositories";
 import {
@@ -34,6 +34,7 @@ import EvidenceReviewStep from "./components/EvidenceReviewStep";
 import ProgressTimeline from "./components/ProgressTimeline";
 import SignSubmitStep from "./components/SignSubmitStep";
 import UploadStep from "./components/UploadStep";
+import WalletReadinessPanel from "./components/WalletReadinessPanel";
 import "./NotarizePage.css";
 
 function NotarizePage() {
@@ -69,6 +70,8 @@ function NotarizePage() {
   const [checkingTransactionStatus, setCheckingTransactionStatus] =
     useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
+  const [walletConnecting, setWalletConnecting] =
+    useState<boolean>(false);
   const [wallet, setWallet] = useState<WalletConnection>({
     status: "disconnected",
   });
@@ -86,6 +89,43 @@ function NotarizePage() {
       mounted = false;
     };
   }, []);
+
+  async function handleConnectWallet() {
+    try {
+      setWalletConnecting(true);
+
+      const result = await WalletService.connect();
+      setWallet(result);
+
+      if (
+        result.status === "connected" &&
+        result.address &&
+        proof
+      ) {
+        const draft =
+          AlgorandProofTransactionDraftService.createDraft(
+            proof,
+            result.address
+          );
+
+        setTransactionDraft(draft);
+      }
+    } finally {
+      setWalletConnecting(false);
+    }
+  }
+
+  async function handleDisconnectWallet() {
+    try {
+      setWalletConnecting(true);
+
+      const result = await WalletService.disconnect();
+      setWallet(result);
+      setTransactionDraft(null);
+    } finally {
+      setWalletConnecting(false);
+    }
+  }
 
   async function handleFileChange(
     event: React.ChangeEvent<HTMLInputElement>
@@ -432,6 +472,13 @@ function NotarizePage() {
           </div>
         </div>
 
+        <WalletReadinessPanel
+          wallet={wallet}
+          connecting={walletConnecting}
+          onConnect={handleConnectWallet}
+          onDisconnect={handleDisconnectWallet}
+        />
+
         <BlockchainPreparationStep
           transactionDraft={transactionDraft}
         />
@@ -520,6 +567,9 @@ function NotarizePage() {
 }
 
 export default NotarizePage;
+
+
+
 
 
 
