@@ -20,12 +20,11 @@ type ProgressTimelineProps = {
   confirmationResult: AlgorandConfirmationResult | null;
 };
 
-function formatStep(
-  complete: boolean,
-  label: string
-): string {
-  return `${complete ? "Complete" : "Pending"}: ${label}`;
-}
+type ProgressStage = {
+  label: string;
+  description: string;
+  complete: boolean;
+};
 
 function ProgressTimeline({
   fileName,
@@ -39,70 +38,87 @@ function ProgressTimeline({
   submissionResult,
   confirmationResult,
 }: ProgressTimelineProps) {
+  const documentPrepared = Boolean(
+    fileName &&
+      fileHash &&
+      proof &&
+      evidenceRecord &&
+      serializedProofPayload
+  );
+
+  const stages: ProgressStage[] = [
+    {
+      label: "Document",
+      description: "Document selected and cryptographic proof prepared.",
+      complete: documentPrepared,
+    },
+    {
+      label: "Wallet",
+      description: "Pera Wallet connected.",
+      complete: walletReady,
+    },
+    {
+      label: "Transaction",
+      description: "Algorand transaction prepared for review.",
+      complete: Boolean(transactionDraft),
+    },
+    {
+      label: "Signature",
+      description: "Transaction approved and signed with Pera Wallet.",
+      complete: Boolean(signedTransaction),
+    },
+    {
+      label: "Submission",
+      description: "Signed transaction submitted to Algorand TestNet.",
+      complete: Boolean(submissionResult),
+    },
+    {
+      label: "Confirmation",
+      description: "Blockchain confirmation received.",
+      complete: Boolean(confirmationResult),
+    },
+  ];
+
+  const completedStages = stages.filter(
+    (stage) => stage.complete
+  ).length;
+
   return (
-    <div className="notarize-result">
-      <strong>Notarization Progress</strong>
+    <div className="notarize-result notarize-progress">
+      <div className="notarize-progress-header">
+        <strong>Notarization Progress</strong>
+        <span>
+          {completedStages} of {stages.length} stages complete
+        </span>
+      </div>
 
-      <p>
-        {formatStep(Boolean(fileName), "Document selected")}
-      </p>
+      <ol className="notarize-progress-list">
+        {stages.map((stage, index) => (
+          <li
+            key={stage.label}
+            className={
+              stage.complete
+                ? "notarize-progress-stage complete"
+                : "notarize-progress-stage pending"
+            }
+          >
+            <div className="notarize-progress-marker">
+              {stage.complete ? "✓" : index + 1}
+            </div>
 
-      <p>
-        {formatStep(
-          Boolean(fileHash),
-          "SHA-256 hash generated"
-        )}
-      </p>
+            <div className="notarize-progress-content">
+              <div className="notarize-progress-stage-header">
+                <strong>{stage.label}</strong>
+                <span>
+                  {stage.complete ? "Complete" : "Pending"}
+                </span>
+              </div>
 
-      <p>
-        {formatStep(Boolean(proof), "Proof created")}
-      </p>
-
-      <p>
-        {formatStep(
-          Boolean(evidenceRecord),
-          "Evidence record created"
-        )}
-      </p>
-
-      <p>
-        {formatStep(
-          Boolean(serializedProofPayload),
-          "Proof payload prepared"
-        )}
-      </p>
-
-      <p>
-        {formatStep(walletReady, "Pera Wallet connected")}
-      </p>
-
-      <p>
-        {formatStep(
-          Boolean(transactionDraft),
-          "Algorand transaction prepared"
-        )}
-      </p>
-
-      <p>
-        {formatStep(
-          Boolean(signedTransaction),
-          "Transaction signed"
-        )}
-      </p>
-
-      <p>
-        {formatStep(
-          Boolean(submissionResult),
-          "Transaction submitted"
-        )}
-      </p>
-
-      <p>
-        {formatStep(
-          Boolean(confirmationResult),
-          "Blockchain confirmation received"
-        )}
-      </p>
+              <p>{stage.description}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }

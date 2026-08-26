@@ -102,3 +102,88 @@
 .notarize-recovery-actions button {
   margin-top: 0.5rem;
 }
+
+/* Phase 5.1B - Notarization Progress */
+
+.notarize-progress {
+  padding: 1.25rem;
+}
+
+.notarize-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.notarize-progress-header span {
+  font-size: 0.875rem;
+  opacity: 0.75;
+}
+
+.notarize-progress-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.notarize-progress-stage {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 0.85rem 0;
+}
+
+.notarize-progress-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 2rem;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+.notarize-progress-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notarize-progress-stage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.notarize-progress-stage-header span {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.notarize-progress-content p {
+  margin: 0.25rem 0 0;
+  opacity: 0.75;
+}
+
+.notarize-progress-stage.pending {
+  opacity: 0.65;
+}
+
+.notarize-progress-stage.complete {
+  opacity: 1;
+}
+
+@media (max-width: 640px) {
+  .notarize-progress-header,
+  .notarize-progress-stage-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
