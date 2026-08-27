@@ -1,5 +1,6 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import EvidenceCard from "../../components/cards/EvidenceCard";
+import EvidenceDetailsPanel from "../../components/evidence/EvidenceDetailsPanel";
 import { EvidenceRepository } from "../../repositories";
 import { HashService } from "../../services";
 import type { EvidenceRecord } from "../../services";
@@ -17,6 +18,8 @@ function VerifyPage() {
   const [match, setMatch] = useState<EvidenceRecord | null>(null);
   const [checked, setChecked] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
+  const [selectedRecord, setSelectedRecord] =
+    useState<EvidenceRecord | null>(null);
 
   async function handleFileChange(
     event: React.ChangeEvent<HTMLInputElement>
@@ -25,6 +28,7 @@ function VerifyPage() {
 
     setChecked(false);
     setMatch(null);
+    setSelectedRecord(null);
     setHashValue("");
     setFileName(file?.name ?? "");
 
@@ -94,7 +98,7 @@ function VerifyPage() {
 
       <div className="verify-workspace">
         <div className="verify-card">
-          <strong>Step 1 — Select Document</strong>
+          <strong>Step 1 - Select Document</strong>
 
           <p>
             Choose the exact document you want to compare against
@@ -113,7 +117,7 @@ function VerifyPage() {
         </div>
 
         <div className="verify-card">
-          <strong>Step 2 — SHA-256 Fingerprint</strong>
+          <strong>Step 2 - SHA-256 Fingerprint</strong>
 
           {fileName ? (
             <>
@@ -157,14 +161,14 @@ function VerifyPage() {
                 }
               >
                 <div className="verify-progress-marker">
-                  {stage.complete ? "✓" : index + 1}
+                  {stage.complete ? "OK" : index + 1}
                 </div>
 
                 <div className="verify-progress-content">
                   <div className="verify-progress-stage-header">
                     <strong>{stage.label}</strong>
                     <span>
-                      {stage.complete ? "Complete" : "Pending"}
+                  {stage.complete ? "OK" : index + 1}
                     </span>
                   </div>
 
@@ -237,7 +241,16 @@ function VerifyPage() {
       {match && (
         <div className="verify-match">
           <h2>Matching Evidence Record</h2>
-          <EvidenceCard record={match} />
+          <EvidenceCard
+            record={match}
+            onViewDetails={setSelectedRecord}
+          />
+
+          {selectedRecord && (
+            <div className="verify-details">
+              <EvidenceDetailsPanel record={selectedRecord} />
+            </div>
+          )}
         </div>
       )}
     </section>
@@ -245,3 +258,4 @@ function VerifyPage() {
 }
 
 export default VerifyPage;
+
