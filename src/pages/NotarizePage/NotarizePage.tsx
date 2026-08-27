@@ -14,6 +14,7 @@ import { TransactionRecoveryDecisionService } from "../../services/algorand/Tran
 import {
   AlgorandExplorerService,
   AlgorandProofTransactionDraftService,
+  AlgorandTestNetPreflightService,
   AlgorandTransactionSigningService,
   WalletService,
 } from "../../services";
@@ -179,6 +180,26 @@ function NotarizePage() {
     try {
       setProcessing(true);
       setRecoveryMessage("");
+      setSigningMessage(
+        "Checking Algorand TestNet readiness..."
+      );
+
+      const preflight =
+        await AlgorandTestNetPreflightService.evaluate();
+
+      if (!preflight.ready) {
+        const reason =
+          preflight.errors.length > 0
+            ? preflight.errors.join(" ")
+            : "Algorand TestNet readiness checks did not pass.";
+
+        setSigningMessage(
+          `Signing blocked. ${reason}`
+        );
+
+        return;
+      }
+
       setSigningMessage(
         "Opening Pera Wallet for signature approval..."
       );
@@ -576,6 +597,7 @@ function NotarizePage() {
 }
 
 export default NotarizePage;
+
 
 
 

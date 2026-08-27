@@ -20,3 +20,11 @@ export type {
   AlgorandNotarizationLifecycleStage,
 } from "./AlgorandNotarizationLifecycleService";
 
+export {
+  AlgorandTestNetPreflightService,
+} from "./AlgorandTestNetPreflightService";
+
+export type {
+  AlgorandTestNetPreflightResult,
+} from "./AlgorandTestNetPreflightService";
+
