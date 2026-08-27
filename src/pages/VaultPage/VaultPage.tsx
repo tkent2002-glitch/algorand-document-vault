@@ -224,13 +224,65 @@ function VaultPage() {
                 <EvidenceDetailsPanel record={selectedItem.latestRecord} />
 
                 <div className="evidence-history">
-                  <h3>Evidence History</h3>
+                  <div className="evidence-history-header">
+                    <div>
+                      <h3>Evidence Record History</h3>
+                      <p>
+                        Chronological evidence records sharing this exact
+                        document fingerprint.
+                      </p>
+                    </div>
+
+                    <span>
+                      {selectedItem.records.length} record
+                      {selectedItem.records.length === 1 ? "" : "s"}
+                    </span>
+                  </div>
 
                   {selectedItem.records.map((record) => (
                     <div className="evidence-history-item" key={record.id}>
-                      <strong>{record.status}</strong>
-                      <span>{new Date(record.createdAt).toLocaleString()}</span>
-                      <code>{shorten(record.id)}</code>
+                      <div className="evidence-history-status">
+                        <strong>{record.status}</strong>
+                      </div>
+
+                      <div className="evidence-history-meta">
+                        <div>
+                          <span>Created</span>
+                          <strong>
+                            {new Date(record.createdAt).toLocaleString()}
+                          </strong>
+                        </div>
+
+                        <div>
+                          <span>Submitted</span>
+                          <strong>
+                            {record.submittedAt
+                              ? new Date(record.submittedAt).toLocaleString()
+                              : "Not submitted"}
+                          </strong>
+                        </div>
+
+                        <div>
+                          <span>Confirmed</span>
+                          <strong>
+                            {record.confirmedAt
+                              ? new Date(record.confirmedAt).toLocaleString()
+                              : "Not confirmed"}
+                          </strong>
+                        </div>
+
+                        <div>
+                          <span>Confirmed Round</span>
+                          <strong>
+                            {record.confirmedRound ?? "Pending"}
+                          </strong>
+                        </div>
+                      </div>
+
+                      <div className="evidence-history-record-id">
+                        <span>Record ID</span>
+                        <code>{shorten(record.id)}</code>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -244,6 +296,8 @@ function VaultPage() {
 }
 
 export default VaultPage;
+
+
 
 
 
