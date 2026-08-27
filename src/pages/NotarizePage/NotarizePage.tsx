@@ -31,6 +31,7 @@ import DocumentSummaryStep from "./components/DocumentSummaryStep";
 import DuplicateEvidenceWarning from "./components/DuplicateEvidenceWarning";
 import EvidenceRecordPreview from "./components/EvidenceRecordPreview";
 import EvidenceReviewStep from "./components/EvidenceReviewStep";
+import NotarizationSuccessPanel from "./components/NotarizationSuccessPanel";
 import ProgressTimeline from "./components/ProgressTimeline";
 import SignSubmitStep from "./components/SignSubmitStep";
 import UploadStep from "./components/UploadStep";
@@ -549,6 +550,11 @@ function NotarizePage() {
           onSubmitTransaction={handleSubmitTransaction}
         />
 
+        <NotarizationSuccessPanel
+          confirmationResult={confirmationResult}
+          evidenceRecord={evidenceRecord}
+        />
+
         <ProgressTimeline
           fileName={fileName}
           fileHash={fileHash}
@@ -567,6 +573,7 @@ function NotarizePage() {
 }
 
 export default NotarizePage;
+
 
 
 
