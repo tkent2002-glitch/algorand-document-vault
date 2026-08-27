@@ -122,7 +122,10 @@ function NotarizePage() {
 
       const result = await WalletService.disconnect();
       setWallet(result);
-      setTransactionDraft(null);
+
+      if (result.status === "disconnected") {
+        setTransactionDraft(null);
+      }
     } finally {
       setWalletConnecting(false);
     }
@@ -573,6 +576,7 @@ function NotarizePage() {
 }
 
 export default NotarizePage;
+
 
 
 

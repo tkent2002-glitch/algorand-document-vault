@@ -14,6 +14,7 @@ function WalletReadinessPanel({
   onDisconnect,
 }: WalletReadinessPanelProps) {
   const connected = wallet.status === "connected";
+  const hasError = wallet.status === "error";
 
   return (
     <div className="notarize-result wallet-readiness-panel">
@@ -50,13 +51,15 @@ function WalletReadinessPanel({
       ) : (
         <>
           <p>
-            Connect Pera Wallet before approving an Algorand
-            notarization transaction.
+            {hasError
+              ? "Pera Wallet could not complete the previous wallet operation."
+              : "Connect Pera Wallet before approving an Algorand notarization transaction."}
           </p>
 
           <p>
-            Selecting a document does not upload or submit anything to
-            the blockchain.
+            {hasError
+              ? "No signing or submission action will proceed until a valid wallet connection is established."
+              : "Selecting a document does not upload or submit anything to the blockchain."}
           </p>
 
           <button
@@ -66,7 +69,9 @@ function WalletReadinessPanel({
           >
             {connecting
               ? "Connecting..."
-              : "Connect Pera Wallet"}
+              : hasError
+                ? "Retry Pera Wallet Connection"
+                : "Connect Pera Wallet"}
           </button>
         </>
       )}
@@ -75,3 +80,4 @@ function WalletReadinessPanel({
 }
 
 export default WalletReadinessPanel;
+

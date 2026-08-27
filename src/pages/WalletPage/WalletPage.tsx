@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { WalletService } from "../../services";
 import type { WalletConnection } from "../../types/wallet";
 import "./WalletPage.css";
@@ -27,7 +27,9 @@ function WalletPage() {
       setMessage(
         result.status === "connected"
           ? "Existing Pera Wallet session restored."
-          : "Wallet not connected."
+          : result.status === "error"
+            ? "Pera Wallet session could not be restored."
+            : "Wallet not connected."
       );
     });
   }, []);
@@ -43,7 +45,9 @@ function WalletPage() {
     setMessage(
       result.status === "connected"
         ? "Pera Wallet connected successfully."
-        : "Pera Wallet connection was not completed."
+        : result.status === "error"
+          ? "Pera Wallet connection failed."
+          : "Pera Wallet connection was not completed."
     );
   }
 
@@ -51,7 +55,11 @@ function WalletPage() {
     const result = await WalletService.disconnect();
 
     setConnection(result);
-    setMessage("Pera Wallet disconnected.");
+    setMessage(
+      result.status === "disconnected"
+        ? "Pera Wallet disconnected."
+        : "Pera Wallet could not be disconnected cleanly."
+    );
   }
 
   const isConnected =

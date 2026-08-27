@@ -8,18 +8,26 @@ export class WalletService {
   });
 
   static async reconnect(): Promise<WalletConnection> {
-    const accounts = await WalletService.pera.reconnectSession();
+    try {
+      const accounts = await WalletService.pera.reconnectSession();
 
-    if (accounts.length > 0) {
+      if (accounts.length > 0) {
+        return {
+          status: "connected",
+          address: accounts[0],
+        };
+      }
+
       return {
-        status: "connected",
-        address: accounts[0],
+        status: "disconnected",
+      };
+    } catch (error) {
+      console.error("Pera Wallet session restoration failed:", error);
+
+      return {
+        status: "error",
       };
     }
-
-    return {
-      status: "disconnected",
-    };
   }
 
   static async connect(): Promise<WalletConnection> {
@@ -46,11 +54,19 @@ export class WalletService {
   }
 
   static async disconnect(): Promise<WalletConnection> {
-    await WalletService.pera.disconnect();
+    try {
+      await WalletService.pera.disconnect();
 
-    return {
-      status: "disconnected",
-    };
+      return {
+        status: "disconnected",
+      };
+    } catch (error) {
+      console.error("Pera Wallet disconnection failed:", error);
+
+      return {
+        status: "error",
+      };
+    }
   }
 
   static isConnected(): boolean {
