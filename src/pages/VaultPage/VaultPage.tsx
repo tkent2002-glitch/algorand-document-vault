@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import EvidenceDetailsPanel from "../../components/evidence/EvidenceDetailsPanel";
 import { EvidenceRepository } from "../../repositories";
 import type { EvidenceRecord } from "../../services";
@@ -108,10 +108,18 @@ function VaultPage() {
       <div className="vault-header">
         <p className="vault-eyebrow">Evidence Repository</p>
         <h2>Evidence Vault</h2>
+
         <p>
-          Organize cryptographic evidence records by unique document fingerprint.
-          Documents are not stored here.
+          Review cryptographic evidence records organized by unique
+          document fingerprint. The Vault stores evidence metadata and
+          blockchain references, not the original documents.
         </p>
+
+        <div className="vault-boundary-summary">
+          <span>Evidence records: Stored locally</span>
+          <span>Original documents: Not stored</span>
+          <span>Fingerprint: SHA-256</span>
+        </div>
       </div>
 
       <VaultBackupActions />
@@ -175,7 +183,13 @@ function VaultPage() {
       ) : (
         <div className="evidence-workspace">
           <aside className="evidence-index">
-            <h3>Unique Document Fingerprints</h3>
+            <div className="evidence-index-header">
+              <h3>Document Fingerprints</h3>
+              <p>
+                Select a fingerprint to inspect its latest evidence
+                record and history.
+              </p>
+            </div>
 
             {filteredIndex.map((item) => (
               <button
@@ -230,3 +244,6 @@ function VaultPage() {
 }
 
 export default VaultPage;
+
+
+

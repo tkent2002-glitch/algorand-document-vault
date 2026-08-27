@@ -203,3 +203,70 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Phase 5.3A - Vault Workspace Clarity */
+
+.vault-boundary-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.vault-boundary-summary span {
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--social-bg);
+  font-size: 0.8rem;
+}
+
+.vault-empty {
+  padding: 2rem;
+}
+
+.vault-empty strong {
+  color: var(--text-h);
+  font-size: 1.1rem;
+}
+
+.vault-empty-guidance {
+  margin-bottom: 0;
+  opacity: 0.75;
+  font-size: 0.9rem;
+}
+
+.evidence-index-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.evidence-index-header p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.evidence-selection-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.evidence-selection-meta span:last-child {
+  text-transform: capitalize;
+}
+
+.evidence-fingerprint-label {
+  margin: 0.5rem 0 0;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
