@@ -1,4 +1,4 @@
-import algosdk from "algosdk";
+﻿import algosdk from "algosdk";
 import type {
   AlgorandUnsignedProofTransaction,
   NotarizationProof,
@@ -25,7 +25,7 @@ export class AlgorandTransactionBuilderService {
       amount: PROOF_TRANSACTION_AMOUNT_MICROALGOS,
       note,
       suggestedParams,
-    } as any);
+    });
 
     return {
       txId: transaction.txID(),
@@ -37,3 +37,4 @@ export class AlgorandTransactionBuilderService {
     };
   }
 }
+

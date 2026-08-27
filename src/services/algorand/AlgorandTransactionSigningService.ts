@@ -25,7 +25,7 @@ export class AlgorandTransactionSigningService {
       amount: PROOF_TRANSACTION_AMOUNT_MICROALGOS,
       note,
       suggestedParams,
-    } as any);
+    });
 
     const signedTransaction =
       await WalletService.signSingleTransaction(transaction);
@@ -38,3 +38,5 @@ export class AlgorandTransactionSigningService {
     };
   }
 }
+
+
