@@ -67,3 +67,90 @@
   font-weight: 700;
   color: var(--text-h);
 }
+
+/* Phase 5.3B - Backup UX Polish */
+
+.vault-backup-header,
+.vault-import-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.vault-backup-security-label,
+.vault-import-header > span {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.vault-backup-options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.vault-backup-option {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.vault-backup-option-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.vault-backup-option-header h3 {
+  margin: 0;
+}
+
+.vault-backup-option-header p {
+  margin: 0.35rem 0 0;
+}
+
+.vault-backup-option-header > span {
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.vault-backup-properties {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.vault-backup-properties p {
+  margin: 0;
+}
+
+.vault-backup-password-status {
+  margin: -0.25rem 0 0;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.vault-backup-boundary {
+  margin: 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+@media (max-width: 800px) {
+  .vault-backup-options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vault-backup-header {
+    flex-direction: column;
+  }
+}
+

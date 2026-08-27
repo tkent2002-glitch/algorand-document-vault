@@ -57,11 +57,7 @@
   font-size: 0.9rem;
 }
 
-.vault-import-preview::after {
-  content: "Only import backup files you trust. Invalid or conflicting records are blocked before they can modify the Vault.";
-  color: var(--text);
-  font-size: 0.9rem;
-}
+
 
 .vault-import-change-preview button {
   width: fit-content;
@@ -78,3 +74,88 @@
   cursor: not-allowed;
   opacity: 0.55;
 }
+
+/* Phase 5.3B - Import UX Polish */
+
+.vault-import-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.vault-import-safety {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.vault-import-safety p {
+  margin: 0;
+}
+
+.vault-import-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.vault-import-status span {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.vault-import-metadata,
+.vault-import-change-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.vault-import-metadata div,
+.vault-import-change-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.vault-import-metadata span,
+.vault-import-change-grid span {
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.vault-import-conflict-warning,
+.vault-import-errors {
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.vault-import-boundary {
+  margin: 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+@media (max-width: 800px) {
+  .vault-import-header {
+    flex-direction: column;
+  }
+
+  .vault-import-metadata,
+  .vault-import-change-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

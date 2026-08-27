@@ -107,71 +107,147 @@ function VaultBackupActions() {
     }
   }
 
+  const passwordsMatch =
+    password.length > 0 &&
+    confirmPassword.length > 0 &&
+    password === confirmPassword;
+
+  const passwordLongEnough =
+    password.length >= MINIMUM_PASSWORD_LENGTH;
+
   return (
     <section className="vault-backup-actions">
-      <div>
-        <strong>Vault Backup</strong>
-        <p>
-          Export Evidence Vault records without storing the original documents.
-        </p>
+      <div className="vault-backup-header">
+        <div>
+          <strong>Vault Backup</strong>
+          <p>
+            Export local evidence records without including the original
+            documents.
+          </p>
+        </div>
+
+        <span className="vault-backup-security-label">
+          Integrity Protected
+        </span>
       </div>
 
-      <div className="vault-backup-option">
-        <h3>Plain JSON Backup</h3>
-        <p>
-          Human-readable and integrity protected, but not confidential.
-        </p>
+      <div className="vault-backup-options-grid">
+        <div className="vault-backup-option">
+          <div className="vault-backup-option-header">
+            <div>
+              <h3>Plain JSON Backup</h3>
+              <p>
+                Human-readable backup with cryptographic integrity
+                protection.
+              </p>
+            </div>
 
-        <button
-          type="button"
-          onClick={handlePlainExport}
-          disabled={exporting}
-        >
-          Export Plain Backup
-        </button>
-      </div>
+            <span>Readable</span>
+          </div>
 
-      <div className="vault-backup-option">
-        <h3>Encrypted Backup</h3>
-        <p>
-          Encrypt the integrity-protected backup using AES-GCM and a password
-          derived key.
-        </p>
+          <div className="vault-backup-properties">
+            <p>
+              <strong>Integrity:</strong> Protected
+            </p>
+            <p>
+              <strong>Confidentiality:</strong> Not protected
+            </p>
+            <p>
+              <strong>Original documents:</strong> Not included
+            </p>
+          </div>
 
-        <label>
-          Backup Password
-          <input
-            type="password"
-            value={password}
-            minLength={MINIMUM_PASSWORD_LENGTH}
-            autoComplete="new-password"
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </label>
+          <button
+            type="button"
+            onClick={handlePlainExport}
+            disabled={exporting}
+          >
+            {exporting
+              ? "Export in Progress..."
+              : "Export Plain Backup"}
+          </button>
+        </div>
 
-        <label>
-          Confirm Password
-          <input
-            type="password"
-            value={confirmPassword}
-            minLength={MINIMUM_PASSWORD_LENGTH}
-            autoComplete="new-password"
-            onChange={(event) => setConfirmPassword(event.target.value)}
-          />
-        </label>
+        <div className="vault-backup-option">
+          <div className="vault-backup-option-header">
+            <div>
+              <h3>Encrypted Backup</h3>
+              <p>
+                Encrypt the integrity-protected backup using AES-GCM
+                with a password-derived key.
+              </p>
+            </div>
 
-        <button
-          type="button"
-          onClick={handleEncryptedExport}
-          disabled={exporting}
-        >
-          Export Encrypted Backup
-        </button>
+            <span>Confidential</span>
+          </div>
 
-        <p className="vault-backup-warning">
-          The password is not stored or recoverable. Losing it means the
-          encrypted backup cannot be opened.
-        </p>
+          <div className="vault-backup-properties">
+            <p>
+              <strong>Integrity:</strong> Protected
+            </p>
+            <p>
+              <strong>Confidentiality:</strong> AES-GCM encrypted
+            </p>
+            <p>
+              <strong>Original documents:</strong> Not included
+            </p>
+          </div>
+
+          <label>
+            Backup Password
+            <input
+              type="password"
+              value={password}
+              minLength={MINIMUM_PASSWORD_LENGTH}
+              autoComplete="new-password"
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </label>
+
+          <p className="vault-backup-password-status">
+            Password length: {password.length} / {MINIMUM_PASSWORD_LENGTH}
+            minimum
+          </p>
+
+          <label>
+            Confirm Password
+            <input
+              type="password"
+              value={confirmPassword}
+              minLength={MINIMUM_PASSWORD_LENGTH}
+              autoComplete="new-password"
+              onChange={(event) => setConfirmPassword(event.target.value)}
+            />
+          </label>
+
+          {confirmPassword.length > 0 && (
+            <p className="vault-backup-password-status">
+              Passwords: {passwordsMatch ? "Match" : "Do not match"}
+            </p>
+          )}
+
+          <button
+            type="button"
+            onClick={handleEncryptedExport}
+            disabled={exporting}
+          >
+            {exporting
+              ? "Export in Progress..."
+              : "Export Encrypted Backup"}
+          </button>
+
+          {!passwordLongEnough && password.length > 0 && (
+            <p className="vault-backup-warning">
+              Use at least {MINIMUM_PASSWORD_LENGTH} characters before
+              exporting an encrypted backup.
+            </p>
+          )}
+
+          <p className="vault-backup-warning">
+            The backup password is never stored or recoverable. If it
+            is lost, the encrypted backup cannot be opened.
+          </p>
+        </div>
       </div>
 
       {message && (
@@ -179,6 +255,11 @@ function VaultBackupActions() {
           {message}
         </p>
       )}
+
+      <p className="vault-backup-boundary">
+        Backup files contain evidence records and metadata only. They
+        never contain your original documents.
+      </p>
     </section>
   );
 }
