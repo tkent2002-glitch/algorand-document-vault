@@ -18,6 +18,14 @@ Vitest currently covers important behavior in these areas:
 - Repository behavior
 - IndexedDB storage
 - localStorage-to-IndexedDB migration
+- Algorand transaction-policy and lifecycle boundaries
+- Core accessibility labels, landmarks, navigation state, and focus behavior
+
+## Lint verification
+
+```powershell
+npm run lint
+```
 
 ## Build verification
 
@@ -25,4 +33,6 @@ Vitest currently covers important behavior in these areas:
 npm run build
 ```
 
-Tests do not replace runtime validation for Pera Wallet popups, browser persistence, downloads, TestNet submission, confirmation, and explorer behavior.
+Tests do not replace runtime validation for Pera Wallet mobile handoff, browser
+persistence, downloads, assistive technologies, TestNet submission,
+confirmation, and explorer behavior.

@@ -28,9 +28,14 @@ Open the local URL printed by Vite.
 
 ```powershell
 npm test
+npm run lint
 npm run build
 ```
 
 ## TestNet note
 
 Blockchain workflows currently target Algorand TestNet. Do not send MainNet funds or treat the application as production-ready.
+
+The current Pera Mobile connection handoff remains under live compatibility
+validation. A funded TestNet account is required only for the final signing and
+submission test; local tests and production builds do not require wallet funds.

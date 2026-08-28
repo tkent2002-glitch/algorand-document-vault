@@ -20,8 +20,13 @@ The Vault groups evidence history by document fingerprint and shows status, time
 
 The Wallet page connects, restores, and disconnects a Pera Wallet session. The application does not receive the wallet's private keys.
 
+Pera Web and Pera Mobile accounts do not automatically synchronize. The current
+mobile QR/deep-link connection experience must be revalidated before public
+alpha. Never enter a wallet recovery phrase into Algorand Document Vault.
+
 ## Important limitations
 
 - Verification searches the local vault unless blockchain verification is explicitly shown.
 - No matching local record does not prove that a document is invalid.
 - A blockchain timestamp does not prove that the document's contents are true or legally binding.
+- TestNet ALGO is valueless development currency; MainNet funds are out of scope.

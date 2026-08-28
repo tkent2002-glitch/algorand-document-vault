@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/algorand-document-vault-banner.png" alt="Algorand Document Vault â€” Privacy-First Blockchain Notarization" width="100%" />
+  <img src="docs/images/algorand-document-vault-banner.png" alt="Algorand Document Vault — Privacy-First Blockchain Notarization" width="100%" />
 </p>
 
 # Algorand Document Vault
@@ -30,7 +30,7 @@ The system proves document existence and integrity at a point in time. It does n
 
 ## Current status
 
-**Current phase:** Phase 4 â€” Algorand TestNet integration and hardening
+**Current focus:** Public alpha readiness and live TestNet validation
 
 | Capability | Status |
 |---|:---:|
@@ -42,8 +42,9 @@ The system proves document existence and integrity at a point in time. It does n
 | Backup integrity and trust verification | Complete |
 | AES-GCM encrypted backups and recovery | Complete |
 | Algorand SDK transaction construction | Implemented |
-| Pera Wallet connection and signing | Implemented |
+| Pera Wallet integration | Implemented; current mobile handoff requires live revalidation |
 | TestNet submission and confirmation flow | Validation in progress |
+| Accessibility blocker remediation | Complete; broader manual review remains |
 | MainNet release | Planned |
 
 ## Key features
@@ -165,6 +166,7 @@ npm run dev
 
 ```powershell
 npm test
+npm run lint
 npm run build
 ```
 
@@ -177,6 +179,8 @@ Please do not disclose vulnerabilities through a public issue. Follow the privat
 Important boundaries:
 
 - The application currently targets Algorand TestNet.
+- TestNet ALGO has no monetary value; never use MainNet funds for development validation.
+- The current Pera Mobile QR/deep-link flow still requires live compatibility validation.
 - The project has not yet completed an independent security audit.
 - Encrypted backups cannot be recovered if the password is lost.
 - Blockchain notarization proves timestamped existence and integrity, not legal validity or truthfulness.
@@ -203,7 +207,7 @@ Important boundaries:
 ### Planned
 
 - Independent security review
-- Accessibility and cross-browser review
+- Cross-browser and manual assistive-technology review
 - Performance testing with larger evidence vaults
 - MainNet readiness review
 - Versioned public releases
