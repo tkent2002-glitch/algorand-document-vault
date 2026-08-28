@@ -19,7 +19,7 @@ live Pera Wallet workflow can be completed.
 - [x] `npm run build` produces a production bundle.
 - [x] GitHub Actions runs tests, lint, and the production build.
 - [ ] `git diff --check` passes on the final release diff.
-- [ ] Review and accept or resolve all production-build warnings.
+- [x] Review and accept or resolve all production-build warnings.
 
 ## Accessibility
 
@@ -38,7 +38,7 @@ live Pera Wallet workflow can be completed.
 ## Browser and device validation
 
 - [ ] Test the current stable Chrome release on Windows.
-- [ ] Test the current stable Edge release on Windows.
+- [x] Test the current stable Edge release on Windows.
 - [ ] Test the current stable Firefox release.
 - [ ] Test the current stable Safari release on macOS or iOS.
 - [ ] Test representative Android and iOS mobile layouts.
@@ -52,7 +52,7 @@ live Pera Wallet workflow can be completed.
 - [x] Wallet rejection and uncertain submission paths fail closed in automated tests.
 - [ ] Revalidate the current Pera Mobile connection and QR/deep-link experience.
 - [ ] Explicitly verify the wallet session is bound to Algorand TestNet.
-- [ ] Fund a dedicated TestNet account with valueless TestNet ALGO.
+- [x] Fund a dedicated TestNet account with valueless TestNet ALGO.
 - [ ] Complete a live sign, submit, and confirmation workflow.
 - [ ] Verify the confirmed transaction and proof note in a TestNet explorer.
 - [ ] Verify the confirmed evidence record persists after reload.
@@ -81,8 +81,8 @@ live Pera Wallet workflow can be completed.
 
 - [ ] Establish and test a representative large Evidence Vault dataset.
 - [ ] Record startup, search, hashing, backup, and restore performance.
-- [ ] Investigate the current large JavaScript chunk warning.
-- [ ] Investigate the browser `buffer.Buffer` compatibility warning.
+- [x] Investigate the current large JavaScript chunk warning.
+- [x] Investigate the browser `buffer.Buffer` compatibility warning.
 - [ ] Verify production hosting configuration and direct-load behavior.
 - [ ] Smoke-test the exact packaged release artifact.
 

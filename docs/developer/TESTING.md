@@ -33,6 +33,29 @@ npm run lint
 npm run build
 ```
 
+## Production browser smoke tests
+
+Install the Playwright browser binaries once, then run the full Chromium,
+Microsoft Edge, Firefox, and WebKit matrix against a local production preview:
+
+```powershell
+npx playwright install
+npm run test:browser
+```
+
+If the host cannot launch Playwright Firefox, the Chromium, installed Microsoft
+Edge, and WebKit baseline can still be verified without hiding Firefox from the
+full release matrix:
+
+```powershell
+npm run test:browser:core
+```
+
+The smoke test checks initial-load chunk deferral, deferred route loading,
+browser `Buffer` initialization, core route rendering, console errors, and
+uncaught page errors. It stubs external font and wallet-configuration requests
+so those third-party services do not make the result nondeterministic.
+
 Tests do not replace runtime validation for Pera Wallet mobile handoff, browser
 persistence, downloads, assistive technologies, TestNet submission,
 confirmation, and explorer behavior.
