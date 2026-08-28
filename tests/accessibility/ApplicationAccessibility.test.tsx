@@ -69,6 +69,27 @@ describe("application accessibility boundaries", () => {
     ).toHaveAttribute("type", "file");
   });
 
+  it("keeps the viewport stable after pointer navigation", async () => {
+    render(<App />);
+
+    const main = screen.getByRole("main");
+    const focus = vi.spyOn(main, "focus");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Verify" }),
+      { detail: 1 }
+    );
+
+    await waitFor(() => {
+      expect(document.title).toBe(
+        "Verify | Algorand Document Vault"
+      );
+      expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+    });
+
+    expect(main).toHaveFocus();
+  });
+
   it("provides a keyboard skip link to the main landmark", () => {
     render(<App />);
 

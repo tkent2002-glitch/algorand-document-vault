@@ -77,8 +77,9 @@ Manual accessibility evidence recorded August 28, 2026:
 - [x] Test the current stable Chrome release on Windows.
 - [x] Test the current stable Edge release on Windows.
 - [x] Test the current stable Firefox release.
-- [ ] Test the current stable Safari release on macOS or iOS.
-- [ ] Test representative Android and iOS mobile layouts.
+- [x] Test the current stable Safari release on macOS or iOS.
+- [ ] Test a representative physical Android layout.
+- [x] Test a representative physical iOS layout.
 - [x] Verify IndexedDB persistence after reload in clean Chromium, Edge, and WebKit contexts.
 - [x] Verify IndexedDB persistence after a full browser restart.
 - [x] Automate plain and encrypted backup download/restore in Chromium, Edge, and WebKit.
@@ -99,8 +100,9 @@ Manual responsive evidence recorded August 28, 2026:
   skipped.
 - Real browser zoom and physical operating-system visual modes remain manual
   checks; viewport resizing and media emulation are not treated as substitutes.
-- Responsive viewport checks do not replace manual testing in stable Chrome,
-  Firefox, Safari, or physical Android and iOS devices.
+- Responsive viewport checks do not replace the outstanding physical Android
+  test. Stable Chrome, Firefox, Safari, and physical iOS results are recorded
+  separately.
 - The dashboard and application shell were subsequently redesigned with a
   responsive sidebar, distinct workflow cards, real local evidence activity,
   and consistent surfaces across Notarize, Verify, Vault, and Wallet. Desktop
@@ -119,6 +121,16 @@ Manual responsive evidence recorded August 28, 2026:
   Private Browsing sessions, and retained the expected Draft state. The
   encrypted restore rejected an incorrect password before accepting the test
   password; both previews reported one new record and zero conflicts.
+- Current Safari on an iPhone 17 Pro Max running iOS 26.6 loaded all five routes
+  over a temporary HTTPS origin without horizontal overflow or blocked content.
+  The first pass exposed a touch-navigation defect: moving focus to `main`
+  scrolled the compact navigation out of view after each tap. Pointer navigation
+  now preserves the viewport while retaining the main-landmark focus handoff,
+  and a regression test covers that boundary; the physical retest passed.
+- A disposable photo selected through the iOS picker produced a local Draft
+  record that survived refresh. Plain and encrypted backups downloaded into
+  Files, and a Pera same-device handoff returned to a connected TestNet session.
+  The wallet session and Draft record both survived a subsequent Safari refresh.
 
 ## Algorand TestNet and wallet validation
 

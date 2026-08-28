@@ -31,6 +31,16 @@ function App() {
   const [activePage, setActivePage] = useState<Page>("dashboard");
   const mainRef = useRef<HTMLElement>(null);
   const initialRender = useRef(true);
+  const preventScrollOnNextFocus = useRef(false);
+
+  function handleNavigate(
+    page: Page,
+    options?: { preventScroll?: boolean }
+  ) {
+    preventScrollOnNextFocus.current =
+      options?.preventScroll ?? false;
+    setActivePage(page);
+  }
 
   useEffect(() => {
     const pageNames: Record<Page, string> = {
@@ -48,7 +58,10 @@ function App() {
       return;
     }
 
-    mainRef.current?.focus();
+    mainRef.current?.focus({
+      preventScroll: preventScrollOnNextFocus.current,
+    });
+    preventScrollOnNextFocus.current = false;
   }, [activePage]);
 
   return (
@@ -59,7 +72,10 @@ function App() {
 
       <aside className="app-sidebar">
         <Header />
-        <Navigation activePage={activePage} onNavigate={setActivePage} />
+        <Navigation
+          activePage={activePage}
+          onNavigate={handleNavigate}
+        />
 
         <div className="app-sidebar-boundary" aria-label="Workspace boundaries">
           <div>
@@ -87,7 +103,7 @@ function App() {
         >
           <Suspense fallback={<p role="status">Loading page...</p>}>
             {activePage === "dashboard" && (
-              <DashboardPage onNavigate={setActivePage} />
+              <DashboardPage onNavigate={handleNavigate} />
             )}
             {activePage === "notarize" && <NotarizePage />}
             {activePage === "verify" && <VerifyPage />}

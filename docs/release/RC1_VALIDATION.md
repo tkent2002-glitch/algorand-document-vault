@@ -18,11 +18,12 @@ the automated suite passes.
 | Release identity and TestNet boundary | Passed | Version and network fail-closed checks are automated. |
 | Unit, lint, build, and release packaging | Passed | Local gates and both pull-request CI jobs passed. |
 | Installed stable Chrome on Windows | Passed | Chrome `151.0.7922.174`; seven production-preview tests passed. |
-| Accessibility automation and Windows manual validation | Passed with browser/device gates open | Narrator, keyboard-only workflows, real Chrome zoom, Windows light/dark, contrast theme, and reduced motion passed. Safari and physical mobile coverage remain open. |
+| Accessibility automation and manual validation | Passed with browser/device gates open | Narrator, keyboard-only workflows, real Chrome zoom, Windows visual modes, and the physical iOS navigation fix passed. Cross-browser zoom and physical Android coverage remain open. |
 | Algorand TestNet and Pera Wallet | Passed with one documented deferral | Live confirmation and recovery paths passed; manual timeout induction is deferred. |
 | Installed stable Firefox on Windows | Passed | Firefox `154.0.1`; all routes, persistence, exports, wrong-password rejection, and isolated plain/encrypted restores passed. |
-| Stable Safari | Open | WebKit automation passed; current stable Safari on macOS or iOS still requires an operator check. |
-| Physical Android and iOS | Open | Responsive emulation is evidence, not a physical-device result. |
+| Current Safari on physical iPhone | Passed | iPhone 17 Pro Max, iOS 26.6; routes, storage, file selection, exports, and secure Pera handoff passed. |
+| Physical Android | Open | Responsive emulation is evidence, not a physical-device result. |
+| Physical iOS | Passed | iPhone 17 Pro Max on iOS 26.6 passed portrait layout, storage, file selection, backup export, and Pera handoff checks. |
 | Screenshots | Open | Capture after the current interface is declared frozen for RC1. |
 | Independent security review | Not started | No independent reviewer or report is recorded. |
 | Product-owner approval | Open | Approval must be explicit after all blockers are closed or accepted. |
@@ -51,6 +52,14 @@ The following evidence is already repeatable or recorded:
   encrypted backups downloaded and restored into separate empty Private
   Browsing sessions; and the encrypted restore rejected an incorrect password
   before accepting the test password.
+- Current Safari on an iPhone 17 Pro Max running iOS 26.6 passed hands-on HTTPS
+  validation on August 28, 2026. All five routes fit in portrait orientation;
+  a disposable photo produced a Draft record that survived refresh; plain and
+  encrypted backups downloaded to Files; and the Pera same-device handoff
+  returned to a connected TestNet session that survived refresh. The initial
+  pass found pointer navigation scrolling the compact navigation out of view.
+  The focus handoff now uses `preventScroll` for pointer activation, a regression
+  test covers the behavior, and the physical Safari retest passed.
 - Live TestNet transaction
   `D5QWYDQFAZRL3F7H2I6ELJATMZNI7XYVX3GWR4U6NIGABEEZO3LA` confirmed in round
   `66759442`, and its evidence record persisted after reload and restart.
@@ -72,10 +81,10 @@ named stable browser or a responsive viewport for a physical device.
 | Zoom and reflow | Stable Chrome, Edge, Firefox, and Safari at 200% and 400% | 200% preserves normal workflow access; 400% reflows to a narrow layout without two-dimensional page scrolling or hidden controls. | Partial - physical Windows Chrome passed at 200% (960 CSS pixels) and 400% (480 CSS pixels) on all five routes with no horizontal overflow or hidden controls; Edge, Firefox, and Safari remain open. |
 | Reduced motion | Physical OS setting | Navigation and feedback remain understandable with nonessential motion suppressed. | Passed - Windows animation effects off, August 28, 2026; `prefers-reduced-motion` activated and visible durations were capped at 0.01 milliseconds. Restored to On. |
 | Stable Firefox | Current stable desktop Firefox | Dashboard, Notarize, Verify, Vault, and Wallet load without console-visible failure; persistence and backup download/restore work. | Passed - Windows Firefox `154.0.1`, August 28, 2026; all five routes loaded, a disposable draft survived reload and full restart, both backup formats downloaded and restored in isolated sessions, and wrong-password rejection passed. |
-| Stable Safari | Current stable Safari on macOS or iOS | Core routes, storage, file selection, download/share behavior, and Wallet handoff work over a secure origin. | Open |
+| Stable Safari | Current stable Safari on macOS or iOS | Core routes, storage, file selection, download/share behavior, and Wallet handoff work over a secure origin. | Passed - current Safari on iPhone 17 Pro Max, iOS 26.6, August 28, 2026; HTTPS routes, storage, photo selection, plain/encrypted export, Pera handoff, and post-refresh restoration passed after the verified pointer-navigation fix. |
 | Android layout | Representative physical Android phone | All routes fit, 44-pixel targets remain usable, file selection works, and no fixed panel blocks content. | Open |
-| iOS layout | Representative physical iPhone | All routes fit, file selection and backup export work, and the Pera same-device handoff returns to a connected session. | Open |
-| Manual backup UX | Every supported stable browser | Plain and encrypted files can be saved, identified, selected, previewed, rejected with a wrong password, and restored with the correct password. | Partial - Windows Firefox `154.0.1` passed the complete workflow on August 28, 2026; remaining supported-browser coverage stays open. |
+| iOS layout | Representative physical iPhone | All routes fit, file selection and backup export work, and the Pera same-device handoff returns to a connected session. | Passed - iPhone 17 Pro Max, iOS 26.6, August 28, 2026; portrait routes fit after the pointer-navigation fix, photo selection and both exports worked, and Pera returned to a connected TestNet session. |
+| Manual backup UX | Every supported stable browser | Plain and encrypted files can be saved, identified, selected, previewed, rejected with a wrong password, and restored with the correct password. | Partial - Windows Firefox `154.0.1` passed the complete workflow; iOS Safari passed plain and encrypted export to Files, while isolated Safari restore coverage remains open. |
 
 ## Operator procedure
 
