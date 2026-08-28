@@ -16,6 +16,19 @@ Selecting a document recomputes its fingerprint and searches the local Evidence 
 
 The Vault groups evidence history by document fingerprint and shows status, timestamps, proof details, transaction metadata, backup export, and safe import previews.
 
+Use **Export Plain Backup** for a readable JSON backup with integrity metadata,
+or enter and confirm a password before selecting **Export Encrypted Backup**.
+The encrypted format protects the backup with PBKDF2-derived AES-GCM encryption.
+Keep its password separately: the application does not store it and cannot recover
+it.
+
+To restore a plain backup, select its JSON file and review the validation and
+change preview before choosing **Import New Records**. To restore an encrypted
+backup, select its JSON file, enter the backup password, and choose **Decrypt and
+Preview** first. A wrong password or modified encrypted file is rejected before
+the Vault can be changed. Original documents are never included in either backup
+format.
+
 ## Wallet
 
 The Wallet page connects, restores, and disconnects a Pera Wallet session. The application does not receive the wallet's private keys.

@@ -42,8 +42,10 @@ live Pera Wallet workflow can be completed.
 - [ ] Test the current stable Firefox release.
 - [ ] Test the current stable Safari release on macOS or iOS.
 - [ ] Test representative Android and iOS mobile layouts.
-- [ ] Verify IndexedDB persistence after reload and browser restart.
-- [ ] Verify backup download and restore behavior in each supported browser.
+- [x] Verify IndexedDB persistence after reload in clean Chromium, Edge, and WebKit contexts.
+- [ ] Verify IndexedDB persistence after a full browser restart.
+- [x] Automate plain and encrypted backup download/restore in Chromium, Edge, and WebKit.
+- [ ] Manually verify backup download and restore UX in each supported browser.
 
 ## Algorand TestNet and wallet validation
 
@@ -86,6 +88,8 @@ Live validation evidence recorded August 28, 2026:
 - [x] Encrypted backups use the documented PBKDF2 and AES-GCM boundary.
 - [x] Backup imports validate structure and preview changes before writing.
 - [x] Corrupted persistence and conflicting backup records fail closed.
+- [x] Automate plain and encrypted clean-profile backup round trips, including
+  wrong-password rejection and reload persistence.
 - [ ] Perform a manual plain-backup round trip in a clean browser profile.
 - [ ] Perform a manual encrypted-backup round trip in a clean browser profile.
 

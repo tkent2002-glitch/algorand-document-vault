@@ -51,11 +51,14 @@ full release matrix:
 npm run test:browser:core
 ```
 
-The smoke test checks initial-load chunk deferral, deferred route loading,
+The smoke suite checks initial-load chunk deferral, deferred route loading,
 browser `Buffer` initialization, core route rendering, console errors, and
-uncaught page errors. It stubs external font and wallet-configuration requests
-so those third-party services do not make the result nondeterministic.
+uncaught page errors. It also creates a record, downloads plain and AES-GCM
+encrypted backups, restores each in a clean browser context, verifies encrypted
+password rejection and retry, and confirms that imported IndexedDB data survives
+a reload. It stubs external font and wallet-configuration requests so those
+third-party services do not make the result nondeterministic.
 
 Tests do not replace runtime validation for Pera Wallet mobile handoff, browser
-persistence, downloads, assistive technologies, TestNet submission,
-confirmation, and explorer behavior.
+restart persistence, platform download UX, assistive technologies, TestNet
+submission, confirmation, and explorer behavior.

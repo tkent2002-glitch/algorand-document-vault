@@ -26,6 +26,17 @@
   border-top: 1px solid var(--border);
 }
 
+.vault-import-decryption {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.vault-import-decryption button {
+  width: fit-content;
+}
+
 .vault-import-result ul {
   margin: 0;
   padding-left: 1.25rem;
