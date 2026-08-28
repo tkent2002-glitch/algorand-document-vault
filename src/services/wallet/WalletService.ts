@@ -1,4 +1,4 @@
-﻿import { PeraWalletConnect } from "@perawallet/connect";
+import { PeraWalletConnect } from "@perawallet/connect";
 import type { Transaction } from "algosdk";
 import type { WalletConnection } from "../../types/wallet";
 import { Logger } from "../../core";
@@ -22,7 +22,7 @@ export class WalletService {
       return {
         status: "disconnected",
       };
-    } catch (error) {
+    } catch {
       Logger.error("Pera Wallet session restoration failed.");
 
       return {
@@ -45,7 +45,7 @@ export class WalletService {
       return {
         status: "disconnected",
       };
-    } catch (error) {
+    } catch {
       Logger.error("Pera Wallet connection failed.");
 
       return {
@@ -61,7 +61,7 @@ export class WalletService {
       return {
         status: "disconnected",
       };
-    } catch (error) {
+    } catch {
       Logger.error("Pera Wallet disconnection failed.");
 
       return {

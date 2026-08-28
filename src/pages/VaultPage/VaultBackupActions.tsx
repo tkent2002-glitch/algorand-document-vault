@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Logger } from "../../core";
 import { EvidenceRepository } from "../../repositories";
 import {
@@ -24,7 +24,7 @@ function downloadJsonFile(fileName: string, data: unknown): void {
   URL.revokeObjectURL(url);
 }
 
-async function createTrustedBackupPayload() {
+async function createIntegrityProtectedBackupPayload() {
   const records = await EvidenceRepository.listAsync();
 
   const payload = {
@@ -51,7 +51,7 @@ function VaultBackupActions() {
       setMessage("");
       setExporting(true);
 
-      const backup = await createTrustedBackupPayload();
+      const backup = await createIntegrityProtectedBackupPayload();
 
       downloadJsonFile(
         `algorand-document-vault-backup-${Date.now()}.json`,
@@ -59,7 +59,7 @@ function VaultBackupActions() {
       );
 
       setMessage("Plain Evidence Vault backup exported successfully.");
-    } catch (error) {
+    } catch {
       Logger.error("Plain backup export failed.");
       setMessage("Plain backup export failed.");
     } finally {
@@ -85,10 +85,10 @@ function VaultBackupActions() {
     try {
       setExporting(true);
 
-      const trustedBackup = await createTrustedBackupPayload();
+      const integrityProtectedBackup = await createIntegrityProtectedBackupPayload();
 
       const encryptedBackup = await BackupEncryptionService.encrypt(
-        trustedBackup,
+        integrityProtectedBackup,
         password
       );
 
@@ -100,7 +100,7 @@ function VaultBackupActions() {
       setPassword("");
       setConfirmPassword("");
       setMessage("Encrypted Evidence Vault backup exported successfully.");
-    } catch (error) {
+    } catch {
       Logger.error("Encrypted backup export failed.");
       setMessage("Encrypted backup export failed.");
     } finally {

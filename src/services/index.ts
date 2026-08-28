@@ -1,4 +1,4 @@
-﻿export {
+export {
   AlgorandConfirmationService,
   AlgorandExplorerService,
   AlgorandProofNoteService,
@@ -12,7 +12,7 @@
 
 export {
   BackupIntegrityService,
-  BackupTrustService,
+  BackupIntegrityValidationService,
   EvidenceBackupImportPreviewService,
   EvidenceBackupImportService,
   EvidenceBackupValidationService,
@@ -38,12 +38,12 @@ export { WalletService } from "./wallet";
 
 export type {
   BackupIntegrityMetadata,
-  BackupTrustResult,
+  BackupIntegrityValidationResult,
   EvidenceBackupFile,
   EvidenceBackupImportPreview,
   EvidenceBackupImportResult,
   EvidenceBackupValidationResult,
-  TrustedEvidenceBackupFile,
+  IntegrityProtectedEvidenceBackupFile,
 } from "./backup";
 
 export type { DocumentValidationResult } from "./documents";

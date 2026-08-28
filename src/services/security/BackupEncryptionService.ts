@@ -1,4 +1,4 @@
-﻿import { KeyDerivationService } from "./KeyDerivationService";
+import { KeyDerivationService } from "./KeyDerivationService";
 import { SecureRandomService } from "./SecureRandomService";
 import type {
   EncryptedEvidenceBackupFile,
@@ -29,6 +29,14 @@ function base64ToBytes(value: string): Uint8Array {
   return bytes;
 }
 
+function decodeBackupBase64(value: string): Uint8Array {
+  try {
+    return base64ToBytes(value);
+  } catch {
+    throw new Error("Invalid backup encryption metadata.");
+  }
+}
+
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
   return bytes.buffer.slice(
     bytes.byteOffset,
@@ -47,6 +55,10 @@ export class BackupEncryptionService {
   ): Promise<EncryptedEvidenceBackupFile> {
     if (!password) {
       throw new Error("Backup encryption password is required.");
+    }
+
+    if (password.length < 12) {
+      throw new Error("Backup encryption password must contain at least 12 characters.");
     }
 
     const salt = SecureRandomService.randomBytes(SALT_LENGTH_BYTES);
@@ -96,14 +108,22 @@ export class BackupEncryptionService {
 
     if (
       backup.encryption.algorithm !== "AES-GCM" ||
-      backup.encryption.keyDerivation !== "PBKDF2-SHA-256"
+      backup.encryption.keyDerivation !== "PBKDF2-SHA-256" ||
+      backup.encryption.iterations !== PBKDF2_ITERATIONS
     ) {
       throw new Error("Unsupported backup encryption configuration.");
     }
 
-    const salt = base64ToBytes(backup.encryption.salt);
-    const iv = base64ToBytes(backup.encryption.iv);
-    const ciphertext = base64ToBytes(backup.ciphertext);
+    const salt = decodeBackupBase64(backup.encryption.salt);
+    const iv = decodeBackupBase64(backup.encryption.iv);
+    const ciphertext = decodeBackupBase64(backup.ciphertext);
+
+    if (
+      salt.byteLength !== SALT_LENGTH_BYTES ||
+      iv.byteLength !== IV_LENGTH_BYTES
+    ) {
+      throw new Error("Invalid backup encryption metadata.");
+    }
 
     const key = await KeyDerivationService.deriveAesKeyFromPassword(
       password,

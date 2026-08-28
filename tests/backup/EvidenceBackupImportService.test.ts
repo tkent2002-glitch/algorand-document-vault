@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { BackupIntegrityService } from "../../src/services/backup/BackupIntegrityService";
 import { EvidenceBackupImportService } from "../../src/services/backup/EvidenceBackupImportService";
 import type { EvidenceRecord } from "../../src/services";
@@ -18,8 +18,9 @@ function createRecord(id: string, hashValue: string): EvidenceRecord {
     hashValue,
     proof: {
       id: `proof-${id}`,
-      status: "created",
+      status: "draft",
       payload: {
+        appId: "algorand-document-vault",
         schemaVersion: "1.0",
         hash: {
           algorithm: "SHA-256",
@@ -33,7 +34,7 @@ function createRecord(id: string, hashValue: string): EvidenceRecord {
   };
 }
 
-async function createTrustedBackup(records: EvidenceRecord[]) {
+async function createIntegrityProtectedBackup(records: EvidenceRecord[]) {
   const payload = {
     schema: "adv-evidence-backup-v1" as const,
     exportedAt: "2026-07-08T00:00:00.000Z",
@@ -49,7 +50,7 @@ async function createTrustedBackup(records: EvidenceRecord[]) {
 
 describe("EvidenceBackupImportService", () => {
   it("imports new records", async () => {
-    const backup = await createTrustedBackup([createRecord("record-1", hashA)]);
+    const backup = await createIntegrityProtectedBackup([createRecord("record-1", hashA)]);
 
     const result = await EvidenceBackupImportService.importNewRecords(backup, []);
 
@@ -61,7 +62,7 @@ describe("EvidenceBackupImportService", () => {
 
   it("skips existing records with the same id", async () => {
     const existing = createRecord("record-1", hashA);
-    const backup = await createTrustedBackup([existing]);
+    const backup = await createIntegrityProtectedBackup([existing]);
 
     const result = await EvidenceBackupImportService.importNewRecords(backup, [
       existing,
@@ -76,7 +77,7 @@ describe("EvidenceBackupImportService", () => {
   it("blocks conflicting records with same id but different hash", async () => {
     const existing = createRecord("record-1", hashA);
     const conflicting = createRecord("record-1", hashB);
-    const backup = await createTrustedBackup([conflicting]);
+    const backup = await createIntegrityProtectedBackup([conflicting]);
 
     const result = await EvidenceBackupImportService.importNewRecords(backup, [
       existing,

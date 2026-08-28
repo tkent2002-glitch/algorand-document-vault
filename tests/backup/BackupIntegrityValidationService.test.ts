@@ -1,9 +1,9 @@
-﻿import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { BackupIntegrityService } from "../../src/services/backup/BackupIntegrityService";
 import {
-  BackupTrustService,
-  type TrustedEvidenceBackupFile,
-} from "../../src/services/backup/BackupTrustService";
+  BackupIntegrityValidationService,
+  type IntegrityProtectedEvidenceBackupFile,
+} from "../../src/services/backup/BackupIntegrityValidationService";
 import type { EvidenceRecord } from "../../src/services";
 
 const hash =
@@ -18,8 +18,9 @@ function createRecord(): EvidenceRecord {
     hashValue: hash,
     proof: {
       id: "proof-record-1",
-      status: "created",
+      status: "draft",
       payload: {
+        appId: "algorand-document-vault",
         schemaVersion: "1.0",
         hash: {
           algorithm: "SHA-256",
@@ -33,7 +34,7 @@ function createRecord(): EvidenceRecord {
   };
 }
 
-async function createTrustedBackup(): Promise<TrustedEvidenceBackupFile> {
+async function createIntegrityProtectedBackup(): Promise<IntegrityProtectedEvidenceBackupFile> {
   const payload = {
     schema: "adv-evidence-backup-v1" as const,
     exportedAt: "2026-07-09T01:00:00.000Z",
@@ -47,13 +48,13 @@ async function createTrustedBackup(): Promise<TrustedEvidenceBackupFile> {
   };
 }
 
-describe("BackupTrustService", () => {
-  it("trusts a structurally valid backup with verified integrity", async () => {
-    const backup = await createTrustedBackup();
+describe("BackupIntegrityValidationService", () => {
+  it("accepts a structurally valid backup with verified integrity", async () => {
+    const backup = await createIntegrityProtectedBackup();
 
-    const result = await BackupTrustService.evaluate(backup);
+    const result = await BackupIntegrityValidationService.evaluate(backup);
 
-    expect(result.trusted).toBe(true);
+    expect(result.valid).toBe(true);
     expect(result.structureValid).toBe(true);
     expect(result.integrityPresent).toBe(true);
     expect(result.integrityVerified).toBe(true);
@@ -61,16 +62,16 @@ describe("BackupTrustService", () => {
   });
 
   it("rejects a backup without integrity metadata", async () => {
-    const backup: TrustedEvidenceBackupFile = {
+    const backup: IntegrityProtectedEvidenceBackupFile = {
       schema: "adv-evidence-backup-v1",
       exportedAt: "2026-07-09T01:00:00.000Z",
       recordCount: 1,
       records: [createRecord()],
     };
 
-    const result = await BackupTrustService.evaluate(backup);
+    const result = await BackupIntegrityValidationService.evaluate(backup);
 
-    expect(result.trusted).toBe(false);
+    expect(result.valid).toBe(false);
     expect(result.structureValid).toBe(true);
     expect(result.integrityPresent).toBe(false);
     expect(result.integrityVerified).toBe(false);
@@ -80,16 +81,16 @@ describe("BackupTrustService", () => {
   });
 
   it("rejects a backup modified after its digest was created", async () => {
-    const backup = await createTrustedBackup();
+    const backup = await createIntegrityProtectedBackup();
 
     backup.records[0] = {
       ...backup.records[0],
       documentName: "modified.txt",
     };
 
-    const result = await BackupTrustService.evaluate(backup);
+    const result = await BackupIntegrityValidationService.evaluate(backup);
 
-    expect(result.trusted).toBe(false);
+    expect(result.valid).toBe(false);
     expect(result.structureValid).toBe(true);
     expect(result.integrityPresent).toBe(true);
     expect(result.integrityVerified).toBe(false);
@@ -99,7 +100,7 @@ describe("BackupTrustService", () => {
   });
 
   it("rejects an unsupported integrity algorithm", async () => {
-    const backup = await createTrustedBackup();
+    const backup = await createIntegrityProtectedBackup();
 
     const unsupportedBackup = {
       ...backup,
@@ -107,11 +108,11 @@ describe("BackupTrustService", () => {
         algorithm: "MD5",
         digest: backup.integrity?.digest ?? "",
       },
-    } as unknown as TrustedEvidenceBackupFile;
+    } as unknown as IntegrityProtectedEvidenceBackupFile;
 
-    const result = await BackupTrustService.evaluate(unsupportedBackup);
+    const result = await BackupIntegrityValidationService.evaluate(unsupportedBackup);
 
-    expect(result.trusted).toBe(false);
+    expect(result.valid).toBe(false);
     expect(result.integrityPresent).toBe(true);
     expect(result.integrityVerified).toBe(false);
     expect(result.errors).toContain(
@@ -119,3 +120,7 @@ describe("BackupTrustService", () => {
     );
   });
 });
+
+
+
+
