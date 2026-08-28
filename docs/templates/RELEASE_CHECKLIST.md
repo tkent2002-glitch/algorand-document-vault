@@ -81,9 +81,11 @@ Manual responsive evidence recorded August 28, 2026:
   checks; viewport resizing and media emulation are not treated as substitutes.
 - Responsive viewport checks do not replace manual testing in stable Chrome,
   Firefox, Safari, or physical Android and iOS devices.
-- The responsive geometry passed, but the dashboard action buttons visually
-  abut and the desktop composition remains sparse. These are visual-polish
-  findings to address before freezing the public-alpha UI.
+- The dashboard and application shell were subsequently redesigned with a
+  responsive sidebar, distinct workflow cards, real local evidence activity,
+  and consistent surfaces across Notarize, Verify, Vault, and Wallet. Desktop
+  and 390 x 844 CSS-pixel visual review confirmed clear spacing and hierarchy;
+  no placeholder balance, account, or activity data was introduced.
 
 ## Algorand TestNet and wallet validation
 

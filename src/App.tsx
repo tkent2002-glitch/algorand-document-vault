@@ -56,25 +56,46 @@ function App() {
       <a className="skip-link" href="#main-content">
         Skip to main content
       </a>
-      <Header />
-      <Navigation activePage={activePage} onNavigate={setActivePage} />
 
-      <main
-        className="app-main"
-        id="main-content"
-        ref={mainRef}
-        tabIndex={-1}
-      >
-        <Suspense fallback={<p role="status">Loading page...</p>}>
-          {activePage === "dashboard" && (
-            <DashboardPage onNavigate={setActivePage} />
-          )}
-          {activePage === "notarize" && <NotarizePage />}
-          {activePage === "verify" && <VerifyPage />}
-          {activePage === "vault" && <VaultPage />}
-          {activePage === "wallet" && <WalletPage />}
-        </Suspense>
-      </main>
+      <aside className="app-sidebar">
+        <Header />
+        <Navigation activePage={activePage} onNavigate={setActivePage} />
+
+        <div className="app-sidebar-boundary" aria-label="Workspace boundaries">
+          <div>
+            <span className="app-status-dot" aria-hidden="true" />
+            <span>Algorand TestNet</span>
+          </div>
+          <p>Evidence metadata stays on this device.</p>
+        </div>
+      </aside>
+
+      <div className="app-workspace">
+        <div className="app-topbar" aria-label="Workspace status">
+          <span>Public alpha workspace</span>
+          <div>
+            <span className="app-topbar-pill">TestNet only</span>
+            <span className="app-topbar-pill">Documents stay local</span>
+          </div>
+        </div>
+
+        <main
+          className="app-main"
+          id="main-content"
+          ref={mainRef}
+          tabIndex={-1}
+        >
+          <Suspense fallback={<p role="status">Loading page...</p>}>
+            {activePage === "dashboard" && (
+              <DashboardPage onNavigate={setActivePage} />
+            )}
+            {activePage === "notarize" && <NotarizePage />}
+            {activePage === "verify" && <VerifyPage />}
+            {activePage === "vault" && <VaultPage />}
+            {activePage === "wallet" && <WalletPage />}
+          </Suspense>
+        </main>
+      </div>
     </div>
   );
 }

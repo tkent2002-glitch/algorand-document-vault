@@ -1,7 +1,4 @@
-.page {
-  padding: 40px;
-  text-align: center;
-}.notarize-page {
+.notarize-page {
   text-align: left;
 }
 
@@ -42,7 +39,59 @@
 }
 
 .notarize-result {
+  min-width: 0;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--social-bg);
+  box-shadow: var(--shadow);
   text-align: left;
+}
+
+.notarize-result > strong:first-child {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--text-h);
+  font-size: 1.05rem;
+}
+
+.notarize-result p + p,
+.notarize-result p + label,
+.notarize-result label + input {
+  margin-top: 0.65rem;
+}
+
+.notarize-result label {
+  display: block;
+  color: var(--text-h);
+  font-weight: 650;
+}
+
+.notarize-result input[type="file"] {
+  width: 100%;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.wallet-readiness-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.wallet-readiness-header span {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  background: var(--accent-bg);
+  color: var(--accent-strong);
+  font-size: 0.75rem;
+  font-weight: 750;
 }
 
 .notarize-result strong {
@@ -60,6 +109,7 @@
 }
 
 .notarize-result button {
+  margin-top: 0.75rem;
   cursor: pointer;
   border: 1px solid var(--accent-border);
   border-radius: 10px;
@@ -180,6 +230,11 @@
 }
 
 @media (max-width: 640px) {
+  .wallet-readiness-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .notarize-progress-header,
   .notarize-progress-stage-header {
     align-items: flex-start;

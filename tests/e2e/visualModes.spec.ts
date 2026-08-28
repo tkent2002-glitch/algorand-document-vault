@@ -40,7 +40,7 @@ test("renders every page in dark mode without overflow", async ({ page }) => {
           .trim()
       )
     )
-    .toBe("#16171d");
+    .toBe("#050b18");
 
   for (const pageName of PAGE_NAMES) {
     await page
