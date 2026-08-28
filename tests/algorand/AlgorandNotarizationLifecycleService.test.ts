@@ -39,7 +39,7 @@ function createEvidenceRecord(): EvidenceRecord {
 function createSignedTransaction():
   AlgorandSignedProofTransaction {
   return {
-    txId: "UNSIGNED-TX-ID",
+    txId: "TESTNET-TX-ID",
     signedTransaction: new Uint8Array([1, 2, 3]),
     signedTransactionByteLength: 3,
     signedAt: "2026-07-12T00:01:00.000Z",
@@ -161,5 +161,63 @@ describe("AlgorandNotarizationLifecycleService", () => {
         (error as AlgorandNotarizationLifecycleError).stage
       ).toBe("confirming");
     }
+  });
+
+  it("rejects a submitted transaction id that does not match the signed transaction", async () => {
+    const saveSpy = vi
+      .spyOn(EvidenceRepository, "saveAsync")
+      .mockResolvedValue();
+
+    vi.spyOn(
+      AlgorandSubmissionService,
+      "submitSignedTransaction"
+    ).mockResolvedValue({
+      transactionId: "DIFFERENT-TX-ID",
+      submittedAt: "2026-07-12T00:02:00.000Z",
+    });
+
+    const confirmationSpy = vi
+      .spyOn(
+        AlgorandConfirmationService,
+        "waitForConfirmation"
+      )
+      .mockResolvedValue({
+        transactionId: "DIFFERENT-TX-ID",
+        confirmedRound: 123456,
+        confirmedAt: "2026-07-12T00:03:00.000Z",
+      });
+
+    try {
+      await AlgorandNotarizationLifecycleService.complete({
+        signedTransaction: {
+          ...createSignedTransaction(),
+          txId: "EXPECTED-TX-ID",
+        },
+        evidenceRecord: createEvidenceRecord(),
+      });
+
+      throw new Error("Expected transaction ID mismatch.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(
+        AlgorandNotarizationLifecycleError
+      );
+
+      const lifecycleError =
+        error as AlgorandNotarizationLifecycleError;
+
+      expect(lifecycleError.stage).toBe("submitting");
+      expect(lifecycleError.transactionId).toBe(
+        "DIFFERENT-TX-ID"
+      );
+      expect(lifecycleError.causeValue).toBeInstanceOf(Error);
+      expect(
+        (lifecycleError.causeValue as Error).message
+      ).toBe(
+        "Submitted transaction ID does not match the ADv signed transaction ID."
+      );
+    }
+
+    expect(saveSpy).not.toHaveBeenCalled();
+    expect(confirmationSpy).not.toHaveBeenCalled();
   });
 });

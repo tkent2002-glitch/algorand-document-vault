@@ -6,6 +6,7 @@ import type {
 import { WalletService } from "../wallet/WalletService";
 import { AlgorandProofNoteService } from "./AlgorandProofNoteService";
 import { AlgorandService } from "./AlgorandService";
+import { AlgorandTransactionPolicyService } from "./AlgorandTransactionPolicyService";
 
 const PROOF_TRANSACTION_AMOUNT_MICROALGOS = 0;
 
@@ -25,6 +26,12 @@ export class AlgorandTransactionSigningService {
       amount: PROOF_TRANSACTION_AMOUNT_MICROALGOS,
       note,
       suggestedParams,
+    });
+
+    AlgorandTransactionPolicyService.assertValid({
+      transaction,
+      expectedSenderAddress: senderAddress,
+      expectedNote: note,
     });
 
     const signedTransaction =

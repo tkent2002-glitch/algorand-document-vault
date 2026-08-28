@@ -36,10 +36,10 @@ function createEvidenceRecord(): EvidenceRecord {
   };
 }
 
-function createSignedTransaction():
+function createSignedTransaction(txId = "UNSIGNED-TX-ID"):
   AlgorandSignedProofTransaction {
   return {
-    txId: "UNSIGNED-TX-ID",
+    txId,
     signedTransaction: new Uint8Array([1, 2, 3]),
     signedTransactionByteLength: 3,
     signedAt: "2026-07-12T00:01:00.000Z",
@@ -74,7 +74,7 @@ describe("Algorand lifecycle recovery boundary", () => {
 
     try {
       await AlgorandNotarizationLifecycleService.complete({
-        signedTransaction: createSignedTransaction(),
+        signedTransaction: createSignedTransaction("RECOVERY-TX-ID"),
         evidenceRecord: createEvidenceRecord(),
       });
 

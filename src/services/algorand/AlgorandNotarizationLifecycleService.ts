@@ -85,6 +85,14 @@ export class AlgorandNotarizationLifecycleService {
 
       transactionId = submissionResult.transactionId;
 
+      if (
+        submissionResult.transactionId !==
+        input.signedTransaction.txId
+      ) {
+        throw new Error(
+          "Submitted transaction ID does not match the ADv signed transaction ID."
+        );
+      }
       const submittedRecord =
         EvidenceRecordService.markSubmitted(
           input.evidenceRecord,
