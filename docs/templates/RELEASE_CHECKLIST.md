@@ -7,7 +7,7 @@ live Pera Wallet workflow can be completed.
 
 ## Release identity
 
-- [ ] Set `package.json` to the approved alpha version.
+- [x] Set `package.json` to the approved alpha version.
 - [ ] Confirm the release commit and tag both use the approved version.
 - [ ] Update `CHANGELOG.md` with the release date and final scope.
 - [ ] Confirm the working tree is clean before tagging.
@@ -190,5 +190,14 @@ Large-Vault evidence recorded August 28, 2026:
 
 - [ ] All blocking items above are complete or explicitly deferred with rationale.
 - [ ] Independent security review status is documented.
-- [ ] MainNet remains disabled and out of scope for this alpha.
+- [x] MainNet remains disabled and out of scope for this alpha.
 - [ ] Product owner approves the release candidate.
+
+Release-identity evidence recorded August 28, 2026:
+
+- `package.json`, `package-lock.json`, and the application runtime identify the
+  candidate as `0.1.0-alpha`.
+- `npm run verify:release-readiness` fails closed if those versions drift, if
+  the default Algorand network or endpoint stops targeting TestNet, if the
+  transaction policy stops requiring the TestNet genesis, or if a MainNet API
+  endpoint is introduced into production source.

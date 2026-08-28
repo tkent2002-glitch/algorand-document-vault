@@ -35,6 +35,9 @@ jobs:
       - name: Verify tracked content
         run: npm run verify:tracked-content
 
+      - name: Verify release identity and TestNet boundary
+        run: npm run verify:release-readiness
+
       - name: Verify dependency tree
         run: npm ls --all --depth=0
 
