@@ -167,8 +167,8 @@ Manual backup evidence recorded August 28, 2026:
 - [x] Record startup, search, hashing, backup, and restore performance.
 - [x] Investigate the current large JavaScript chunk warning.
 - [x] Investigate the browser `buffer.Buffer` compatibility warning.
-- [ ] Verify production hosting configuration and direct-load behavior.
-- [ ] Smoke-test the exact packaged release artifact.
+- [x] Verify production hosting configuration and direct-load behavior.
+- [x] Smoke-test the exact packaged release artifact.
 
 Large-Vault evidence recorded August 28, 2026:
 
