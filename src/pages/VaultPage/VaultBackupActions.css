@@ -68,6 +68,10 @@
   color: var(--text-h);
 }
 
+.vault-backup-message:empty {
+  margin: 0;
+}
+
 /* Phase 5.3B - Backup UX Polish */
 
 .vault-backup-header,

@@ -251,11 +251,14 @@ function VaultBackupActions() {
         </div>
       </div>
 
-      {message && (
-        <p className="vault-backup-message" role="status">
-          {message}
-        </p>
-      )}
+      <p
+        className="vault-backup-message"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {message}
+      </p>
 
       <p className="vault-backup-boundary">
         Backup files contain evidence records and metadata only. They

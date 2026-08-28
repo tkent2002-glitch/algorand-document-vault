@@ -104,4 +104,26 @@ describe("application accessibility boundaries", () => {
     ).toHaveAttribute("type", "file");
     expect(screen.getAllByRole("main")).toHaveLength(1);
   });
+
+  it("keeps the backup status region mounted when validation updates", async () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Vault" }));
+
+    const exportButton = await screen.findByRole("button", {
+      name: "Export Encrypted Backup",
+    });
+    const statusRegion = screen.getByRole("status");
+
+    expect(statusRegion).toBeEmptyDOMElement();
+    expect(statusRegion).toHaveAttribute("aria-live", "polite");
+    expect(statusRegion).toHaveAttribute("aria-atomic", "true");
+
+    fireEvent.click(exportButton);
+
+    expect(statusRegion).toHaveTextContent(
+      "Password must contain at least 12 characters."
+    );
+    expect(screen.getByRole("status")).toBe(statusRegion);
+  });
 });

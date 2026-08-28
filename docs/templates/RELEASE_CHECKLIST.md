@@ -31,9 +31,26 @@ live Pera Wallet workflow can be completed.
 - [x] Header text meets WCAG AA contrast in the tested light theme.
 - [x] Dynamic wallet and transaction outcomes use live status semantics.
 - [x] Accessibility boundary regressions are covered by automated tests.
-- [ ] Complete a manual screen-reader pass.
+- [x] Complete a manual screen-reader pass.
 - [ ] Complete keyboard-only testing for every workflow.
 - [ ] Verify light, dark, high-contrast, zoom, and reduced-motion modes.
+
+Manual accessibility evidence recorded August 28, 2026:
+
+- All five pages exposed one main landmark, one application-level heading, a
+  page-specific heading, a unique document title, and the active navigation
+  item as `aria-current="page"`.
+- Navigation changes moved focus to `main`, and a backup-password mismatch was
+  exposed through a live status region.
+- A physical keyboard pass confirmed the skip link, visible focus treatment,
+  Dashboard call-to-action, navigation, Notarize and Verify file controls,
+  Vault backup controls, search and filter order, evidence-record selection,
+  and Wallet action focus. The live wallet was not disconnected.
+- Windows Narrator announced the primary navigation and current Wallet state,
+  the Pera Wallet heading, and the main landmark. An initial minimum-password
+  validation announcement failed because the status region was conditionally
+  mounted with its text. A persistent polite, atomic live region and regression
+  test were added; Narrator announced the validation message after the fix.
 
 ## Browser and device validation
 
@@ -46,6 +63,21 @@ live Pera Wallet workflow can be completed.
 - [x] Verify IndexedDB persistence after a full browser restart.
 - [x] Automate plain and encrypted backup download/restore in Chromium, Edge, and WebKit.
 - [ ] Manually verify backup download and restore UX in each supported browser.
+
+Manual responsive evidence recorded August 28, 2026:
+
+- Dashboard, Notarize, Verify, Vault, and Wallet rendered without horizontal
+  overflow at 390 x 844, 768 x 1024, and 1440 x 900 CSS-pixel viewports.
+- Visible buttons, inputs, and selects met the 44-pixel minimum in the tested
+  mobile viewport.
+- The active session validated the light theme only. Dark mode, forced-colors
+  high contrast, reduced motion, and browser zoom still require real-mode
+  checks; viewport resizing is not treated as a substitute.
+- Responsive viewport checks do not replace manual testing in stable Chrome,
+  Firefox, Safari, or physical Android and iOS devices.
+- The responsive geometry passed, but the dashboard action buttons visually
+  abut and the desktop composition remains sparse. These are visual-polish
+  findings to address before freezing the public-alpha UI.
 
 ## Algorand TestNet and wallet validation
 
