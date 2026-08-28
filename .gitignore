@@ -14,6 +14,14 @@ playwright-report
 test-results
 *.local
 
+# Local configuration and Evidence Vault exports
+.env
+.env.*
+!.env.example
+!.env.*.example
+algorand-document-vault-backup-*.json
+algorand-document-vault-encrypted-backup-*.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

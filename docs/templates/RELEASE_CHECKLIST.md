@@ -99,8 +99,13 @@ Live validation evidence recorded August 28, 2026:
 - [x] Confirm installation, quick-start, testing, and user guides are current.
 - [ ] Capture current screenshots after the UI is frozen.
 - [x] Confirm security-reporting instructions and trust boundaries are prominent.
-- [ ] Confirm no secrets, wallet recovery material, or private documents are tracked.
-- [ ] Complete dependency and license review.
+- [x] Confirm no secrets, wallet recovery material, or private documents are tracked.
+- [x] Complete the local dependency-tree and license review.
+- [x] Run the current npm production advisory audit with approved registry access.
+- [x] Resolve the Pera WalletConnect production advisories and pass automated regression gates.
+- [x] Review the remaining development-only npm advisories.
+- [x] Apply and verify the patch-only development-tooling advisory fixes.
+- [x] Revalidate the live Pera TestNet connection and signing workflow after the upgrade.
 
 ## Performance and packaging
 

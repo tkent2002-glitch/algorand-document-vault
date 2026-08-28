@@ -13,7 +13,7 @@
     "test:browser:core": "npm run build && playwright test --project=chromium --project=edge --project=webkit"
   },
   "dependencies": {
-    "@perawallet/connect": "^1.5.2",
+    "@perawallet/connect": "^1.6.0",
     "algosdk": "^3.6.0",
     "buffer": "^6.0.3",
     "react": "^19.2.7",
