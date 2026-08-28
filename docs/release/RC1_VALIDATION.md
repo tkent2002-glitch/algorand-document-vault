@@ -1,10 +1,10 @@
 # Public Alpha RC1 Validation
 
-**Candidate version:** `0.1.0-alpha`  
-**Candidate base:** `3da7716`  
-**Validation branch:** `codex/phase-10-release-candidate-validation`  
-**Opened:** August 28, 2026  
-**Release status:** Not approved
+- **Candidate version:** `0.1.0-alpha`
+- **Candidate base:** `3da7716`
+- **Validation branch:** `codex/phase-10-release-candidate-validation`
+- **Opened:** August 28, 2026
+- **Release status:** Not approved
 
 This document is the evidence ledger and operator runbook for the first public
 alpha release candidate. The authoritative gate list remains
