@@ -51,6 +51,18 @@ full release matrix:
 npm run test:browser:core
 ```
 
+Before approving a release candidate on Windows, run the same suite against the
+locally installed stable Google Chrome channel:
+
+```powershell
+npm run test:browser:stable-chrome
+```
+
+This command intentionally remains a local release check rather than a CI gate.
+It requires Google Chrome to be installed on the Windows validation host; the
+portable CI matrix continues to use Playwright-managed Chromium, Firefox, and
+WebKit engines.
+
 The smoke suite checks initial-load chunk deferral, deferred route loading,
 browser `Buffer` initialization, core route rendering, console errors, and
 uncaught page errors. It also creates a record, downloads plain and AES-GCM

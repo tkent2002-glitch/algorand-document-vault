@@ -15,6 +15,7 @@
     "test:browser": "npm run build && playwright test",
     "test:browser:ci": "npm run build && playwright test --project=chromium --project=firefox --project=webkit",
     "test:browser:core": "npm run build && playwright test --project=chromium --project=edge --project=webkit",
+    "test:browser:stable-chrome": "npm run build && playwright test --config=playwright.chrome.config.ts",
     "verify:tracked-content": "node tools/release/verify-tracked-content.mjs",
     "verify:release-readiness": "node tools/release/verify-release-readiness.mjs"
   },

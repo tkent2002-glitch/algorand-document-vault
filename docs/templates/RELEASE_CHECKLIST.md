@@ -54,7 +54,7 @@ Manual accessibility evidence recorded August 28, 2026:
 
 ## Browser and device validation
 
-- [ ] Test the current stable Chrome release on Windows.
+- [x] Test the current stable Chrome release on Windows.
 - [x] Test the current stable Edge release on Windows.
 - [ ] Test the current stable Firefox release.
 - [ ] Test the current stable Safari release on macOS or iOS.
@@ -86,6 +86,12 @@ Manual responsive evidence recorded August 28, 2026:
   and consistent surfaces across Notarize, Verify, Vault, and Wallet. Desktop
   and 390 x 844 CSS-pixel visual review confirmed clear spacing and hierarchy;
   no placeholder balance, account, or activity data was introduced.
+- Installed Google Chrome `151.0.7922.174` on Windows passed the complete
+  production-preview suite through `npm run test:browser:stable-chrome`: seven
+  checks covering clean loading, plain and encrypted backup recovery,
+  10,000-document Vault behavior, dark mode, forced colors, reduced motion, and
+  320-CSS-pixel reflow. Hands-on download UX and real browser zoom remain
+  separate manual gates.
 
 ## Algorand TestNet and wallet validation
 
@@ -189,7 +195,7 @@ Large-Vault evidence recorded August 28, 2026:
 ## Release approval
 
 - [ ] All blocking items above are complete or explicitly deferred with rationale.
-- [ ] Independent security review status is documented.
+- [x] Independent security review status is documented.
 - [x] MainNet remains disabled and out of scope for this alpha.
 - [ ] Product owner approves the release candidate.
 
@@ -201,3 +207,5 @@ Release-identity evidence recorded August 28, 2026:
   the default Algorand network or endpoint stops targeting TestNet, if the
   transaction policy stops requiring the TestNet genesis, or if a MainNet API
   endpoint is introduced into production source.
+- Candidate status, evidence, open gates, and operator procedures are tracked
+  in `docs/release/RC1_VALIDATION.md`.

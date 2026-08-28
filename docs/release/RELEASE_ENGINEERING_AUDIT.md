@@ -25,6 +25,10 @@ exports, or missing local assets were present.
 The exact artifact passed a direct-load Chromium smoke test with its Content
 Security Policy, anti-framing, and content-type protections active.
 
+Pull request 14 completed both GitHub Actions jobs successfully before merge.
+The merged candidate base is commit `3da7716`. Installed stable Google Chrome
+`151.0.7922.174` on Windows also passed the seven-test production-preview suite.
+
 ## Firefox status
 
 The Windows host contains Playwright Firefox, but Windows returned `spawn
@@ -36,8 +40,10 @@ release checklist until it is completed on a host that can launch Firefox.
 
 ## Remaining external checks
 
-- Confirm the CI workflow succeeds after these controls are pushed.
 - Select a production host and translate the hosting contract if necessary.
 - Smoke-test the deployed HTTPS origin and Pera Wallet handoff.
 - Complete physical-device, stable-browser, and independent security review.
 - Obtain product-owner approval before publishing a release.
+
+The current disposition and exact operator procedures are maintained in
+`RC1_VALIDATION.md`.

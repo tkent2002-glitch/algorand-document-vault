@@ -25,10 +25,11 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
 
 ### In progress
 
-- Full Algorand TestNet end-to-end notarization validation
-- Current Pera Mobile connection handoff validation
-- Cross-browser, screen-reader, and performance validation
-- Public alpha release preparation
+- Manual stable Firefox, Safari/iOS, and representative mobile-device checks
+- Real zoom, operating-system visual-mode, and per-browser backup UX checks
+- Current post-redesign screenshots
+- Independent security review and product-owner release approval
+- Public-alpha hosting selection and deployed HTTPS validation
 
 ## [0.1.0-alpha] - Planned
 
