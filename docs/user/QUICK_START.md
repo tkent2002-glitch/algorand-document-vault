@@ -20,9 +20,10 @@ Store backup passwords safely. They are not recoverable by the application.
 
 ## TestNet validation status
 
-The desktop QR-to-Pera Mobile connection, signing, TestNet submission,
-confirmation, explorer proof note, and persisted evidence record were validated
-live on August 28, 2026. Same-device mobile deep-link behavior remains under
-compatibility validation. Do not import a mobile recovery phrase into Pera Web
-merely to test this application. Use only valueless TestNet ALGO, and never
-enter wallet recovery material into this application or a TestNet dispenser.
+The desktop QR-to-Pera Mobile connection, same-device mobile handoff, signing,
+TestNet submission, confirmation, explorer proof note, and persisted evidence
+record were validated live on August 28, 2026. Same-device WalletConnect must
+run in a secure HTTPS browser context because it requires Web Crypto. Do not
+import a mobile recovery phrase into Pera Web merely to test this application.
+Use only valueless TestNet ALGO, and never enter wallet recovery material into
+this application or a TestNet dispenser.

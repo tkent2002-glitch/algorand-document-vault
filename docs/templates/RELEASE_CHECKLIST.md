@@ -51,7 +51,7 @@ live Pera Wallet workflow can be completed.
 - [x] Submission transaction IDs are checked against the signed transaction ID.
 - [x] Wallet rejection and uncertain submission paths fail closed in automated tests.
 - [x] Revalidate the desktop QR-to-Pera Mobile connection experience.
-- [ ] Revalidate the same-device Pera Mobile deep-link experience.
+- [x] Revalidate the same-device Pera Mobile deep-link experience over HTTPS.
 - [x] Explicitly verify the wallet session is bound to Algorand TestNet.
 - [x] Fund a dedicated TestNet account with valueless TestNet ALGO.
 - [x] Complete a live sign, submit, and confirmation workflow.
@@ -71,6 +71,13 @@ Live validation evidence recorded August 28, 2026:
 - A rejected signature request produced recovery guidance, kept submission
   disabled, and allowed a second signing attempt; the retry was also rejected
   without creating signed bytes or broadcasting a transaction.
+- A same-device HTTPS session in Chrome opened Pera Mobile and returned a
+  connected wallet session. Plain LAN HTTP was rejected because WalletConnect
+  requires Web Crypto in a secure browser context.
+- Manual timeout induction is deferred: interrupting connectivity after a live
+  broadcast would intentionally create an uncertain submission state. Automated
+  tests cover timeout classification, status lookup, and fail-closed retry
+  behavior without risking a duplicate or ambiguous TestNet transaction.
 
 ## Data safety and recovery
 

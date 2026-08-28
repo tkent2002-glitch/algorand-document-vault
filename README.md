@@ -42,7 +42,7 @@ The system proves document existence and integrity at a point in time. It does n
 | Backup integrity and trust verification | Complete |
 | AES-GCM encrypted backups and recovery | Complete |
 | Algorand SDK transaction construction | Implemented |
-| Pera Wallet integration | Desktop QR-to-mobile flow validated on TestNet |
+| Pera Wallet integration | Desktop QR and same-device HTTPS mobile handoff validated on TestNet |
 | TestNet submission and confirmation flow | Live validation complete |
 | Accessibility blocker remediation | Complete; broader manual review remains |
 | MainNet release | Planned |
@@ -180,7 +180,7 @@ Important boundaries:
 
 - The application currently targets Algorand TestNet.
 - TestNet ALGO has no monetary value; never use MainNet funds for development validation.
-- The desktop QR-to-Pera Mobile flow has been validated live; same-device deep-link behavior still requires compatibility validation.
+- Desktop QR and same-device Pera Mobile handoff have been validated live. Same-device WalletConnect requires a secure HTTPS browser context.
 - The project has not yet completed an independent security audit.
 - Encrypted backups cannot be recovered if the password is lost.
 - Blockchain notarization proves timestamped existence and integrity, not legal validity or truthfulness.
