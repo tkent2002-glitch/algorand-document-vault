@@ -76,7 +76,7 @@ Manual accessibility evidence recorded August 28, 2026:
 
 - [x] Test the current stable Chrome release on Windows.
 - [x] Test the current stable Edge release on Windows.
-- [ ] Test the current stable Firefox release.
+- [x] Test the current stable Firefox release.
 - [ ] Test the current stable Safari release on macOS or iOS.
 - [ ] Test representative Android and iOS mobile layouts.
 - [x] Verify IndexedDB persistence after reload in clean Chromium, Edge, and WebKit contexts.
@@ -112,6 +112,13 @@ Manual responsive evidence recorded August 28, 2026:
   10,000-document Vault behavior, dark mode, forced colors, reduced motion, and
   320-CSS-pixel reflow. Hands-on download UX and real browser zoom remain
   separate manual gates.
+- Installed Mozilla Firefox `154.0.1` on Windows loaded Dashboard, Notarize,
+  Verify, Vault, and Wallet without visible failure. A disposable `README.md`
+  draft survived reload and a complete Firefox restart. Plain and encrypted
+  backups downloaded successfully, restored one record into separate clean
+  Private Browsing sessions, and retained the expected Draft state. The
+  encrypted restore rejected an incorrect password before accepting the test
+  password; both previews reported one new record and zero conflicts.
 
 ## Algorand TestNet and wallet validation
 

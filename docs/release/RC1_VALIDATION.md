@@ -18,9 +18,10 @@ the automated suite passes.
 | Release identity and TestNet boundary | Passed | Version and network fail-closed checks are automated. |
 | Unit, lint, build, and release packaging | Passed | Local gates and both pull-request CI jobs passed. |
 | Installed stable Chrome on Windows | Passed | Chrome `151.0.7922.174`; seven production-preview tests passed. |
-| Accessibility automation and Windows manual validation | Passed with browser/device gates open | Narrator, keyboard-only workflows, real Chrome zoom, Windows light/dark, contrast theme, and reduced motion passed. Firefox, Safari, and physical mobile coverage remain open. |
+| Accessibility automation and Windows manual validation | Passed with browser/device gates open | Narrator, keyboard-only workflows, real Chrome zoom, Windows light/dark, contrast theme, and reduced motion passed. Safari and physical mobile coverage remain open. |
 | Algorand TestNet and Pera Wallet | Passed with one documented deferral | Live confirmation and recovery paths passed; manual timeout induction is deferred. |
-| Stable Firefox and Safari | Open | Linux engine automation passed; current stable desktop/mobile browsers still require operator checks. |
+| Installed stable Firefox on Windows | Passed | Firefox `154.0.1`; all routes, persistence, exports, wrong-password rejection, and isolated plain/encrypted restores passed. |
+| Stable Safari | Open | WebKit automation passed; current stable Safari on macOS or iOS still requires an operator check. |
 | Physical Android and iOS | Open | Responsive emulation is evidence, not a physical-device result. |
 | Screenshots | Open | Capture after the current interface is declared frozen for RC1. |
 | Independent security review | Not started | No independent reviewer or report is recorded. |
@@ -44,6 +45,12 @@ The following evidence is already repeatable or recorded:
   encrypted backup recovery, wrong-password retry, reload persistence,
   10,000-document Vault paging and search, dark mode, forced colors, reduced
   motion, and 320-CSS-pixel reflow.
+- Installed Mozilla Firefox `154.0.1` on Windows passed hands-on validation on
+  August 28, 2026. Dashboard, Notarize, Verify, Vault, and Wallet loaded; a
+  disposable draft survived reload and a complete browser restart; plain and
+  encrypted backups downloaded and restored into separate empty Private
+  Browsing sessions; and the encrypted restore rejected an incorrect password
+  before accepting the test password.
 - Live TestNet transaction
   `D5QWYDQFAZRL3F7H2I6ELJATMZNI7XYVX3GWR4U6NIGABEEZO3LA` confirmed in round
   `66759442`, and its evidence record persisted after reload and restart.
@@ -64,11 +71,11 @@ named stable browser or a responsive viewport for a physical device.
 | High contrast | Windows Contrast Theme | Native controls, navigation state, focus, errors, and status indicators remain distinguishable without color alone. | Passed - Windows Aquatic contrast theme, August 28, 2026; `forced-colors` activated, focus and controls remained distinguishable, and no horizontal overflow occurred. Restored to `None`. |
 | Zoom and reflow | Stable Chrome, Edge, Firefox, and Safari at 200% and 400% | 200% preserves normal workflow access; 400% reflows to a narrow layout without two-dimensional page scrolling or hidden controls. | Partial - physical Windows Chrome passed at 200% (960 CSS pixels) and 400% (480 CSS pixels) on all five routes with no horizontal overflow or hidden controls; Edge, Firefox, and Safari remain open. |
 | Reduced motion | Physical OS setting | Navigation and feedback remain understandable with nonessential motion suppressed. | Passed - Windows animation effects off, August 28, 2026; `prefers-reduced-motion` activated and visible durations were capped at 0.01 milliseconds. Restored to On. |
-| Stable Firefox | Current stable desktop Firefox | Dashboard, Notarize, Verify, Vault, and Wallet load without console-visible failure; persistence and backup download/restore work. | Open |
+| Stable Firefox | Current stable desktop Firefox | Dashboard, Notarize, Verify, Vault, and Wallet load without console-visible failure; persistence and backup download/restore work. | Passed - Windows Firefox `154.0.1`, August 28, 2026; all five routes loaded, a disposable draft survived reload and full restart, both backup formats downloaded and restored in isolated sessions, and wrong-password rejection passed. |
 | Stable Safari | Current stable Safari on macOS or iOS | Core routes, storage, file selection, download/share behavior, and Wallet handoff work over a secure origin. | Open |
 | Android layout | Representative physical Android phone | All routes fit, 44-pixel targets remain usable, file selection works, and no fixed panel blocks content. | Open |
 | iOS layout | Representative physical iPhone | All routes fit, file selection and backup export work, and the Pera same-device handoff returns to a connected session. | Open |
-| Manual backup UX | Every supported stable browser | Plain and encrypted files can be saved, identified, selected, previewed, rejected with a wrong password, and restored with the correct password. | Open |
+| Manual backup UX | Every supported stable browser | Plain and encrypted files can be saved, identified, selected, previewed, rejected with a wrong password, and restored with the correct password. | Partial - Windows Firefox `154.0.1` passed the complete workflow on August 28, 2026; remaining supported-browser coverage stays open. |
 
 ## Operator procedure
 
