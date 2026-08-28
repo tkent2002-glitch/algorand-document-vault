@@ -105,14 +105,21 @@ function VerifyPage() {
             your local Evidence Vault.
           </p>
 
+          <label htmlFor="verification-document">
+            Document to verify
+          </label>
+
           <input
+            id="verification-document"
             type="file"
             onChange={handleFileChange}
             disabled={processing}
           />
 
           {processing && (
-            <p>Calculating fingerprint and searching the Vault...</p>
+            <p role="status">
+              Calculating fingerprint and searching the Vault...
+            </p>
           )}
         </div>
 
@@ -189,7 +196,7 @@ function VerifyPage() {
           )}
 
           {checked && match && (
-            <div className="verify-success">
+            <div className="verify-success" role="status">
               <strong>Fingerprint Match Found</strong>
 
               <p>
@@ -205,7 +212,7 @@ function VerifyPage() {
           )}
 
           {checked && !match && (
-            <div className="verify-warning">
+            <div className="verify-warning" role="status">
               <strong>No Local Evidence Match Found</strong>
 
               <p>

@@ -102,7 +102,7 @@ function SignSubmitStep({
         <p>{signGuidance}</p>
 
         {signingMessage && (
-          <p>
+          <p role="status">
             <strong>Signing Status:</strong>{" "}
             {signingMessage}
           </p>
@@ -148,7 +148,7 @@ function SignSubmitStep({
         )}
 
         {submissionMessage && (
-          <p>
+          <p role="status">
             <strong>Submission Status:</strong>{" "}
             {submissionMessage}
           </p>
@@ -168,7 +168,7 @@ function SignSubmitStep({
       </div>
 
       {submissionResult && (
-        <div className="notarize-result">
+        <div className="notarize-result" role="status">
           <strong>Algorand Submission</strong>
 
           <p>
@@ -190,7 +190,7 @@ function SignSubmitStep({
       )}
 
       {confirmationMessage && (
-        <div className="notarize-result">
+        <div className="notarize-result" role="status">
           <strong>Confirmation Status</strong>
 
           <p>{confirmationMessage}</p>

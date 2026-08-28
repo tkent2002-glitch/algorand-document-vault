@@ -129,7 +129,9 @@ function VaultImportPreview({
         </p>
       </div>
 
+      <label htmlFor="vault-backup-file">Evidence Vault backup file</label>
       <input
+        id="vault-backup-file"
         type="file"
         accept="application/json"
         onChange={handleFileChange}
@@ -144,6 +146,7 @@ function VaultImportPreview({
       {validation && (
         <div className="vault-import-result">
           <div
+            role="status"
             className={
               validation.valid
                 ? "vault-import-status valid"

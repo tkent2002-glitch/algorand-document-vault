@@ -148,14 +148,22 @@ function VaultPage() {
       </div>
 
       <div className="vault-toolbar">
+        <label className="visually-hidden" htmlFor="vault-search">
+          Search evidence by filename or fingerprint
+        </label>
         <input
+          id="vault-search"
           type="search"
           placeholder="Search by filename or hash..."
           value={searchText}
           onChange={(event) => setSearchText(event.target.value)}
         />
 
+        <label className="visually-hidden" htmlFor="vault-status-filter">
+          Filter evidence by status
+        </label>
         <select
+          id="vault-status-filter"
           value={statusFilter}
           onChange={(event) =>
             setStatusFilter(event.target.value as VaultStatusFilter)
@@ -211,7 +219,7 @@ function VaultPage() {
             ))}
           </aside>
 
-          <main className="evidence-workspace-detail">
+          <div className="evidence-workspace-detail">
             {selectedItem && (
               <>
                 <div className="evidence-workspace-summary">
@@ -288,7 +296,7 @@ function VaultPage() {
                 </div>
               </>
             )}
-          </main>
+          </div>
         </div>
       )}
     </section>

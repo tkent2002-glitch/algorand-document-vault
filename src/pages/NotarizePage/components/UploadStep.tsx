@@ -7,7 +7,12 @@ function UploadStep({ onFileChange }: UploadStepProps) {
     <div className="notarize-result">
       <strong>Select Document</strong>
       <p>Choose the document you want to prepare for notarization.</p>
-      <input type="file" onChange={onFileChange} />
+      <label htmlFor="notarization-document">Document to notarize</label>
+      <input
+        id="notarization-document"
+        type="file"
+        onChange={onFileChange}
+      />
     </div>
   );
 }

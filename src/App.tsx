@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Header from "./components/Header/Header";
 import Navigation from "./components/Navigation/Navigation";
@@ -14,13 +14,42 @@ type Page = "dashboard" | "notarize" | "verify" | "vault" | "wallet";
 
 function App() {
   const [activePage, setActivePage] = useState<Page>("dashboard");
+  const mainRef = useRef<HTMLElement>(null);
+  const initialRender = useRef(true);
+
+  useEffect(() => {
+    const pageNames: Record<Page, string> = {
+      dashboard: "Dashboard",
+      notarize: "Notarize",
+      verify: "Verify",
+      vault: "Evidence Vault",
+      wallet: "Wallet",
+    };
+
+    document.title = `${pageNames[activePage]} | Algorand Document Vault`;
+
+    if (initialRender.current) {
+      initialRender.current = false;
+      return;
+    }
+
+    mainRef.current?.focus();
+  }, [activePage]);
 
   return (
     <div className="app">
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
       <Header />
       <Navigation activePage={activePage} onNavigate={setActivePage} />
 
-      <main className="app-main">
+      <main
+        className="app-main"
+        id="main-content"
+        ref={mainRef}
+        tabIndex={-1}
+      >
         {activePage === "dashboard" && (
           <DashboardPage onNavigate={setActivePage} />
         )}

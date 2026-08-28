@@ -7,10 +7,18 @@
 
 .app-header h1 {
   margin: 0;
-  font-size: 3rem;
+  color: white;
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1.1;
 }
 
 .app-header p {
   margin-top: 12px;
-  font-size: 1.4rem;
+  font-size: clamp(1rem, 3vw, 1.4rem);
+}
+
+@media (max-width: 520px) {
+  .app-header {
+    padding: 1rem;
+  }
 }

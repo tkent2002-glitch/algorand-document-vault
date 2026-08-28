@@ -106,7 +106,9 @@ function WalletPage() {
         <div className="wallet-panel-header">
           <div>
             <strong>Connection Status</strong>
-            <p>{message}</p>
+            <p role="status" aria-live="polite">
+              {message}
+            </p>
           </div>
 
           <span
