@@ -70,9 +70,15 @@ Manual responsive evidence recorded August 28, 2026:
   overflow at 390 x 844, 768 x 1024, and 1440 x 900 CSS-pixel viewports.
 - Visible buttons, inputs, and selects met the 44-pixel minimum in the tested
   mobile viewport.
-- The active session validated the light theme only. Dark mode, forced-colors
-  high contrast, reduced motion, and browser zoom still require real-mode
-  checks; viewport resizing is not treated as a substitute.
+- The active session validated the light theme. Automated Chromium, Edge, and
+  WebKit checks rendered every page in dark mode without overflow, verified
+  reduced-motion durations do not exceed 0.01 milliseconds, and confirmed
+  320-CSS-pixel reflow preserves 44-pixel controls.
+- Automated forced-colors checks retained visible keyboard focus in Chromium
+  and Edge. WebKit forced-colors emulation is unavailable and explicitly
+  skipped.
+- Real browser zoom and physical operating-system visual modes remain manual
+  checks; viewport resizing and media emulation are not treated as substitutes.
 - Responsive viewport checks do not replace manual testing in stable Chrome,
   Firefox, Safari, or physical Android and iOS devices.
 - The responsive geometry passed, but the dashboard action buttons visually
