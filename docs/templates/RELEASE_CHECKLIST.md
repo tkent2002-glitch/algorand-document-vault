@@ -43,7 +43,7 @@ live Pera Wallet workflow can be completed.
 - [ ] Test the current stable Safari release on macOS or iOS.
 - [ ] Test representative Android and iOS mobile layouts.
 - [x] Verify IndexedDB persistence after reload in clean Chromium, Edge, and WebKit contexts.
-- [ ] Verify IndexedDB persistence after a full browser restart.
+- [x] Verify IndexedDB persistence after a full browser restart.
 - [x] Automate plain and encrypted backup download/restore in Chromium, Edge, and WebKit.
 - [ ] Manually verify backup download and restore UX in each supported browser.
 
@@ -90,8 +90,22 @@ Live validation evidence recorded August 28, 2026:
 - [x] Corrupted persistence and conflicting backup records fail closed.
 - [x] Automate plain and encrypted clean-profile backup round trips, including
   wrong-password rejection and reload persistence.
-- [ ] Perform a manual plain-backup round trip in a clean browser profile.
-- [ ] Perform a manual encrypted-backup round trip in a clean browser profile.
+- [x] Perform a manual plain-backup round trip in a clean browser profile.
+- [x] Perform a manual encrypted-backup round trip in a clean browser profile.
+
+Manual backup evidence recorded August 28, 2026:
+
+- A plain backup exported five evidence records, exposed no original document
+  content, validated successfully in an isolated empty browser storage origin,
+  and restored all five records.
+- An encrypted backup exposed neither known filenames nor original document
+  content in plaintext. The restore rejected an incorrect password, accepted
+  the correct password, validated the same five records, and restored them.
+- Both restored Vaults retained five records, four unique documents, and the
+  confirmed TestNet record after reload.
+- The original Vault retained five records, four unique documents, four drafts,
+  and one confirmed record after Codex and its in-app browser were fully closed,
+  reopened, and the local development server was restarted on the same origin.
 
 ## Documentation and security
 
