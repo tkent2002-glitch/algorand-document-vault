@@ -18,7 +18,7 @@ the automated suite passes.
 | Release identity and TestNet boundary | Passed | Version and network fail-closed checks are automated. |
 | Unit, lint, build, and release packaging | Passed | Local gates and both pull-request CI jobs passed. |
 | Installed stable Chrome on Windows | Passed | Chrome `151.0.7922.174`; seven production-preview tests passed. |
-| Accessibility automation and Narrator | Passed with manual gates open | Keyboard coverage, real zoom, and physical visual modes remain open. |
+| Accessibility automation and Windows manual validation | Passed with browser/device gates open | Narrator, keyboard-only workflows, real Chrome zoom, Windows light/dark, contrast theme, and reduced motion passed. Firefox, Safari, and physical mobile coverage remain open. |
 | Algorand TestNet and Pera Wallet | Passed with one documented deferral | Live confirmation and recovery paths passed; manual timeout induction is deferred. |
 | Stable Firefox and Safari | Open | Linux engine automation passed; current stable desktop/mobile browsers still require operator checks. |
 | Physical Android and iOS | Open | Responsive emulation is evidence, not a physical-device result. |
@@ -59,11 +59,11 @@ named stable browser or a responsive viewport for a physical device.
 
 | Check | Required environment | Acceptance criteria | Status |
 | --- | --- | --- | --- |
-| Keyboard-only workflow pass | Stable Chrome or Edge on Windows | Every route, field, file control, dialog, validation error, and primary action is reachable and operable; focus order is logical and visible; no trap occurs. Do not disconnect the funded wallet merely to complete the pass. | Open |
-| Light and dark modes | Windows plus supported mobile OS | Text, controls, selected states, errors, and focus remain readable; no content disappears or overflows. | Open |
-| High contrast | Windows Contrast Theme | Native controls, navigation state, focus, errors, and status indicators remain distinguishable without color alone. | Open |
-| Zoom and reflow | Stable Chrome, Edge, Firefox, and Safari at 200% and 400% | 200% preserves normal workflow access; 400% reflows to a narrow layout without two-dimensional page scrolling or hidden controls. | Open |
-| Reduced motion | Physical OS setting | Navigation and feedback remain understandable with nonessential motion suppressed. | Open |
+| Keyboard-only workflow pass | Stable Chrome or Edge on Windows | Every route, field, file control, dialog, validation error, and primary action is reachable and operable; focus order is logical and visible; no trap occurs. Do not disconnect the funded wallet merely to complete the pass. | Passed - Windows Chrome, August 28, 2026; all five routes and workflow controls passed with no trap, and the funded wallet remained connected. |
+| Light and dark modes | Windows plus supported mobile OS | Text, controls, selected states, errors, and focus remain readable; no content disappears or overflows. | Partial - physical Windows Chrome passed light and dark modes on August 28, 2026; supported mobile OS checks remain open. |
+| High contrast | Windows Contrast Theme | Native controls, navigation state, focus, errors, and status indicators remain distinguishable without color alone. | Passed - Windows Aquatic contrast theme, August 28, 2026; `forced-colors` activated, focus and controls remained distinguishable, and no horizontal overflow occurred. Restored to `None`. |
+| Zoom and reflow | Stable Chrome, Edge, Firefox, and Safari at 200% and 400% | 200% preserves normal workflow access; 400% reflows to a narrow layout without two-dimensional page scrolling or hidden controls. | Partial - physical Windows Chrome passed at 200% (960 CSS pixels) and 400% (480 CSS pixels) on all five routes with no horizontal overflow or hidden controls; Edge, Firefox, and Safari remain open. |
+| Reduced motion | Physical OS setting | Navigation and feedback remain understandable with nonessential motion suppressed. | Passed - Windows animation effects off, August 28, 2026; `prefers-reduced-motion` activated and visible durations were capped at 0.01 milliseconds. Restored to On. |
 | Stable Firefox | Current stable desktop Firefox | Dashboard, Notarize, Verify, Vault, and Wallet load without console-visible failure; persistence and backup download/restore work. | Open |
 | Stable Safari | Current stable Safari on macOS or iOS | Core routes, storage, file selection, download/share behavior, and Wallet handoff work over a secure origin. | Open |
 | Android layout | Representative physical Android phone | All routes fit, 44-pixel targets remain usable, file selection works, and no fixed panel blocks content. | Open |

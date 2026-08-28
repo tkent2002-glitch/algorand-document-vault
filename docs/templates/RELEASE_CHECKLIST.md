@@ -32,8 +32,8 @@ live Pera Wallet workflow can be completed.
 - [x] Dynamic wallet and transaction outcomes use live status semantics.
 - [x] Accessibility boundary regressions are covered by automated tests.
 - [x] Complete a manual screen-reader pass.
-- [ ] Complete keyboard-only testing for every workflow.
-- [ ] Verify light, dark, high-contrast, zoom, and reduced-motion modes.
+- [x] Complete keyboard-only testing for every workflow.
+- [x] Verify light, dark, high-contrast, zoom, and reduced-motion modes.
 
 Manual accessibility evidence recorded August 28, 2026:
 
@@ -46,6 +46,26 @@ Manual accessibility evidence recorded August 28, 2026:
   Dashboard call-to-action, navigation, Notarize and Verify file controls,
   Vault backup controls, search and filter order, evidence-record selection,
   and Wallet action focus. The live wallet was not disconnected.
+- Installed Chrome on Windows passed keyboard-only navigation across Dashboard,
+  Notarize, Verify, Vault, and Wallet. Focus order was logical, focus remained
+  visible, disabled signing controls were skipped, and no keyboard trap was
+  encountered.
+- Physical Chrome zoom at 200% (960 CSS pixels wide) and 400% (480 CSS pixels
+  wide) preserved every workflow without horizontal page overflow, clipped
+  controls, or controls positioned outside the viewport. Zoom was restored to
+  100% after the test.
+- The physical Windows light and dark modes kept Dashboard, Wallet, and Vault
+  text, form controls, status treatments, and navigation readable without
+  horizontal overflow. Windows was restored to light mode after the test.
+- The Windows Aquatic contrast theme activated `forced-colors`, retained
+  distinguishable navigation and native controls, and exposed a visible
+  three-pixel focus outline on the Vault export action. Dashboard and Vault had
+  no horizontal overflow or controls outside the viewport. The contrast theme
+  was restored to `None` after the test.
+- Turning off Windows animation effects activated `prefers-reduced-motion`; the
+  longest visible transition or animation duration was 0.01 milliseconds and
+  the workflows remained understandable. Animation effects were restored after
+  the test.
 - Windows Narrator announced the primary navigation and current Wallet state,
   the Pera Wallet heading, and the main landmark. An initial minimum-password
   validation announcement failed because the status region was conditionally
