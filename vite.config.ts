@@ -4,7 +4,11 @@ import { configDefaults, defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [react()],
   test: {
-    exclude: [...configDefaults.exclude, "tests/e2e/**"],
+    exclude: [
+      ...configDefaults.exclude,
+      "tests/e2e/**",
+      "tools/release/**/*.test.mjs",
+    ],
   },
   resolve: {
     alias: {

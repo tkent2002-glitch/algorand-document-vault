@@ -1,7 +1,7 @@
 {
   "name": "algorand-document-vault",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0-alpha",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,12 +10,13 @@
     "preview": "vite preview",
     "release:package": "npm run build && node tools/release/package-artifact.mjs",
     "security:production": "npm audit --omit=dev --audit-level=high",
-    "test": "vitest run",
+    "test": "vitest run && node --test tools/release/*.test.mjs",
     "test:artifact": "npm run release:package && playwright test --config=playwright.artifact.config.ts",
     "test:browser": "npm run build && playwright test",
     "test:browser:ci": "npm run build && playwright test --project=chromium --project=firefox --project=webkit",
     "test:browser:core": "npm run build && playwright test --project=chromium --project=edge --project=webkit",
-    "verify:tracked-content": "node tools/release/verify-tracked-content.mjs"
+    "verify:tracked-content": "node tools/release/verify-tracked-content.mjs",
+    "verify:release-readiness": "node tools/release/verify-release-readiness.mjs"
   },
   "dependencies": {
     "@perawallet/connect": "^1.6.0",
