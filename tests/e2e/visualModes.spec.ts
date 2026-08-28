@@ -9,15 +9,17 @@ const PAGE_NAMES = [
 ] as const;
 
 async function expectNoHorizontalOverflow(page: Page) {
+  // Chromium on Linux can round fractional layout boundaries by one CSS pixel.
+  // Larger values still represent user-visible horizontal overflow.
   await expect
     .poll(() =>
       page.evaluate(
         () =>
-          document.documentElement.scrollWidth <=
+          document.documentElement.scrollWidth -
           document.documentElement.clientWidth
       )
     )
-    .toBe(true);
+    .toBeLessThanOrEqual(1);
 }
 
 test("renders every page in dark mode without overflow", async ({ page }) => {
