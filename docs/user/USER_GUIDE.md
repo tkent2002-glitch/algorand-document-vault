@@ -14,7 +14,12 @@ Selecting a document recomputes its fingerprint and searches the local Evidence 
 
 ## Vault
 
-The Vault groups evidence history by document fingerprint and shows status, timestamps, proof details, transaction metadata, backup export, and safe import previews.
+The Vault groups evidence history by document fingerprint and shows status,
+timestamps, proof details, transaction metadata, backup export, and safe import
+previews. Search, status filtering, and sorting apply across the document index.
+The index displays up to 50 documents per page, while long histories display up
+to 25 records per page. On smaller screens, select a document to open its detail
+view and use **Back to document list** to return.
 
 Use **Export Plain Backup** for a readable JSON backup with integrity metadata,
 or enter and confirm a password before selecting **Export Encrypted Backup**.

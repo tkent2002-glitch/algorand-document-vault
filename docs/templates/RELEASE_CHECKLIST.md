@@ -163,12 +163,24 @@ Manual backup evidence recorded August 28, 2026:
 
 ## Performance and packaging
 
-- [ ] Establish and test a representative large Evidence Vault dataset.
+- [x] Establish and test a representative large Evidence Vault dataset.
 - [ ] Record startup, search, hashing, backup, and restore performance.
 - [x] Investigate the current large JavaScript chunk warning.
 - [x] Investigate the browser `buffer.Buffer` compatibility warning.
 - [ ] Verify production hosting configuration and direct-load behavior.
 - [ ] Smoke-test the exact packaged release artifact.
+
+Large-Vault evidence recorded August 28, 2026:
+
+- A generated 10,000-document IndexedDB dataset rendered only 50 document
+  controls per page, advanced correctly to documents 51–100, and narrowed to a
+  single filename through search.
+- Document history is bounded to 25 records per page. The document index and
+  desktop details use independent scroll regions; mobile opens details as a
+  separate view with an explicit return to the document list.
+- Unit coverage validates grouping, filtering, sorting, and the first and final
+  pages of the 10,000-document dataset. Chromium browser coverage validates the
+  complete paging, search, and mobile detail-navigation flow.
 
 ## Release approval
 
