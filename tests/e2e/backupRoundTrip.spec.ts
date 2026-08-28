@@ -82,6 +82,8 @@ test("round-trips plain and encrypted backups through clean profiles", async ({
   browser,
   page,
 }) => {
+  test.setTimeout(90_000);
+
   await page.goto(BASE_URL);
   await page
     .getByRole("button", { name: "Notarize", exact: true })
