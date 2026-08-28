@@ -26,7 +26,7 @@ export class EvidenceBackupImportService {
       existingRecords.map((record) => [record.id, record])
     );
 
-    const mergedRecords = [...existingRecords];
+    const recordsToImport: EvidenceRecord[] = [];
 
     let importedRecords = 0;
     let skippedExistingRecords = 0;
@@ -45,7 +45,7 @@ export class EvidenceBackupImportService {
         continue;
       }
 
-      mergedRecords.unshift(record);
+      recordsToImport.push(record);
       existingIds.add(record.id);
       recordsById.set(record.id, record);
       importedRecords += 1;
@@ -55,7 +55,7 @@ export class EvidenceBackupImportService {
       importedRecords,
       skippedExistingRecords,
       blockedConflictingRecords,
-      records: mergedRecords,
+      records: [...recordsToImport.reverse(), ...existingRecords],
     };
   }
 }

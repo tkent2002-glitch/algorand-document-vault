@@ -4,7 +4,10 @@ test("keeps a 10,000-document Vault bounded and navigable", async ({
   browserName,
   page,
 }) => {
-  test.skip(browserName !== "chromium", "Large-dataset UI coverage runs once in Chromium.");
+  test.skip(
+    browserName !== "chromium",
+    "Large-dataset UI coverage requires a Chromium-engine browser."
+  );
 
   await page.goto("/");
   await expect(
@@ -12,6 +15,13 @@ test("keeps a 10,000-document Vault bounded and navigable", async ({
       name: "Cryptographic document integrity, anchored on Algorand.",
     })
   ).toBeVisible();
+  const baselineHeapBytes = await page.evaluate(() => {
+    const measuredPerformance = performance as Performance & {
+      memory?: { usedJSHeapSize: number };
+    };
+
+    return measuredPerformance.memory?.usedJSHeapSize ?? null;
+  });
 
   await page.evaluate(async () => {
     const database = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -60,6 +70,7 @@ test("keeps a 10,000-document Vault bounded and navigable", async ({
     database.close();
   });
 
+  const startupStartedAt = Date.now();
   await page.reload();
   await page.getByRole("button", { name: "Vault", exact: true }).click();
   await expect(
@@ -67,20 +78,59 @@ test("keeps a 10,000-document Vault bounded and navigable", async ({
   ).toBeVisible();
 
   await expect(page.getByText("Showing 1–50 of 10,000 documents")).toBeVisible();
+  const largeVaultReadyMs = Date.now() - startupStartedAt;
+  const largeVaultHeapBytes = await page.evaluate(() => {
+    const measuredPerformance = performance as Performance & {
+      memory?: { usedJSHeapSize: number };
+    };
+
+    return measuredPerformance.memory?.usedJSHeapSize ?? null;
+  });
   await expect(page.locator(".evidence-index-item")).toHaveCount(50);
 
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page.getByText("Showing 51–100 of 10,000 documents")).toBeVisible();
   await expect(page.locator(".evidence-index-item")).toHaveCount(50);
 
-  await page.getByRole("searchbox", {
+  const searchbox = page.getByRole("searchbox", {
     name: "Search evidence by filename or fingerprint",
-  }).fill("scale-document-09999");
+  });
+  const searchStartedAt = Date.now();
+  await searchbox.fill("scale-document-09999");
   await expect(page.getByText("Showing 1–1 of 1 documents")).toBeVisible();
+  const searchReadyMs = Date.now() - searchStartedAt;
   await expect(page.locator(".evidence-index-item")).toHaveCount(1);
 
+  await searchbox.fill("");
+  const sortStartedAt = Date.now();
+  await page.getByRole("combobox", { name: "Sort evidence documents" }).selectOption(
+    "filename"
+  );
+  await expect(page.locator(".evidence-index-item").first()).toContainText(
+    "scale-document-00000.pdf"
+  );
+  const sortReadyMs = Date.now() - sortStartedAt;
+
+  console.info("10,000-record browser performance (milliseconds):", {
+    largeVaultReadyMs,
+    searchReadyMs,
+    sortReadyMs,
+    heapDeltaMiB:
+      baselineHeapBytes === null || largeVaultHeapBytes === null
+        ? "unavailable"
+        : (largeVaultHeapBytes - baselineHeapBytes) / 1024 / 1024,
+    usedHeapMiB:
+      largeVaultHeapBytes === null
+        ? "unavailable"
+        : largeVaultHeapBytes / 1024 / 1024,
+  });
+
+  expect(largeVaultReadyMs).toBeLessThan(5_000);
+  expect(searchReadyMs).toBeLessThan(2_000);
+  expect(sortReadyMs).toBeLessThan(2_000);
+
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.locator(".evidence-index-item").click();
+  await page.locator(".evidence-index-item").first().click();
   await expect(
     page.getByRole("button", { name: "Back to document list" })
   ).toBeVisible();

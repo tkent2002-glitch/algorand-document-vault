@@ -164,7 +164,7 @@ Manual backup evidence recorded August 28, 2026:
 ## Performance and packaging
 
 - [x] Establish and test a representative large Evidence Vault dataset.
-- [ ] Record startup, search, hashing, backup, and restore performance.
+- [x] Record startup, search, hashing, backup, and restore performance.
 - [x] Investigate the current large JavaScript chunk warning.
 - [x] Investigate the browser `buffer.Buffer` compatibility warning.
 - [ ] Verify production hosting configuration and direct-load behavior.
@@ -179,8 +179,12 @@ Large-Vault evidence recorded August 28, 2026:
   desktop details use independent scroll regions; mobile opens details as a
   separate view with an explicit return to the document list.
 - Unit coverage validates grouping, filtering, sorting, and the first and final
-  pages of the 10,000-document dataset. Chromium browser coverage validates the
-  complete paging, search, and mobile detail-navigation flow.
+  pages of the 10,000-document dataset. Chromium and Edge browser coverage
+  validates the complete paging, search, and mobile detail-navigation flow.
+- Repeatable storage, browser, hashing, backup, encryption, validation, and
+  restore measurements are recorded in
+  `docs/performance/LARGE_VAULT_PERFORMANCE.md`. The audit also replaced two
+  quadratic backup-preview/import paths with linear-time implementations.
 
 ## Release approval
 

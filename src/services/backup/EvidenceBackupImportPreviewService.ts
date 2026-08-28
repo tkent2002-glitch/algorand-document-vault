@@ -15,6 +15,9 @@ export class EvidenceBackupImportPreviewService {
     existingRecords: EvidenceRecord[]
   ): EvidenceBackupImportPreview {
     const existingIds = new Set(existingRecords.map((record) => record.id));
+    const existingRecordsById = new Map(
+      existingRecords.map((record) => [record.id, record])
+    );
     const existingHashes = new Set(
       existingRecords.map((record) => record.hashValue)
     );
@@ -37,9 +40,7 @@ export class EvidenceBackupImportPreviewService {
         newRecords += 1;
       }
 
-      const matchingExistingRecord = existingRecords.find(
-        (existingRecord) => existingRecord.id === record.id
-      );
+      const matchingExistingRecord = existingRecordsById.get(record.id);
 
       if (
         matchingExistingRecord &&
