@@ -57,7 +57,8 @@ live Pera Wallet workflow can be completed.
 - [x] Complete a live sign, submit, and confirmation workflow.
 - [x] Verify the confirmed transaction and proof note in a TestNet explorer.
 - [x] Verify the confirmed evidence record persists after reload.
-- [ ] Exercise wallet cancellation, disconnect, timeout, and retry behavior manually.
+- [x] Exercise wallet cancellation, disconnect, and signing retry behavior manually.
+- [ ] Exercise wallet or confirmation timeout behavior manually.
 
 Live validation evidence recorded August 28, 2026:
 
@@ -66,6 +67,10 @@ Live validation evidence recorded August 28, 2026:
 - Pera Explorer displayed the `adv-proof-v1` document-integrity note and the
   expected zero-ALGO self-payment with a `0.001 ALGO` TestNet fee.
 - The confirmed local evidence record and Pera session both survived reload.
+- Disconnecting and reconnecting Pera preserved the confirmed evidence record.
+- A rejected signature request produced recovery guidance, kept submission
+  disabled, and allowed a second signing attempt; the retry was also rejected
+  without creating signed bytes or broadcasting a transaction.
 
 ## Data safety and recovery
 
