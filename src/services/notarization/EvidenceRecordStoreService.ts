@@ -1,4 +1,4 @@
-﻿import { StorageConfiguration } from "../../storage/StorageConfiguration";
+import { StorageConfiguration } from "../../storage/StorageConfiguration";
 import { Logger } from "../../core/Logger";
 import type { EvidenceRecord } from "./EvidenceRecordService";
 
@@ -15,9 +15,9 @@ export class EvidenceRecordStoreService {
 
     try {
       return JSON.parse(raw) as EvidenceRecord[];
-    } catch (error) {
+    } catch {
       Logger.error("Failed to read evidence records from local storage.");
-      return [];
+      throw new Error("Stored evidence records are unreadable.");
     }
   }
 
@@ -48,5 +48,3 @@ export class EvidenceRecordStoreService {
     localStorage.removeItem(STORAGE_KEY);
   }
 }
-
-
