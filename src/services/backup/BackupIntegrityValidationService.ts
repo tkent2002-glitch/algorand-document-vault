@@ -1,14 +1,14 @@
-﻿import type { BackupIntegrityMetadata } from "./BackupIntegrityService";
+import type { BackupIntegrityMetadata } from "./BackupIntegrityService";
 import { BackupIntegrityService } from "./BackupIntegrityService";
 import type { EvidenceBackupFile } from "./EvidenceBackupValidationService";
 import { EvidenceBackupValidationService } from "./EvidenceBackupValidationService";
 
-export type TrustedEvidenceBackupFile = EvidenceBackupFile & {
+export type IntegrityProtectedEvidenceBackupFile = EvidenceBackupFile & {
   integrity?: BackupIntegrityMetadata;
 };
 
-export type BackupTrustResult = {
-  trusted: boolean;
+export type BackupIntegrityValidationResult = {
+  valid: boolean;
   structureValid: boolean;
   integrityPresent: boolean;
   integrityVerified: boolean;
@@ -16,17 +16,18 @@ export type BackupTrustResult = {
 };
 
 function removeIntegrity(
-  backup: TrustedEvidenceBackupFile
+  backup: IntegrityProtectedEvidenceBackupFile
 ): EvidenceBackupFile {
-  const { integrity: _integrity, ...payload } = backup;
+  const payload = { ...backup };
+  delete payload.integrity;
 
   return payload;
 }
 
-export class BackupTrustService {
+export class BackupIntegrityValidationService {
   static async evaluate(
-    backup: TrustedEvidenceBackupFile
-  ): Promise<BackupTrustResult> {
+    backup: IntegrityProtectedEvidenceBackupFile
+  ): Promise<BackupIntegrityValidationResult> {
     const validation = EvidenceBackupValidationService.validate(backup);
     const errors = [...validation.errors];
 
@@ -48,7 +49,7 @@ export class BackupTrustService {
     }
 
     return {
-      trusted:
+      valid:
         validation.valid &&
         integrityPresent &&
         integrityVerified,
@@ -59,3 +60,6 @@ export class BackupTrustService {
     };
   }
 }
+
+
+

@@ -1,7 +1,7 @@
 # Quick Start
 
 1. Start the application with `npm run dev`.
-2. Open **Wallet** and connect a Pera Wallet TestNet account.
+2. Open **Wallet** and connect a Pera Wallet account configured for TestNet.
 3. Open **Notarize** and select a document.
 4. Review the generated SHA-256 fingerprint and proof payload.
 5. Approve the transaction in Pera Wallet.
@@ -17,3 +17,13 @@ Use the Vault backup controls to export either:
 - a password-protected AES-GCM backup.
 
 Store backup passwords safely. They are not recoverable by the application.
+
+## TestNet validation status
+
+The desktop QR-to-Pera Mobile connection, same-device mobile handoff, signing,
+TestNet submission, confirmation, explorer proof note, and persisted evidence
+record were validated live on August 28, 2026. Same-device WalletConnect must
+run in a secure HTTPS browser context because it requires Web Crypto. Do not
+import a mobile recovery phrase into Pera Web merely to test this application.
+Use only valueless TestNet ALGO, and never enter wallet recovery material into
+this application or a TestNet dispenser.

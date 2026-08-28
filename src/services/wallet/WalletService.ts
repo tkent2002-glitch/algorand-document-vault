@@ -1,30 +1,25 @@
 import { PeraWalletConnect } from "@perawallet/connect";
 import type { Transaction } from "algosdk";
+import { installBrowserPolyfills } from "../../browser/installBrowserPolyfills";
 import type { WalletConnection } from "../../types/wallet";
+import { Logger } from "../../core";
+
+installBrowserPolyfills();
 
 export class WalletService {
-  private static readonly pera = new PeraWalletConnect({
-    shouldShowSignTxnToast: false,
-  });
+  private static pera: PeraWalletConnect | undefined;
 
-  static async reconnect(): Promise<WalletConnection> {
-    const accounts = await WalletService.pera.reconnectSession();
+  private static getPera(): PeraWalletConnect {
+    WalletService.pera ??= new PeraWalletConnect({
+      shouldShowSignTxnToast: false,
+    });
 
-    if (accounts.length > 0) {
-      return {
-        status: "connected",
-        address: accounts[0],
-      };
-    }
-
-    return {
-      status: "disconnected",
-    };
+    return WalletService.pera;
   }
 
-  static async connect(): Promise<WalletConnection> {
+  static async reconnect(): Promise<WalletConnection> {
     try {
-      const accounts = await WalletService.pera.connect();
+      const accounts = await WalletService.getPera().reconnectSession();
 
       if (accounts.length > 0) {
         return {
@@ -36,8 +31,31 @@ export class WalletService {
       return {
         status: "disconnected",
       };
-    } catch (error) {
-      console.error("Pera Wallet connection failed:", error);
+    } catch {
+      Logger.error("Pera Wallet session restoration failed.");
+
+      return {
+        status: "error",
+      };
+    }
+  }
+
+  static async connect(): Promise<WalletConnection> {
+    try {
+      const accounts = await WalletService.getPera().connect();
+
+      if (accounts.length > 0) {
+        return {
+          status: "connected",
+          address: accounts[0],
+        };
+      }
+
+      return {
+        status: "disconnected",
+      };
+    } catch {
+      Logger.error("Pera Wallet connection failed.");
 
       return {
         status: "error",
@@ -46,23 +64,32 @@ export class WalletService {
   }
 
   static async disconnect(): Promise<WalletConnection> {
-    await WalletService.pera.disconnect();
+    try {
+      await WalletService.getPera().disconnect();
 
-    return {
-      status: "disconnected",
-    };
+      return {
+        status: "disconnected",
+      };
+    } catch {
+      Logger.error("Pera Wallet disconnection failed.");
+
+      return {
+        status: "error",
+      };
+    }
   }
 
   static isConnected(): boolean {
-    return WalletService.pera.isConnected;
+    return WalletService.getPera().isConnected;
   }
 
   static async signSingleTransaction(
     transaction: Transaction
   ): Promise<Uint8Array> {
-    const signedTransactions = await WalletService.pera.signTransaction([
-      [{ txn: transaction }],
-    ]);
+    const signedTransactions =
+      await WalletService.getPera().signTransaction([
+        [{ txn: transaction }],
+      ]);
 
     return signedTransactions[0];
   }

@@ -8,17 +8,26 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run"
+    "release:package": "npm run build && node tools/release/package-artifact.mjs",
+    "security:production": "npm audit --omit=dev --audit-level=high",
+    "test": "vitest run",
+    "test:artifact": "npm run release:package && playwright test --config=playwright.artifact.config.ts",
+    "test:browser": "npm run build && playwright test",
+    "test:browser:ci": "npm run build && playwright test --project=chromium --project=firefox --project=webkit",
+    "test:browser:core": "npm run build && playwright test --project=chromium --project=edge --project=webkit",
+    "verify:tracked-content": "node tools/release/verify-tracked-content.mjs"
   },
   "dependencies": {
-    "@perawallet/connect": "^1.5.2",
+    "@perawallet/connect": "^1.6.0",
     "algosdk": "^3.6.0",
+    "buffer": "^6.0.3",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.62.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^24.13.2",

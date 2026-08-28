@@ -18,11 +18,16 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
 - Backup integrity and trust verification
 - Algorand SDK and Pera Wallet integration foundations
 - Automated tests across crypto, backups, repositories, storage, security, and workflows
+- Transaction-policy validation before wallet signing
+- Submission transaction-ID integrity validation
+- Accessibility labels, landmarks, focus management, responsive navigation, and regression tests
+- CI lint enforcement
 
 ### In progress
 
 - Full Algorand TestNet end-to-end notarization validation
-- Wallet and network error hardening
+- Current Pera Mobile connection handoff validation
+- Cross-browser, screen-reader, and performance validation
 - Public alpha release preparation
 
 ## [0.1.0-alpha] - Planned

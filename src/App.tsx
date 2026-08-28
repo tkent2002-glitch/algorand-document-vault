@@ -1,34 +1,101 @@
-import { useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import Header from "./components/Header/Header";
 import Navigation from "./components/Navigation/Navigation";
 import DashboardPage from "./pages/DashboardPage/DashboardPage";
-import NotarizePage from "./pages/NotarizePage/NotarizePage";
-import VerifyPage from "./pages/VerifyPage/VerifyPage";
-import VaultPage from "./pages/VaultPage/VaultPage";
-import WalletPage from "./pages/WalletPage/WalletPage";
 
 import "./App.css";
 
 type Page = "dashboard" | "notarize" | "verify" | "vault" | "wallet";
 
+const NotarizePage = lazy(
+  () => import("./pages/NotarizePage/NotarizePage")
+);
+const VerifyPage = lazy(
+  () => import("./pages/VerifyPage/VerifyPage")
+);
+const VaultPage = lazy(
+  () => import("./pages/VaultPage/VaultPage")
+);
+const WalletPage = lazy(
+  () => import("./pages/WalletPage/WalletPage")
+);
+
 function App() {
   const [activePage, setActivePage] = useState<Page>("dashboard");
+  const mainRef = useRef<HTMLElement>(null);
+  const initialRender = useRef(true);
+
+  useEffect(() => {
+    const pageNames: Record<Page, string> = {
+      dashboard: "Dashboard",
+      notarize: "Notarize",
+      verify: "Verify",
+      vault: "Evidence Vault",
+      wallet: "Wallet",
+    };
+
+    document.title = `${pageNames[activePage]} | Algorand Document Vault`;
+
+    if (initialRender.current) {
+      initialRender.current = false;
+      return;
+    }
+
+    mainRef.current?.focus();
+  }, [activePage]);
 
   return (
     <div className="app">
-      <Header />
-      <Navigation activePage={activePage} onNavigate={setActivePage} />
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
 
-      <main className="app-main">
-        {activePage === "dashboard" && (
-          <DashboardPage onNavigate={setActivePage} />
-        )}
-        {activePage === "notarize" && <NotarizePage />}
-        {activePage === "verify" && <VerifyPage />}
-        {activePage === "vault" && <VaultPage />}
-        {activePage === "wallet" && <WalletPage />}
-      </main>
+      <aside className="app-sidebar">
+        <Header />
+        <Navigation activePage={activePage} onNavigate={setActivePage} />
+
+        <div className="app-sidebar-boundary" aria-label="Workspace boundaries">
+          <div>
+            <span className="app-status-dot" aria-hidden="true" />
+            <span>Algorand TestNet</span>
+          </div>
+          <p>Evidence metadata stays on this device.</p>
+        </div>
+      </aside>
+
+      <div className="app-workspace">
+        <div className="app-topbar" aria-label="Workspace status">
+          <span>Public alpha workspace</span>
+          <div>
+            <span className="app-topbar-pill">TestNet only</span>
+            <span className="app-topbar-pill">Documents stay local</span>
+          </div>
+        </div>
+
+        <main
+          className="app-main"
+          id="main-content"
+          ref={mainRef}
+          tabIndex={-1}
+        >
+          <Suspense fallback={<p role="status">Loading page...</p>}>
+            {activePage === "dashboard" && (
+              <DashboardPage onNavigate={setActivePage} />
+            )}
+            {activePage === "notarize" && <NotarizePage />}
+            {activePage === "verify" && <VerifyPage />}
+            {activePage === "vault" && <VaultPage />}
+            {activePage === "wallet" && <WalletPage />}
+          </Suspense>
+        </main>
+      </div>
     </div>
   );
 }

@@ -56,7 +56,7 @@
 
 .vault-toolbar {
   display: grid;
-  grid-template-columns: 1fr 220px;
+  grid-template-columns: minmax(260px, 1fr) 190px 220px;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -67,7 +67,7 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 0.75rem 0.9rem;
-  background: white;
+  background: var(--surface);
   color: var(--text-h);
 }
 
@@ -90,6 +90,21 @@
   top: 1rem;
 }
 
+.evidence-index-list {
+  display: grid;
+  gap: 0.65rem;
+  max-height: min(62vh, 720px);
+  padding: 0.15rem 0.35rem 0.15rem 0.15rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.evidence-index-header .evidence-index-range {
+  color: var(--text-h);
+  font-weight: 700;
+}
+
 .evidence-index h3,
 .evidence-workspace-summary h3,
 .evidence-history h3 {
@@ -107,7 +122,7 @@
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 1rem;
-  background: white;
+  background: var(--surface);
   color: var(--text-h);
 }
 
@@ -133,6 +148,46 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.vault-mobile-back {
+  display: none;
+}
+
+.vault-pagination {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, auto) 1fr minmax(5.5rem, auto);
+  gap: 0.6rem;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.vault-pagination span {
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.vault-pagination button,
+.vault-mobile-back {
+  cursor: pointer;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.vault-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .evidence-workspace-summary {
@@ -162,7 +217,7 @@
   padding: 0.8rem;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: white;
+  background: var(--surface);
 }
 
 .evidence-history-item strong {
@@ -181,6 +236,24 @@
 
   .evidence-index {
     position: static;
+  }
+
+  .evidence-workspace:not(.detail-open) .evidence-workspace-detail {
+    display: none;
+  }
+
+  .evidence-workspace.detail-open .evidence-index {
+    display: none;
+  }
+
+  .evidence-workspace-detail {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .vault-mobile-back {
+    display: block;
+    width: fit-content;
   }
 }
 
@@ -201,5 +274,146 @@
 @media (max-width: 560px) {
   .vault-stats {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Phase 5.3A - Vault Workspace Clarity */
+
+.vault-boundary-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.vault-boundary-summary span {
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--social-bg);
+  font-size: 0.8rem;
+}
+
+.vault-empty {
+  padding: 2rem;
+}
+
+.vault-empty strong {
+  color: var(--text-h);
+  font-size: 1.1rem;
+}
+
+.vault-empty-guidance {
+  margin-bottom: 0;
+  opacity: 0.75;
+  font-size: 0.9rem;
+}
+
+.evidence-index-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.evidence-index-header p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.evidence-selection-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.evidence-selection-meta span:last-child {
+  text-transform: capitalize;
+}
+
+.evidence-fingerprint-label {
+  margin: 0.5rem 0 0;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Phase 5.3C - Evidence Record History Clarity */
+
+.evidence-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.evidence-history-header p {
+  margin: 0.35rem 0 0;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.evidence-history-header > span {
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.evidence-history-item {
+  grid-template-columns: 110px 1fr 130px;
+}
+
+.evidence-history-status {
+  display: flex;
+  align-items: flex-start;
+}
+
+.evidence-history-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.evidence-history-meta div,
+.evidence-history-record-id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.evidence-history-meta span,
+.evidence-history-record-id span {
+  color: var(--text);
+  font-size: 0.75rem;
+}
+
+.evidence-history-meta strong {
+  color: var(--text-h);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.evidence-history-record-id code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .evidence-history-item {
+    grid-template-columns: 1fr;
+  }
+
+  .evidence-history-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .evidence-history-header {
+    flex-direction: column;
   }
 }

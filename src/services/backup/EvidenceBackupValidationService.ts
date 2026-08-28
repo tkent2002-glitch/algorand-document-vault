@@ -1,4 +1,4 @@
-﻿import type { EvidenceRecord } from "../notarization";
+import type { EvidenceRecord } from "../notarization";
 
 export type EvidenceBackupFile = {
   schema: "adv-evidence-backup-v1";
@@ -79,12 +79,51 @@ export class EvidenceBackupValidationService {
           errors.push(`Record ${index} has invalid SHA-256 hash.`);
         }
 
+        if (!record.proof || !record.proof.payload || !record.proof.payload.hash) {
+          errors.push(`Record ${index} is missing proof hash.`);
+        } else if (!record.proof.createdAt || !isIsoDate(record.proof.createdAt)) {
+          errors.push(`Record ${index} has invalid proof createdAt timestamp.`);
+        } else if (!["draft", "pending_wallet_signature", "submitted", "confirmed", "failed"].includes(record.proof.status)) {
+          errors.push(`Record ${index} has unsupported proof status.`);
+        } else if (record.proof.payload.appId !== "algorand-document-vault") {
+          errors.push(`Record ${index} has invalid proof application id.`);
+        } else if (record.proof.payload.schemaVersion !== "1.0") {
+          errors.push(`Record ${index} has unsupported proof schema version.`);
+        } else if (record.proof.payload.hash.algorithm !== "SHA-256") {
+          errors.push(`Record ${index} has unsupported proof hash algorithm.`);
+        } else if (record.proof.payload.hash.value !== record.hashValue) {
+          errors.push(`Record ${index} proof hash does not match record hash.`);
+        }
+
         if (!record.createdAt || !isIsoDate(record.createdAt)) {
           errors.push(`Record ${index} has invalid createdAt timestamp.`);
         }
 
-        if (!record.status) {
-          errors.push(`Record ${index} is missing status.`);
+        if (
+          record.status === "submitted" &&
+          (
+            !record.algorandTransactionId ||
+            !record.submittedAt ||
+            !isIsoDate(record.submittedAt)
+          )
+        ) {
+          errors.push(`Record ${index} submitted evidence is missing submission metadata.`);
+        }
+
+        if (
+          record.status === "confirmed" &&
+          (
+            !record.algorandTransactionId ||
+            typeof record.confirmedRound !== "number" ||
+            !record.confirmedAt ||
+            !isIsoDate(record.confirmedAt)
+          )
+        ) {
+          errors.push(`Record ${index} confirmed evidence is missing confirmation metadata.`);
+        }
+
+        if (!["draft", "signed", "submitted", "confirmed", "failed"].includes(record.status)) {
+          errors.push(`Record ${index} has unsupported status.`);
         }
       });
     }

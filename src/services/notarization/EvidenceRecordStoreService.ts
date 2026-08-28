@@ -1,4 +1,5 @@
 import { StorageConfiguration } from "../../storage/StorageConfiguration";
+import { Logger } from "../../core/Logger";
 import type { EvidenceRecord } from "./EvidenceRecordService";
 
 const STORAGE_KEY =
@@ -14,9 +15,9 @@ export class EvidenceRecordStoreService {
 
     try {
       return JSON.parse(raw) as EvidenceRecord[];
-    } catch (error) {
-      console.error("Failed to read evidence records from local storage:", error);
-      return [];
+    } catch {
+      Logger.error("Failed to read evidence records from local storage.");
+      throw new Error("Stored evidence records are unreadable.");
     }
   }
 

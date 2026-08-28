@@ -8,9 +8,9 @@ The storage layer preserves evidence records locally without storing original do
 
 ```text
 UI and workflows
-â†’ EvidenceRepository
-â†’ EvidenceStore contract
-â†’ IndexedDbEvidenceStore
+→ EvidenceRepository
+→ EvidenceStore contract
+→ IndexedDbEvidenceStore
 ```
 
 Pages and workflows do not access IndexedDB or localStorage directly.

@@ -1,13 +1,13 @@
 # Roadmap
 
-## Phase 1 â€” Foundation
+## Phase 1 — Foundation
 
 - React, TypeScript, and Vite application
 - Core managers and page structure
 - Document validation and SHA-256 hashing
 - Evidence and proof models
 
-## Phase 2 â€” Evidence workflows
+## Phase 2 — Evidence workflows
 
 - Notarization workflow
 - Verification interface
@@ -15,7 +15,7 @@
 - Backup validation and import
 - Repository boundary
 
-## Phase 3 â€” Production-readiness foundation
+## Phase 3 — Production-readiness foundation
 
 - Automated tests
 - Backup integrity and trust
@@ -24,7 +24,7 @@
 - Legacy data migration and recovery
 - Storage configuration centralization
 
-## Phase 4 â€” Algorand TestNet integration and hardening
+## Phase 4 — Algorand TestNet integration and hardening
 
 - Complete end-to-end TestNet validation
 - Classify wallet rejection and connection failures
@@ -32,9 +32,9 @@
 - Verify confirmed blockchain payloads
 - Improve loading, retry, and timeout UX
 
-## Phase 5 â€” Public alpha readiness
+## Phase 5 — Public alpha readiness
 
-- Accessibility review
+- Accessibility blocker remediation complete; manual assistive-technology review pending
 - Cross-browser testing
 - Performance testing
 - User documentation and screenshots

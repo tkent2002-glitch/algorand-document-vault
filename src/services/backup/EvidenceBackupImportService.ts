@@ -1,6 +1,6 @@
-﻿import type { EvidenceRecord } from "../notarization";
-import { BackupTrustService } from "./BackupTrustService";
-import type { TrustedEvidenceBackupFile } from "./BackupTrustService";
+import type { EvidenceRecord } from "../notarization";
+import { BackupIntegrityValidationService } from "./BackupIntegrityValidationService";
+import type { IntegrityProtectedEvidenceBackupFile } from "./BackupIntegrityValidationService";
 
 export type EvidenceBackupImportResult = {
   importedRecords: number;
@@ -10,14 +10,14 @@ export type EvidenceBackupImportResult = {
 
 export class EvidenceBackupImportService {
   static async importNewRecords(
-    backup: TrustedEvidenceBackupFile,
+    backup: IntegrityProtectedEvidenceBackupFile,
     existingRecords: EvidenceRecord[]
   ): Promise<EvidenceBackupImportResult & { records: EvidenceRecord[] }> {
-    const trustResult = await BackupTrustService.evaluate(backup);
+    const integrityResult = await BackupIntegrityValidationService.evaluate(backup);
 
-    if (!trustResult.trusted) {
+    if (!integrityResult.valid) {
       throw new Error(
-        trustResult.errors.join(" ") || "Cannot import untrusted evidence backup."
+        integrityResult.errors.join(" ") || "Cannot import evidence backup that failed integrity validation."
       );
     }
 
@@ -26,7 +26,7 @@ export class EvidenceBackupImportService {
       existingRecords.map((record) => [record.id, record])
     );
 
-    const mergedRecords = [...existingRecords];
+    const recordsToImport: EvidenceRecord[] = [];
 
     let importedRecords = 0;
     let skippedExistingRecords = 0;
@@ -45,7 +45,7 @@ export class EvidenceBackupImportService {
         continue;
       }
 
-      mergedRecords.unshift(record);
+      recordsToImport.push(record);
       existingIds.add(record.id);
       recordsById.set(record.id, record);
       importedRecords += 1;
@@ -55,7 +55,7 @@ export class EvidenceBackupImportService {
       importedRecords,
       skippedExistingRecords,
       blockedConflictingRecords,
-      records: mergedRecords,
+      records: [...recordsToImport.reverse(), ...existingRecords],
     };
   }
 }

@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { EvidenceBackupValidationService } from "../../src/services/backup/EvidenceBackupValidationService";
 
 const validRecord = {
@@ -9,8 +9,9 @@ const validRecord = {
   hashValue: "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
   proof: {
     id: "proof-1",
-    status: "created",
+    status: "draft",
     payload: {
+      appId: "algorand-document-vault",
       schemaVersion: "1.0",
       hash: {
         algorithm: "SHA-256",
@@ -75,5 +76,194 @@ describe("EvidenceBackupValidationService", () => {
 
     expect(result.valid).toBe(false);
     expect(result.errors).toContain("Backup recordCount does not match records length.");
+  });
+
+  it("rejects a proof hash that does not match the evidence record hash", () => {
+    const mismatchedRecord = {
+      ...validRecord,
+      proof: {
+        ...validRecord.proof,
+        payload: {
+          ...validRecord.proof.payload,
+          hash: {
+            ...validRecord.proof.payload.hash,
+            value: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          },
+        },
+      },
+    };
+
+    const result = EvidenceBackupValidationService.validate({
+      schema: "adv-evidence-backup-v1",
+      exportedAt: new Date().toISOString(),
+      recordCount: 1,
+      records: [mismatchedRecord],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain("Record 0 proof hash does not match record hash.");
+  });
+
+  it("rejects a proof created for a different application", () => {
+    const invalidRecord = {
+      ...validRecord,
+      proof: {
+        ...validRecord.proof,
+        payload: {
+          ...validRecord.proof.payload,
+          appId: "different-application",
+        },
+      },
+    };
+
+    const result = EvidenceBackupValidationService.validate({
+      schema: "adv-evidence-backup-v1",
+      exportedAt: new Date().toISOString(),
+      recordCount: 1,
+      records: [invalidRecord],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain("Record 0 has invalid proof application id.");
+  });
+
+  it("rejects an unsupported proof schema version", () => {
+    const invalidRecord = {
+      ...validRecord,
+      proof: {
+        ...validRecord.proof,
+        payload: {
+          ...validRecord.proof.payload,
+          schemaVersion: "9.9",
+        },
+      },
+    };
+
+    const result = EvidenceBackupValidationService.validate({
+      schema: "adv-evidence-backup-v1",
+      exportedAt: new Date().toISOString(),
+      recordCount: 1,
+      records: [invalidRecord],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain("Record 0 has unsupported proof schema version.");
+  });
+
+  it("rejects an unsupported proof hash algorithm", () => {
+    const invalidRecord = {
+      ...validRecord,
+      proof: {
+        ...validRecord.proof,
+        payload: {
+          ...validRecord.proof.payload,
+          hash: {
+            ...validRecord.proof.payload.hash,
+            algorithm: "SHA-1",
+          },
+        },
+      },
+    };
+
+    const result = EvidenceBackupValidationService.validate({
+      schema: "adv-evidence-backup-v1",
+      exportedAt: new Date().toISOString(),
+      recordCount: 1,
+      records: [invalidRecord],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain("Record 0 has unsupported proof hash algorithm.");
+  });
+
+  it("rejects a confirmed record without confirmation metadata", () => {
+    const invalidRecord = {
+      ...validRecord,
+      status: "confirmed",
+    };
+
+    const result = EvidenceBackupValidationService.validate({
+      schema: "adv-evidence-backup-v1",
+      exportedAt: new Date().toISOString(),
+      recordCount: 1,
+      records: [invalidRecord],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain("Record 0 confirmed evidence is missing confirmation metadata.");
+  });
+
+  it("rejects a submitted record without submission metadata", () => {
+    const invalidRecord = {
+      ...validRecord,
+      status: "submitted",
+    };
+
+    const result = EvidenceBackupValidationService.validate({
+      schema: "adv-evidence-backup-v1",
+      exportedAt: new Date().toISOString(),
+      recordCount: 1,
+      records: [invalidRecord],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain("Record 0 submitted evidence is missing submission metadata.");
+  });
+
+  it("rejects an unsupported evidence record status", () => {
+    const invalidRecord = {
+      ...validRecord,
+      status: "verified",
+    };
+
+    const result = EvidenceBackupValidationService.validate({
+      schema: "adv-evidence-backup-v1",
+      exportedAt: new Date().toISOString(),
+      recordCount: 1,
+      records: [invalidRecord],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain("Record 0 has unsupported status.");
+  });
+
+  it("rejects an unsupported proof status", () => {
+    const invalidRecord = {
+      ...validRecord,
+      proof: {
+        ...validRecord.proof,
+        status: "verified",
+      },
+    };
+
+    const result = EvidenceBackupValidationService.validate({
+      schema: "adv-evidence-backup-v1",
+      exportedAt: new Date().toISOString(),
+      recordCount: 1,
+      records: [invalidRecord],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain("Record 0 has unsupported proof status.");
+  });
+
+  it("rejects an invalid proof createdAt timestamp", () => {
+    const invalidRecord = {
+      ...validRecord,
+      proof: {
+        ...validRecord.proof,
+        createdAt: "not-a-date",
+      },
+    };
+
+    const result = EvidenceBackupValidationService.validate({
+      schema: "adv-evidence-backup-v1",
+      exportedAt: new Date().toISOString(),
+      recordCount: 1,
+      records: [invalidRecord],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain("Record 0 has invalid proof createdAt timestamp.");
   });
 });

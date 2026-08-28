@@ -1,5 +1,6 @@
 import algosdk from "algosdk";
-import type { AlgorandNetworkConfig, NotarizationProof } from "../../types";
+import { Logger } from "../../core";
+import type { AlgorandNetworkConfig } from "../../types";
 import { DEFAULT_ALGORAND_NETWORK_CONFIG } from "../../types";
 
 export type AlgorandNodeStatus = {
@@ -34,8 +35,8 @@ export class AlgorandService {
         network: AlgorandService.config.network,
         message: "Connected to Algorand node.",
       };
-    } catch (error) {
-      console.error("Algorand node status check failed:", error);
+    } catch {
+      Logger.error("Algorand node status check failed.");
 
       return {
         connected: false,
@@ -55,15 +56,6 @@ export class AlgorandService {
     const account = algosdk.generateAccount();
     return account.addr.toString();
   }
-
-  static async submitProof(
-    proof: NotarizationProof
-  ): Promise<NotarizationProof> {
-    console.log("Algorand submission placeholder", proof);
-
-    return {
-      ...proof,
-      status: "pending_wallet_signature",
-    };
-  }
 }
+
+
