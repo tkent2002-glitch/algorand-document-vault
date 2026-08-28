@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from "react";
-import { NotarizationWorkflow } from "../../core";
+import { Logger, NotarizationWorkflow } from "../../core";
 import { EvidenceRepository } from "../../repositories";
 import {
   AlgorandNotarizationLifecycleError,
@@ -222,7 +222,7 @@ function NotarizePage() {
       setSubmissionMessage("");
       setConfirmationMessage("");
     } catch (error) {
-      console.error("Transaction signing failed:", error);
+      Logger.error("Transaction signing failed.");
 
       const failure =
         TransactionFailureClassificationService.classify(
@@ -300,10 +300,7 @@ function NotarizePage() {
       setUnsafeResubmissionBlocked(false);
       setRecoveryMessage("");
     } catch (error) {
-      console.error(
-        "End-to-end Algorand notarization failed:",
-        error
-      );
+      Logger.error("End-to-end Algorand notarization failed.");
 
       const lifecycleStage =
         error instanceof AlgorandNotarizationLifecycleError
@@ -597,6 +594,7 @@ function NotarizePage() {
 }
 
 export default NotarizePage;
+
 
 
 

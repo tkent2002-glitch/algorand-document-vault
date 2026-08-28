@@ -1,4 +1,5 @@
 ﻿import { AlgorandService } from "./AlgorandService";
+import { Logger } from "../../core";
 
 export type AlgorandTransactionLookupStatus =
   | "confirmed"
@@ -114,10 +115,7 @@ export class AlgorandTransactionStatusService {
         };
       }
 
-      console.error(
-        "Algorand transaction status verification failed:",
-        error
-      );
+      Logger.error("Algorand transaction status verification failed.");
 
       return {
         transactionId: normalizedTransactionId,
@@ -130,3 +128,4 @@ export class AlgorandTransactionStatusService {
     }
   }
 }
+

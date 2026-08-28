@@ -1,4 +1,5 @@
-import type { EvidenceRecord } from "../../services";
+﻿import type { EvidenceRecord } from "../../services";
+import { Logger } from "../../core/Logger";
 import {
   EvidenceStoreMigrationService,
   IndexedDbEvidenceStore,
@@ -100,9 +101,7 @@ export class EvidenceRepository {
         };
       }
 
-      console.warn(
-        "IndexedDB was empty after a completed migration. Recovery migration will run."
-      );
+      Logger.warn("IndexedDB was empty after a completed migration. Recovery migration will run.");
     }
 
     const migration =
@@ -131,3 +130,5 @@ export class EvidenceRepository {
     }
   }
 }
+
+

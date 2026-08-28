@@ -1,4 +1,5 @@
-import { StorageConfiguration } from "../../storage/StorageConfiguration";
+﻿import { StorageConfiguration } from "../../storage/StorageConfiguration";
+import { Logger } from "../../core/Logger";
 import type { EvidenceRecord } from "./EvidenceRecordService";
 
 const STORAGE_KEY =
@@ -15,7 +16,7 @@ export class EvidenceRecordStoreService {
     try {
       return JSON.parse(raw) as EvidenceRecord[];
     } catch (error) {
-      console.error("Failed to read evidence records from local storage:", error);
+      Logger.error("Failed to read evidence records from local storage.");
       return [];
     }
   }
@@ -47,3 +48,5 @@ export class EvidenceRecordStoreService {
     localStorage.removeItem(STORAGE_KEY);
   }
 }
+
+

@@ -1,4 +1,5 @@
-import { useState } from "react";
+﻿import { useState } from "react";
+import { Logger } from "../../core";
 import { EvidenceRepository } from "../../repositories";
 import {
   BackupEncryptionService,
@@ -59,7 +60,7 @@ function VaultBackupActions() {
 
       setMessage("Plain Evidence Vault backup exported successfully.");
     } catch (error) {
-      console.error("Plain backup export failed:", error);
+      Logger.error("Plain backup export failed.");
       setMessage("Plain backup export failed.");
     } finally {
       setExporting(false);
@@ -100,7 +101,7 @@ function VaultBackupActions() {
       setConfirmPassword("");
       setMessage("Encrypted Evidence Vault backup exported successfully.");
     } catch (error) {
-      console.error("Encrypted backup export failed:", error);
+      Logger.error("Encrypted backup export failed.");
       setMessage("Encrypted backup export failed.");
     } finally {
       setExporting(false);

@@ -1,4 +1,5 @@
 ﻿import algosdk from "algosdk";
+import { Logger } from "../../core";
 import type { AlgorandNetworkConfig } from "../../types";
 import { DEFAULT_ALGORAND_NETWORK_CONFIG } from "../../types";
 
@@ -35,7 +36,7 @@ export class AlgorandService {
         message: "Connected to Algorand node.",
       };
     } catch (error) {
-      console.error("Algorand node status check failed:", error);
+      Logger.error("Algorand node status check failed.");
 
       return {
         connected: false,
@@ -56,4 +57,5 @@ export class AlgorandService {
     return account.addr.toString();
   }
 }
+
 

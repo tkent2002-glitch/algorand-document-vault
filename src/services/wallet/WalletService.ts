@@ -1,6 +1,7 @@
-import { PeraWalletConnect } from "@perawallet/connect";
+﻿import { PeraWalletConnect } from "@perawallet/connect";
 import type { Transaction } from "algosdk";
 import type { WalletConnection } from "../../types/wallet";
+import { Logger } from "../../core";
 
 export class WalletService {
   private static readonly pera = new PeraWalletConnect({
@@ -22,7 +23,7 @@ export class WalletService {
         status: "disconnected",
       };
     } catch (error) {
-      console.error("Pera Wallet session restoration failed:", error);
+      Logger.error("Pera Wallet session restoration failed.");
 
       return {
         status: "error",
@@ -45,7 +46,7 @@ export class WalletService {
         status: "disconnected",
       };
     } catch (error) {
-      console.error("Pera Wallet connection failed:", error);
+      Logger.error("Pera Wallet connection failed.");
 
       return {
         status: "error",
@@ -61,7 +62,7 @@ export class WalletService {
         status: "disconnected",
       };
     } catch (error) {
-      console.error("Pera Wallet disconnection failed:", error);
+      Logger.error("Pera Wallet disconnection failed.");
 
       return {
         status: "error",
