@@ -20,7 +20,9 @@ Store backup passwords safely. They are not recoverable by the application.
 
 ## TestNet validation status
 
-The live Pera Mobile connection and TestNet submission flow remain under
+The desktop QR-to-Pera Mobile connection, signing, TestNet submission,
+confirmation, explorer proof note, and persisted evidence record were validated
+live on August 28, 2026. Same-device mobile deep-link behavior remains under
 compatibility validation. Do not import a mobile recovery phrase into Pera Web
 merely to test this application. Use only valueless TestNet ALGO, and never
 enter wallet recovery material into this application or a TestNet dispenser.

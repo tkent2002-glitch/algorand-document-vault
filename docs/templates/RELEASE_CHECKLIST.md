@@ -50,13 +50,22 @@ live Pera Wallet workflow can be completed.
 - [x] Transactions are constrained by the local ADv transaction policy before signing.
 - [x] Submission transaction IDs are checked against the signed transaction ID.
 - [x] Wallet rejection and uncertain submission paths fail closed in automated tests.
-- [ ] Revalidate the current Pera Mobile connection and QR/deep-link experience.
-- [ ] Explicitly verify the wallet session is bound to Algorand TestNet.
+- [x] Revalidate the desktop QR-to-Pera Mobile connection experience.
+- [ ] Revalidate the same-device Pera Mobile deep-link experience.
+- [x] Explicitly verify the wallet session is bound to Algorand TestNet.
 - [x] Fund a dedicated TestNet account with valueless TestNet ALGO.
-- [ ] Complete a live sign, submit, and confirmation workflow.
-- [ ] Verify the confirmed transaction and proof note in a TestNet explorer.
-- [ ] Verify the confirmed evidence record persists after reload.
+- [x] Complete a live sign, submit, and confirmation workflow.
+- [x] Verify the confirmed transaction and proof note in a TestNet explorer.
+- [x] Verify the confirmed evidence record persists after reload.
 - [ ] Exercise wallet cancellation, disconnect, timeout, and retry behavior manually.
+
+Live validation evidence recorded August 28, 2026:
+
+- TestNet transaction: `D5QWYDQFAZRL3F7H2I6ELJATMZNI7XYVX3GWR4U6NIGABEEZO3LA`
+- Confirmed round: `66759442`
+- Pera Explorer displayed the `adv-proof-v1` document-integrity note and the
+  expected zero-ALGO self-payment with a `0.001 ALGO` TestNet fee.
+- The confirmed local evidence record and Pera session both survived reload.
 
 ## Data safety and recovery
 

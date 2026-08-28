@@ -36,6 +36,8 @@ npm run build
 
 Blockchain workflows currently target Algorand TestNet. Do not send MainNet funds or treat the application as production-ready.
 
-The current Pera Mobile connection handoff remains under live compatibility
-validation. A funded TestNet account is required only for the final signing and
-submission test; local tests and production builds do not require wallet funds.
+The desktop QR-to-Pera Mobile connection and complete TestNet transaction flow
+have been validated live. Same-device mobile deep-link behavior remains under
+compatibility validation. A funded TestNet account is required only for live
+signing and submission tests; local tests and production builds do not require
+wallet funds.
