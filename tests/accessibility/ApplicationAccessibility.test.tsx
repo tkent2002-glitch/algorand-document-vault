@@ -65,7 +65,7 @@ describe("application accessibility boundaries", () => {
 
     expect(verify).toHaveAttribute("aria-current", "page");
     expect(
-      screen.getByLabelText("Document to verify")
+      await screen.findByLabelText("Document to verify")
     ).toHaveAttribute("type", "file");
   });
 

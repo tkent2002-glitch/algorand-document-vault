@@ -2,7 +2,7 @@
 import { createRoot } from "react-dom/client";
 
 import App from "./App";
-import { ApplicationManager } from "./core";
+import { ApplicationManager } from "./core/ApplicationManager";
 import { EvidenceRepository } from "./repositories";
 
 import "./index.css";

@@ -1,16 +1,25 @@
 import { PeraWalletConnect } from "@perawallet/connect";
 import type { Transaction } from "algosdk";
+import { installBrowserPolyfills } from "../../browser/installBrowserPolyfills";
 import type { WalletConnection } from "../../types/wallet";
 import { Logger } from "../../core";
 
+installBrowserPolyfills();
+
 export class WalletService {
-  private static readonly pera = new PeraWalletConnect({
-    shouldShowSignTxnToast: false,
-  });
+  private static pera: PeraWalletConnect | undefined;
+
+  private static getPera(): PeraWalletConnect {
+    WalletService.pera ??= new PeraWalletConnect({
+      shouldShowSignTxnToast: false,
+    });
+
+    return WalletService.pera;
+  }
 
   static async reconnect(): Promise<WalletConnection> {
     try {
-      const accounts = await WalletService.pera.reconnectSession();
+      const accounts = await WalletService.getPera().reconnectSession();
 
       if (accounts.length > 0) {
         return {
@@ -33,7 +42,7 @@ export class WalletService {
 
   static async connect(): Promise<WalletConnection> {
     try {
-      const accounts = await WalletService.pera.connect();
+      const accounts = await WalletService.getPera().connect();
 
       if (accounts.length > 0) {
         return {
@@ -56,7 +65,7 @@ export class WalletService {
 
   static async disconnect(): Promise<WalletConnection> {
     try {
-      await WalletService.pera.disconnect();
+      await WalletService.getPera().disconnect();
 
       return {
         status: "disconnected",
@@ -71,15 +80,16 @@ export class WalletService {
   }
 
   static isConnected(): boolean {
-    return WalletService.pera.isConnected;
+    return WalletService.getPera().isConnected;
   }
 
   static async signSingleTransaction(
     transaction: Transaction
   ): Promise<Uint8Array> {
-    const signedTransactions = await WalletService.pera.signTransaction([
-      [{ txn: transaction }],
-    ]);
+    const signedTransactions =
+      await WalletService.getPera().signTransaction([
+        [{ txn: transaction }],
+      ]);
 
     return signedTransactions[0];
   }

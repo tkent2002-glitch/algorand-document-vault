@@ -1,16 +1,31 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import Header from "./components/Header/Header";
 import Navigation from "./components/Navigation/Navigation";
 import DashboardPage from "./pages/DashboardPage/DashboardPage";
-import NotarizePage from "./pages/NotarizePage/NotarizePage";
-import VerifyPage from "./pages/VerifyPage/VerifyPage";
-import VaultPage from "./pages/VaultPage/VaultPage";
-import WalletPage from "./pages/WalletPage/WalletPage";
 
 import "./App.css";
 
 type Page = "dashboard" | "notarize" | "verify" | "vault" | "wallet";
+
+const NotarizePage = lazy(
+  () => import("./pages/NotarizePage/NotarizePage")
+);
+const VerifyPage = lazy(
+  () => import("./pages/VerifyPage/VerifyPage")
+);
+const VaultPage = lazy(
+  () => import("./pages/VaultPage/VaultPage")
+);
+const WalletPage = lazy(
+  () => import("./pages/WalletPage/WalletPage")
+);
 
 function App() {
   const [activePage, setActivePage] = useState<Page>("dashboard");
@@ -50,13 +65,15 @@ function App() {
         ref={mainRef}
         tabIndex={-1}
       >
-        {activePage === "dashboard" && (
-          <DashboardPage onNavigate={setActivePage} />
-        )}
-        {activePage === "notarize" && <NotarizePage />}
-        {activePage === "verify" && <VerifyPage />}
-        {activePage === "vault" && <VaultPage />}
-        {activePage === "wallet" && <WalletPage />}
+        <Suspense fallback={<p role="status">Loading page...</p>}>
+          {activePage === "dashboard" && (
+            <DashboardPage onNavigate={setActivePage} />
+          )}
+          {activePage === "notarize" && <NotarizePage />}
+          {activePage === "verify" && <VerifyPage />}
+          {activePage === "vault" && <VaultPage />}
+          {activePage === "wallet" && <WalletPage />}
+        </Suspense>
       </main>
     </div>
   );
