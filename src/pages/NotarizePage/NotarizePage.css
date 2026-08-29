@@ -94,6 +94,17 @@
   color: var(--text);
 }
 
+.notarize-result input[type="file"]::file-selector-button {
+  margin-right: 0.65rem;
+  cursor: pointer;
+  border: 0;
+  border-right: 1px solid var(--border);
+  padding: 0.48rem 0.72rem;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 750;
+}
+
 .wallet-readiness-header {
   display: flex;
   align-items: center;
@@ -111,6 +122,22 @@
   color: var(--accent-strong);
   font-size: 0.72rem;
   font-weight: 750;
+}
+
+.wallet-readiness-address {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 74%, transparent);
+}
+
+.wallet-readiness-address code {
+  color: var(--text-h);
+  font-size: 0.8rem;
 }
 
 .notarize-result strong {
@@ -138,6 +165,11 @@
   font-weight: 700;
 }
 
+.notarize-result button:hover:not(:disabled) {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
 .notarize-result button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
@@ -145,6 +177,54 @@
 
 .notarize-action-step {
   height: 100%;
+}
+
+.notarize-action-step.inactive {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--border) 80%, transparent);
+  background: color-mix(in srgb, var(--social-bg) 44%, transparent);
+}
+
+.notarize-action-step.ready {
+  border-color: var(--accent-border);
+  background: color-mix(in srgb, var(--accent-bg) 42%, var(--social-bg));
+}
+
+.notarize-action-step.processing {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-bg) 55%, var(--social-bg));
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.notarize-action-meta,
+.notarize-signed-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+}
+
+.notarize-action-meta span,
+.notarize-signed-summary span {
+  padding: 0.24rem 0.48rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.notarize-action-meta .complete,
+.notarize-signed-summary span:first-child {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+}
+
+.wallet-connection-action.secondary {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--text);
 }
 
 .notarize-recovery-message {

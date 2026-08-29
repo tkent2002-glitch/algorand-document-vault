@@ -64,6 +64,20 @@ function SignSubmitStep({
     Boolean(submissionResult) ||
     processing;
 
+  const signStepState =
+    processing && !signedTransaction
+      ? "processing"
+      : readyForSignature
+        ? "ready"
+        : "inactive";
+
+  const submitStepState =
+    processing && signedTransaction && !submissionResult
+      ? "processing"
+      : signedTransaction && !submissionResult
+        ? "ready"
+        : "inactive";
+
   let submitGuidance =
     "Sign the transaction before it can be submitted.";
 
@@ -84,20 +98,19 @@ function SignSubmitStep({
 
   return (
     <>
-      <div className="notarize-result notarize-action-step">
+      <div
+        className={`notarize-result notarize-action-step ${signStepState}`}
+      >
         <strong>Step 1 — Sign Transaction</strong>
 
-        <p>
-          Wallet:{" "}
-          {walletReady ? "Connected" : "Not connected"}
-        </p>
-
-        <p>
-          Transaction:{" "}
-          {transactionPrepared
-            ? "Prepared"
-            : "Not prepared"}
-        </p>
+        <div className="notarize-action-meta">
+          <span className={walletReady ? "complete" : "pending"}>
+            Wallet {walletReady ? "connected" : "not connected"}
+          </span>
+          <span className={transactionPrepared ? "complete" : "pending"}>
+            Transaction {transactionPrepared ? "prepared" : "not prepared"}
+          </span>
+        </div>
 
         <p>{signGuidance}</p>
 
@@ -121,31 +134,19 @@ function SignSubmitStep({
         </button>
       </div>
 
-      <div className="notarize-result notarize-action-step">
+      <div
+        className={`notarize-result notarize-action-step ${submitStepState}`}
+      >
         <strong>Step 2 — Submit Transaction</strong>
 
         <p>{submitGuidance}</p>
 
         {signedTransaction ? (
-          <>
-            <p>
-              Transaction ID:{" "}
-              <code>{signedTransaction.txId}</code>
-            </p>
-
-            <p>
-              Signed Bytes:{" "}
-              {signedTransaction.signedTransactionByteLength}
-            </p>
-
-            <p>
-              Signed At:{" "}
-              {signedTransaction.signedAt}
-            </p>
-          </>
-        ) : (
-          <p>No signed transaction is available yet.</p>
-        )}
+          <div className="notarize-signed-summary">
+            <span>Signed transaction ready</span>
+            <span>{signedTransaction.signedTransactionByteLength} bytes</span>
+          </div>
+        ) : null}
 
         {submissionMessage && (
           <p role="status">

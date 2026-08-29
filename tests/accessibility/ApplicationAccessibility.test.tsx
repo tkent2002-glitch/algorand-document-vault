@@ -12,6 +12,7 @@ import {
 import { afterEach, describe, expect, it, vi } from "vitest";
 import App from "../../src/App";
 import UploadStep from "../../src/pages/NotarizePage/components/UploadStep";
+import WalletReadinessPanel from "../../src/pages/NotarizePage/components/WalletReadinessPanel";
 
 vi.mock("@perawallet/connect", () => ({
   PeraWalletConnect: class {
@@ -105,6 +106,27 @@ describe("application accessibility boundaries", () => {
     expect(
       screen.getByLabelText("Document to notarize")
     ).toHaveAttribute("type", "file");
+  });
+
+  it("keeps a shortened connected-wallet address fully accessible", () => {
+    const address =
+      "UQWCJ6BW2GY6S2WORUZX7SGKAHDS4PPHSDWCSHZCS7ZNPOZEUX7UV6X4ZI";
+
+    render(
+      <WalletReadinessPanel
+        wallet={{ status: "connected", address }}
+        connecting={false}
+        onConnect={vi.fn()}
+        onDisconnect={vi.fn()}
+      />
+    );
+
+    const displayedAddress = screen.getByLabelText(
+      `Wallet address ${address}`
+    );
+
+    expect(displayedAddress).toHaveTextContent("UQWCJ6BW2G…7UV6X4ZI");
+    expect(displayedAddress).toHaveAttribute("title", address);
   });
 
   it("labels Vault controls without nesting main landmarks", async () => {
