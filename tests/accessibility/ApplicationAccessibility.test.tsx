@@ -144,16 +144,25 @@ describe("application accessibility boundaries", () => {
     expect(toolsSummary?.closest("details")).toHaveAttribute("open");
 
     expect(
+      screen.queryByLabelText("Search evidence by filename or fingerprint")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Filter evidence by status")).not.toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Export backup" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Restore backup" }));
+    expect(
+      screen.getByLabelText("Evidence Vault backup file")
+    ).toHaveAttribute("type", "file");
+
+    fireEvent.click(toolsSummary!);
+    expect(
       await screen.findByLabelText(
         "Search evidence by filename or fingerprint"
       )
     ).toHaveAttribute("type", "search");
-    expect(
-      screen.getByLabelText("Filter evidence by status")
-    ).toHaveValue("all");
-    expect(
-      screen.getByLabelText("Evidence Vault backup file")
-    ).toHaveAttribute("type", "file");
     expect(screen.getAllByRole("main")).toHaveLength(1);
   });
 

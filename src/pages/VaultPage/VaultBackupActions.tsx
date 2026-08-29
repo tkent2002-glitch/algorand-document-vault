@@ -120,16 +120,11 @@ function VaultBackupActions() {
     <section className="vault-backup-actions">
       <div className="vault-backup-header">
         <div>
-          <strong>Vault Backup</strong>
+          <h3>Export evidence records</h3>
           <p>
-            Export local evidence records without including the original
-            documents.
+            Choose a readable JSON file or a password-encrypted backup.
           </p>
         </div>
-
-        <span className="vault-backup-security-label">
-          Integrity Protected
-        </span>
       </div>
 
       <div className="vault-backup-options-grid">
@@ -138,25 +133,16 @@ function VaultBackupActions() {
             <div>
               <h3>Plain JSON Backup</h3>
               <p>
-                Human-readable backup with cryptographic integrity
-                protection.
+                Easy to inspect and protected against unnoticed changes.
               </p>
             </div>
 
             <span>Readable</span>
           </div>
 
-          <div className="vault-backup-properties">
-            <p>
-              <strong>Integrity:</strong> Protected
-            </p>
-            <p>
-              <strong>Confidentiality:</strong> Not protected
-            </p>
-            <p>
-              <strong>Original documents:</strong> Not included
-            </p>
-          </div>
+          <p className="vault-backup-option-security">
+            Integrity protected · Not encrypted
+          </p>
 
           <button
             type="button"
@@ -174,25 +160,16 @@ function VaultBackupActions() {
             <div>
               <h3>Encrypted Backup</h3>
               <p>
-                Encrypt the integrity-protected backup using AES-GCM
-                with a password-derived key.
+                Password protected for safer storage or transfer.
               </p>
             </div>
 
-            <span>Confidential</span>
+            <span>Encrypted</span>
           </div>
 
-          <div className="vault-backup-properties">
-            <p>
-              <strong>Integrity:</strong> Protected
-            </p>
-            <p>
-              <strong>Confidentiality:</strong> AES-GCM encrypted
-            </p>
-            <p>
-              <strong>Original documents:</strong> Not included
-            </p>
-          </div>
+          <p className="vault-backup-option-security">
+            Integrity protected · AES-GCM encrypted
+          </p>
 
           <label>
             Backup Password
@@ -207,7 +184,7 @@ function VaultBackupActions() {
 
           <p className="vault-backup-password-status">
             Password length: {password.length} / {MINIMUM_PASSWORD_LENGTH}
-            minimum
+            {" "}minimum
           </p>
 
           <label>
@@ -261,8 +238,8 @@ function VaultBackupActions() {
       </p>
 
       <p className="vault-backup-boundary">
-        Backup files contain evidence records and metadata only. They
-        never contain your original documents.
+        Backups contain evidence records and metadata only—never your
+        original documents.
       </p>
     </section>
   );

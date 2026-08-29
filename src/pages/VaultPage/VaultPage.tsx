@@ -40,6 +40,8 @@ function VaultPage() {
   const [selectedHash, setSelectedHash] = useState<string>("");
   const [historyPage, setHistoryPage] = useState<number>(1);
   const [detailOpen, setDetailOpen] = useState<boolean>(false);
+  const [toolsOpen, setToolsOpen] = useState<boolean>(false);
+  const [activeTool, setActiveTool] = useState<"export" | "restore">("export");
   const deferredSearchText = useDeferredValue(searchText);
 
   async function reloadRecords(): Promise<void> {
@@ -147,42 +149,99 @@ function VaultPage() {
         <h2>Evidence Vault</h2>
 
         <p>
-          Search and review document fingerprints stored on this
-          device. Open backup and restore tools only when you need them.
+          {toolsOpen
+            ? "Export or restore local evidence records. Original documents are never included."
+            : "Search and review document fingerprints stored on this device. Open backup and restore tools only when you need them."}
         </p>
 
       </div>
 
-      <div className="vault-summary-strip" aria-label="Vault summary">
-        <span>
-          <strong>{evidenceIndex.length}</strong> documents
-        </span>
-        <span>
-          <strong>{records.length}</strong> evidence records
-        </span>
-        <span>
-          <strong>{confirmedCount}</strong> confirmed
-        </span>
-        <span>
-          <strong>{draftCount}</strong> drafts
-        </span>
-      </div>
+      {!toolsOpen && (
+        <div className="vault-summary-strip" aria-label="Vault summary">
+          <span>
+            <strong>{evidenceIndex.length}</strong> documents
+          </span>
+          <span>
+            <strong>{records.length}</strong> evidence records
+          </span>
+          <span>
+            <strong>{confirmedCount}</strong> confirmed
+          </span>
+          <span>
+            <strong>{draftCount}</strong> drafts
+          </span>
+        </div>
+      )}
 
-      <details className="vault-tools">
-        <summary>
+      <details
+        className="vault-tools"
+        open={toolsOpen}
+      >
+        <summary
+          onClick={(event) => {
+            event.preventDefault();
+            setToolsOpen((isOpen) => !isOpen);
+          }}
+        >
           <span>
             <strong>Backup and restore</strong>
             <small>Manage evidence-record backup files</small>
           </span>
-          <span className="vault-tools-action">Open tools</span>
+          <span className="vault-tools-action">
+            {toolsOpen ? "Close tools" : "Open tools"}
+          </span>
         </summary>
 
         <div className="vault-tools-content">
-          <VaultBackupActions />
-          <VaultImportPreview onImportComplete={reloadRecords} />
+          <div
+            className="vault-tools-tabs"
+            role="tablist"
+            aria-label="Backup and restore tools"
+          >
+            <button
+              id="vault-export-tab"
+              type="button"
+              role="tab"
+              aria-selected={activeTool === "export"}
+              aria-controls="vault-export-panel"
+              onClick={() => setActiveTool("export")}
+            >
+              Export backup
+            </button>
+            <button
+              id="vault-restore-tab"
+              type="button"
+              role="tab"
+              aria-selected={activeTool === "restore"}
+              aria-controls="vault-restore-panel"
+              onClick={() => setActiveTool("restore")}
+            >
+              Restore backup
+            </button>
+          </div>
+
+          {activeTool === "export" ? (
+            <div
+              id="vault-export-panel"
+              role="tabpanel"
+              aria-labelledby="vault-export-tab"
+            >
+              <VaultBackupActions />
+            </div>
+          ) : (
+            <div
+              id="vault-restore-panel"
+              role="tabpanel"
+              aria-labelledby="vault-restore-tab"
+            >
+              <VaultImportPreview onImportComplete={reloadRecords} />
+            </div>
+          )}
         </div>
       </details>
 
+      {!toolsOpen && (
+        <>
       <div className="vault-toolbar">
         <label className="visually-hidden" htmlFor="vault-search">
           Search evidence by filename or fingerprint
@@ -511,6 +570,8 @@ function VaultPage() {
             </div>
           )}
         </div>
+      )}
+        </>
       )}
     </section>
   );

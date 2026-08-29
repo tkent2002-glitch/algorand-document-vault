@@ -201,32 +201,29 @@ function VaultImportPreview({
     <section className="vault-import-preview">
       <div className="vault-import-header">
         <div>
-          <strong>Restore from Backup</strong>
+          <h3>Restore evidence records</h3>
           <p>
-            Select an Evidence Vault backup to validate and preview
-            before any records are imported.
+            Choose a backup to validate and preview before importing.
           </p>
         </div>
-
-        <span>Validation Required</span>
       </div>
 
       <div className="vault-import-safety">
         <p>
-          Backup files are inspected before they can modify the Vault.
-        </p>
-        <p>
-          Conflicting record IDs block import automatically.
+          Nothing is imported until validation passes and you approve
+          the preview. Conflicting record IDs are blocked automatically.
         </p>
       </div>
 
-      <label htmlFor="vault-backup-file">Evidence Vault backup file</label>
-      <input
-        id="vault-backup-file"
-        type="file"
-        accept="application/json"
-        onChange={handleFileChange}
-      />
+      <div className="vault-import-file-picker">
+        <label htmlFor="vault-backup-file">Evidence Vault backup file</label>
+        <input
+          id="vault-backup-file"
+          type="file"
+          accept="application/json"
+          onChange={handleFileChange}
+        />
+      </div>
 
       {fileName && (
         <p>
@@ -413,8 +410,7 @@ function VaultImportPreview({
       )}
 
       <p className="vault-import-boundary">
-        Only import backup files you trust. Validation and conflict
-        checks run before records are written to the Vault.
+        Only import backup files you trust.
       </p>
     </section>
   );

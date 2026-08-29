@@ -3,15 +3,23 @@
   flex-direction: column;
   gap: 0.75rem;
   margin-bottom: 0;
-  padding: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--social-bg);
+  padding: 0;
+  border: 0;
+  background: transparent;
   box-shadow: none;
 }
 
-.vault-import-preview strong {
+.vault-import-preview strong,
+.vault-import-header h3 {
   color: var(--text-h);
+}
+
+.vault-import-header h3 {
+  margin: 0;
+}
+
+.vault-import-header p {
+  margin: 0.3rem 0 0;
 }
 
 .vault-import-preview input {
@@ -52,23 +60,10 @@
 .vault-import-change-preview strong {
   color: var(--text-h);
 }
-.vault-backup-actions,
-.vault-import-preview {
-  border-left: 1px solid var(--border);
-}
-
 .vault-backup-actions p,
 .vault-import-preview p {
   max-width: 760px;
 }
-
-.vault-backup-actions::after {
-  content: "Backup files contain evidence records only. They do not contain your original documents.";
-  color: var(--text);
-  font-size: 0.9rem;
-}
-
-
 
 .vault-import-change-preview button {
   width: fit-content;
@@ -96,15 +91,41 @@
 }
 
 .vault-import-safety {
-  display: grid;
-  gap: 0.35rem;
-  padding: 0.85rem;
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+  border-left: 3px solid var(--accent-border);
+  background: color-mix(in srgb, var(--accent-bg) 45%, transparent);
 }
 
 .vault-import-safety p {
   margin: 0;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.vault-import-file-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 1rem;
+  border: 1px dashed var(--accent-border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.vault-import-file-picker label {
+  color: var(--text-h);
+  font-weight: 750;
+}
+
+.vault-import-file-picker input::file-selector-button {
+  cursor: pointer;
+  margin-right: 0.7rem;
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 700;
 }
 
 .vault-import-status {
@@ -155,7 +176,7 @@
   margin: 0;
   padding-top: 1rem;
   border-top: 1px solid var(--border);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   opacity: 0.8;
 }
 
