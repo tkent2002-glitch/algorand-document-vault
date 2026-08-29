@@ -134,7 +134,7 @@ describe("application accessibility boundaries", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Vault" }));
 
-    const toolsSummary = (await screen.findByText("Vault tools", {
+    const toolsSummary = (await screen.findByText("Backup and restore", {
       exact: true,
     })).closest("summary");
 
@@ -162,7 +162,7 @@ describe("application accessibility boundaries", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Vault" }));
 
-    const toolsSummary = (await screen.findByText("Vault tools", {
+    const toolsSummary = (await screen.findByText("Backup and restore", {
       exact: true,
     })).closest("summary");
     fireEvent.click(toolsSummary!);

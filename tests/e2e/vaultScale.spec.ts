@@ -138,6 +138,14 @@ test("keeps a 10,000-document Vault bounded and navigable", async ({
     page.getByRole("complementary", { name: "Document fingerprints" })
   ).toBeHidden();
 
+  const detailDisclosures = page.locator("details.vault-detail-disclosure");
+  await expect(detailDisclosures).toHaveCount(2);
+  await expect(detailDisclosures.nth(0)).not.toHaveAttribute("open", "");
+  await expect(detailDisclosures.nth(1)).not.toHaveAttribute("open", "");
+
+  await detailDisclosures.nth(0).locator("summary").click();
+  await expect(detailDisclosures.nth(0)).toHaveAttribute("open", "");
+
   await page.getByRole("button", { name: "Back to document list" }).click();
   await expect(
     page.getByRole("complementary", { name: "Document fingerprints" })

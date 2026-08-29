@@ -17,11 +17,15 @@
   text-transform: uppercase;
 }
 
-.vault-stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.65rem;
-  margin: 0 0 1rem;
+.vault-summary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 1.15rem;
+  margin: 0 0 0.85rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--social-bg) 62%, transparent);
 }
 
 .vault-toolbar,
@@ -37,27 +41,15 @@
   box-shadow: var(--shadow);
 }
 
-.vault-stats div {
-  display: flex;
-  min-width: 0;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.65rem;
-  padding: 0.7rem 0.8rem;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--social-bg) 70%, transparent);
-}
-
-.vault-stats span,
+.vault-summary-strip span,
 .vault-index-label {
   color: var(--text);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
-.vault-stats strong {
+.vault-summary-strip strong {
   color: var(--text-h);
-  font-size: 1.15rem;
+  font-size: 0.95rem;
 }
 
 .vault-toolbar {
@@ -126,6 +118,21 @@
   grid-template-columns: 1fr;
 }
 
+.evidence-workspace.detail-open .evidence-index-header {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.evidence-workspace.detail-open .evidence-index-item code,
+.evidence-workspace.detail-open .evidence-index-item-meta {
+  display: none;
+}
+
+.evidence-workspace.detail-open .vault-detail-disclosure summary small {
+  display: none;
+}
+
 .evidence-index-header .evidence-index-range {
   color: var(--text-h);
   font-weight: 700;
@@ -190,6 +197,7 @@
 }
 
 .evidence-index-item-meta {
+  justify-content: flex-start;
   color: var(--text);
   font-size: 0.74rem;
 }
@@ -255,6 +263,126 @@
   gap: 0.35rem;
   padding: 0.85rem;
   box-shadow: none;
+}
+
+.vault-selected-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.vault-selected-heading .vault-index-label {
+  margin-bottom: 0.2rem;
+}
+
+.vault-document-receipt {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0.45rem 0 0;
+}
+
+.vault-document-receipt > div {
+  min-width: 0;
+  padding: 0.55rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+}
+
+.vault-document-receipt dt {
+  margin-bottom: 0.18rem;
+  color: var(--text);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.vault-document-receipt dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--text-h);
+  font-size: 0.82rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.evidence-workspace-summary .explorer-link {
+  margin-top: 0.65rem;
+}
+
+.vault-detail-disclosure {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--social-bg) 64%, transparent);
+}
+
+.vault-detail-disclosure > summary {
+  display: flex;
+  min-height: 3.75rem;
+  cursor: pointer;
+  list-style: none;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.8rem;
+}
+
+.vault-detail-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.vault-detail-disclosure > summary::before {
+  content: "+";
+  display: grid;
+  flex: 0 0 1.55rem;
+  width: 1.55rem;
+  height: 1.55rem;
+  place-items: center;
+  border: 1px solid var(--accent-border);
+  border-radius: 50%;
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.vault-detail-disclosure[open] > summary::before {
+  content: "−";
+}
+
+.vault-detail-disclosure > summary > span:first-of-type {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.vault-detail-disclosure summary strong {
+  color: var(--text-h);
+}
+
+.vault-detail-disclosure summary small,
+.vault-detail-disclosure-action {
+  color: var(--text);
+  font-size: 0.74rem;
+}
+
+.vault-detail-disclosure-action {
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.vault-detail-disclosure > .evidence-details-panel,
+.vault-detail-disclosure > .evidence-history {
+  padding: 0.85rem;
+  border-top: 1px solid var(--border);
+}
+
+.vault-detail-disclosure .evidence-details-header,
+.vault-detail-disclosure .blockchain-section .explorer-link {
+  display: none;
 }
 
 .vault-index-label {
@@ -324,10 +452,6 @@
 }
 
 @media (max-width: 900px) {
-  .vault-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .vault-toolbar {
     grid-template-columns: 1fr;
   }
@@ -338,25 +462,17 @@
 }
 
 @media (max-width: 560px) {
-  .vault-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .vault-stats div {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.15rem;
-  }
-
   .evidence-index-list,
   .evidence-workspace.detail-open .evidence-index-list {
     grid-template-columns: 1fr;
   }
+
+  .vault-document-receipt {
+    grid-template-columns: 1fr;
+  }
 }
 
-.evidence-workspace-detail .evidence-workspace-summary,
-.evidence-workspace-detail .evidence-details-panel,
-.evidence-workspace-detail .evidence-history {
+.evidence-workspace-detail > .evidence-workspace-summary {
   padding: 0.85rem 0;
   border: 0;
   border-bottom: 1px solid var(--border);
@@ -370,22 +486,6 @@
 }
 
 /* Phase 5.3A - Vault Workspace Clarity */
-
-.vault-boundary-summary {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.vault-boundary-summary span {
-  padding: 0.4rem 0.7rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--social-bg) 70%, transparent);
-  font-size: 0.8rem;
-}
 
 .vault-empty {
   padding: 2rem;
@@ -404,8 +504,9 @@
 
 .evidence-index-header {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
   margin-bottom: 0.25rem;
 }
 
@@ -520,25 +621,6 @@
 
 /* Phase 5.3C - Evidence Record History Clarity */
 
-.evidence-history-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.evidence-history-header p {
-  margin: 0.35rem 0 0;
-  color: var(--text);
-  font-size: 0.85rem;
-}
-
-.evidence-history-header > span {
-  flex: 0 0 auto;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
 .evidence-history-item {
   grid-template-columns: 110px 1fr 130px;
 }
@@ -587,7 +669,4 @@
     grid-template-columns: 1fr;
   }
 
-  .evidence-history-header {
-    flex-direction: column;
-  }
 }

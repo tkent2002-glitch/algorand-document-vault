@@ -102,18 +102,6 @@ function EvidenceDetailsPanel({ record }: EvidenceDetailsPanelProps) {
       </div>
 
       <div className="evidence-details-section">
-        <h3>Available Actions</h3>
-        <div className="evidence-details-actions">
-          <button type="button" disabled>
-            Verify Coming Soon
-          </button>
-          <button type="button" disabled>
-            Export Report Coming Soon
-          </button>
-        </div>
-      </div>
-
-      <div className="evidence-details-section">
         <h3>Proof Boundary</h3>
         <p>
           This record proves document integrity only. It does not prove legal

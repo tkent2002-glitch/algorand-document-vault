@@ -21,8 +21,9 @@ async function openVault(page: Page) {
 
 async function expectOnePersistedRecord(page: Page) {
   const totalRecords = page
-    .locator(".vault-stats > div")
-    .filter({ hasText: "Total Records" })
+    .getByLabel("Vault summary")
+    .locator("span")
+    .filter({ hasText: "evidence records" })
     .locator("strong");
 
   await expect(totalRecords).toHaveText("1");
