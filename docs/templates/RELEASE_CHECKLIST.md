@@ -129,8 +129,12 @@ Manual responsive evidence recorded August 28, 2026:
   and a regression test covers that boundary; the physical retest passed.
 - A disposable photo selected through the iOS picker produced a local Draft
   record that survived refresh. Plain and encrypted backups downloaded into
-  Files, and a Pera same-device handoff returned to a connected TestNet session.
-  The wallet session and Draft record both survived a subsequent Safari refresh.
+  Files and restored one Draft record into separate empty Safari Private
+  Browsing sessions. The encrypted restore rejected an incorrect password before
+  accepting the disposable test password; both previews reported one new record
+  and zero conflicts. A Pera same-device handoff returned to a connected TestNet
+  session, and the wallet session and Draft record both survived a subsequent
+  Safari refresh.
 
 ## Algorand TestNet and wallet validation
 
