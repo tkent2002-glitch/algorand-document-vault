@@ -28,6 +28,7 @@ the automated suite passes.
 | Independent security review | Not started | No independent reviewer or report is recorded. |
 | Product-owner approval | Open | Approval must be explicit after all blockers are closed or accepted. |
 | Production hosting and HTTPS smoke | Post-approval external gate | Host selection and deployment require a separate approved action. |
+| Post-validation workflow polish | Automated regression passed; focused manual recheck open | Notarize, Verify, and Vault now use task-first layouts and progressive disclosure. Chromium, Edge, and WebKit browser automation passed; the changed routes still require a focused keyboard and physical zoom recheck before interface freeze. |
 
 ## Verified candidate evidence
 
@@ -70,6 +71,12 @@ The following evidence is already repeatable or recorded:
 - Live TestNet transaction
   `D5QWYDQFAZRL3F7H2I6ELJATMZNI7XYVX3GWR4U6NIGABEEZO3LA` confirmed in round
   `66759442`, and its evidence record persisted after reload and restart.
+- The post-validation workflow-polish pass keeps core actions visible while
+  collapsing optional transaction and backup details. Unit, accessibility,
+  build, lint, Chromium, Edge, and WebKit regression checks passed locally.
+  Playwright Firefox could not start in the current Windows Codex host
+  (`spawn UNKNOWN` before page load), so the pull-request Firefox job and the
+  focused physical-browser recheck remain required evidence for this commit.
 
 The final release diff must repeat every automated gate. The statements above
 do not pre-approve a future commit or tag.

@@ -2,12 +2,12 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  padding: 1.25rem;
+  margin-bottom: 0;
+  padding: 1rem;
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 12px;
   background: var(--social-bg);
-  box-shadow: var(--shadow);
+  box-shadow: none;
 }
 
 .vault-import-preview strong {
@@ -54,7 +54,7 @@
 }
 .vault-backup-actions,
 .vault-import-preview {
-  border-left: 4px solid var(--accent);
+  border-left: 1px solid var(--border);
 }
 
 .vault-backup-actions p,

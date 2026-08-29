@@ -92,10 +92,9 @@ function VaultPage() {
     [currentPage, filteredIndex]
   );
 
-  const selectedItem =
-    pagination.items.find((item) => item.hashValue === selectedHash) ??
-    pagination.items[0] ??
-    null;
+  const selectedItem = selectedHash
+    ? pagination.items.find((item) => item.hashValue === selectedHash) ?? null
+    : null;
 
   const historyTotalPages = selectedItem
     ? Math.max(
@@ -140,9 +139,8 @@ function VaultPage() {
         <h2>Evidence Vault</h2>
 
         <p>
-          Review cryptographic evidence records organized by unique
-          document fingerprint. The Vault stores evidence metadata and
-          blockchain references, not the original documents.
+          Search and review document fingerprints stored on this
+          device. Open backup and restore tools only when you need them.
         </p>
 
         <div className="vault-boundary-summary">
@@ -151,9 +149,6 @@ function VaultPage() {
           <span>Fingerprint: SHA-256</span>
         </div>
       </div>
-
-      <VaultBackupActions />
-      <VaultImportPreview onImportComplete={reloadRecords} />
 
       <div className="vault-stats">
         <div>
@@ -176,6 +171,21 @@ function VaultPage() {
           <strong>{confirmedCount}</strong>
         </div>
       </div>
+
+      <details className="vault-tools">
+        <summary>
+          <span>
+            <strong>Vault tools</strong>
+            <small>Export or restore evidence-record backups</small>
+          </span>
+          <span className="vault-tools-action">Open tools</span>
+        </summary>
+
+        <div className="vault-tools-content">
+          <VaultBackupActions />
+          <VaultImportPreview onImportComplete={reloadRecords} />
+        </div>
+      </details>
 
       <div className="vault-toolbar">
         <label className="visually-hidden" htmlFor="vault-search">
@@ -276,16 +286,27 @@ function VaultPage() {
                   }
                   key={item.hashValue}
                   type="button"
+                  aria-pressed={selectedItem?.hashValue === item.hashValue}
                   onClick={() => selectDocument(item.hashValue)}
                 >
-                  <strong>{item.documentName}</strong>
-                  <span>Status: {item.latestRecord.status}</span>
-                  <span>{item.records.length} evidence records</span>
-                  <span>
-                    Last Updated:{" "}
-                    {new Date(item.latestRecord.createdAt).toLocaleDateString()}
+                  <span className="evidence-index-item-heading">
+                    <strong>{item.documentName}</strong>
+                    <span className={`evidence-status ${item.latestRecord.status}`}>
+                      <span className="visually-hidden">Status: </span>
+                      {item.latestRecord.status}
+                    </span>
                   </span>
                   <code>{shorten(item.hashValue)}</code>
+                  <span className="evidence-index-item-meta">
+                    <span>
+                      {item.records.length} evidence record
+                      {item.records.length === 1 ? "" : "s"}
+                    </span>
+                    <span>
+                      Updated{" "}
+                      {new Date(item.latestRecord.createdAt).toLocaleDateString()}
+                    </span>
+                  </span>
                 </button>
               ))}
             </div>
@@ -312,13 +333,16 @@ function VaultPage() {
             </nav>
           </aside>
 
-          <div className="evidence-workspace-detail">
-            {selectedItem && (
+          {selectedItem && (
+            <div className="evidence-workspace-detail">
               <>
                 <button
                   className="vault-mobile-back"
                   type="button"
-                  onClick={() => setDetailOpen(false)}
+                  onClick={() => {
+                    setSelectedHash("");
+                    setDetailOpen(false);
+                  }}
                 >
                   Back to document list
                 </button>
@@ -421,8 +445,8 @@ function VaultPage() {
                   )}
                 </div>
               </>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
     </section>

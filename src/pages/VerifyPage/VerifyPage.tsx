@@ -85,71 +85,104 @@ function VerifyPage() {
       <div className="verify-header">
         <p className="verify-eyebrow">Document Verification</p>
 
-        <h2>
-          Verify document integrity against your Evidence Vault.
-        </h2>
+        <h2>Verify Document</h2>
 
         <p>
-          Select a document to calculate its SHA-256 fingerprint
-          locally and compare it against evidence stored on this
-          device. The document itself is never uploaded.
+          Calculate a SHA-256 fingerprint locally and compare it with
+          evidence stored on this device. Your document is never
+          uploaded.
         </p>
       </div>
 
       <div className="verify-workspace">
-        <div className="verify-card">
-          <strong>Step 1 - Select Document</strong>
+        <div className="verify-primary-grid">
+          <div className="verify-card verify-select-card">
+            <span className="verify-step-label">Step 1</span>
+            <strong>Select a document</strong>
 
-          <p>
-            Choose the exact document you want to compare against
-            your local Evidence Vault.
-          </p>
-
-          <label htmlFor="verification-document">
-            Document to verify
-          </label>
-
-          <input
-            id="verification-document"
-            type="file"
-            onChange={handleFileChange}
-            disabled={processing}
-          />
-
-          {processing && (
-            <p role="status">
-              Calculating fingerprint and searching the Vault...
+            <p>
+              Choose the exact file you want to compare with your
+              local Evidence Vault.
             </p>
-          )}
-        </div>
 
-        <div className="verify-card">
-          <strong>Step 2 - SHA-256 Fingerprint</strong>
+            <label htmlFor="verification-document">
+              Document to verify
+            </label>
 
-          {fileName ? (
-            <>
-              <p>
-                <strong>Selected File:</strong> {fileName}
+            <input
+              id="verification-document"
+              type="file"
+              onChange={handleFileChange}
+              disabled={processing}
+            />
+
+            {processing && (
+              <p role="status">
+                Calculating fingerprint and searching the Vault...
               </p>
+            )}
+          </div>
 
-              {hashValue ? (
-                <>
-                  <p>
-                    This fingerprint was generated from the selected
-                    file in your browser.
-                  </p>
-                  <code>{hashValue}</code>
-                </>
-              ) : (
-                <p>Fingerprint calculation is in progress.</p>
-              )}
-            </>
-          ) : (
-            <p>No document selected yet.</p>
-          )}
+          <div
+            className={
+              checked && match
+                ? "verify-card verify-result-card matched"
+                : checked
+                  ? "verify-card verify-result-card unmatched"
+                  : "verify-card verify-result-card"
+            }
+          >
+            <span className="verify-step-label">Result</span>
+            <strong>Verification status</strong>
+
+            {!checked && (
+              <p>
+                Select a document to compare its fingerprint with
+                local evidence.
+              </p>
+            )}
+
+            {checked && match && (
+              <div className="verify-success" role="status">
+                <strong>Fingerprint Match Found</strong>
+                <p>
+                  This document matches evidence stored in your local
+                  Vault.
+                </p>
+              </div>
+            )}
+
+            {checked && !match && (
+              <div className="verify-warning" role="status">
+                <strong>No Local Evidence Match Found</strong>
+                <p>
+                  No record on this device contains the same
+                  fingerprint. This does not prove the document is
+                  invalid or altered.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="verify-card verify-progress">
+        {fileName && (
+          <div className="verify-fingerprint" role="status">
+            <div>
+              <span>Selected document</span>
+              <strong>{fileName}</strong>
+            </div>
+            <div>
+              <span>SHA-256 fingerprint</span>
+              {hashValue ? (
+                <code>{hashValue}</code>
+              ) : (
+                <strong>Calculating...</strong>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="verify-progress">
           <div className="verify-progress-header">
             <strong>Verification Progress</strong>
             <span>
@@ -175,74 +208,35 @@ function VerifyPage() {
                   <div className="verify-progress-stage-header">
                     <strong>{stage.label}</strong>
                     <span>
-                  {stage.complete ? "OK" : index + 1}
+                      {stage.complete ? "Complete" : "Pending"}
                     </span>
                   </div>
 
-                  <p>{stage.description}</p>
+                  <p className="visually-hidden">{stage.description}</p>
                 </div>
               </li>
             ))}
           </ol>
         </div>
 
-        <div className="verify-card">
-          <strong>Verification Result</strong>
+        <details className="verify-boundary">
+          <summary>
+            What verification does—and does not—prove
+          </summary>
 
-          {!checked && (
+          <div>
             <p>
-              Select a document to run verification.
+              A matching SHA-256 fingerprint supports the conclusion
+              that the selected file has the same content as the file
+              represented by the stored evidence record.
             </p>
-          )}
 
-          {checked && match && (
-            <div className="verify-success" role="status">
-              <strong>Fingerprint Match Found</strong>
-
-              <p>
-                The selected document produces the same SHA-256
-                fingerprint as a record in your Evidence Vault.
-              </p>
-
-              <p>
-                This supports document integrity: the file matches the
-                content fingerprint previously recorded in the Vault.
-              </p>
-            </div>
-          )}
-
-          {checked && !match && (
-            <div className="verify-warning" role="status">
-              <strong>No Local Evidence Match Found</strong>
-
-              <p>
-                No record on this device contains the same SHA-256
-                fingerprint.
-              </p>
-
-              <p>
-                This does not prove that the document is invalid,
-                altered, or fraudulent. It only means that no matching
-                local evidence record was found.
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className="verify-card verify-boundary">
-          <strong>What Verification Proves</strong>
-
-          <p>
-            A matching SHA-256 fingerprint supports the conclusion
-            that the selected file has the same content as the file
-            represented by the stored evidence record.
-          </p>
-
-          <p>
-            It does not establish authorship, ownership, legal
-            validity, truthfulness, or enforceability of the document.
-          </p>
-        </div>
+            <p>
+              It does not establish authorship, ownership, legal
+              validity, truthfulness, or enforceability of the document.
+            </p>
+          </div>
+        </details>
       </div>
 
       {match && (

@@ -464,20 +464,18 @@ function NotarizePage() {
   return (
     <section className="page notarize-page">
       <div className="notarize-header">
+        <p className="notarize-eyebrow">TestNet Notarization</p>
         <h2>Notarize Document</h2>
         <p>
-          Create cryptographic evidence for one document and prepare it
-          for Algorand TestNet notarization.
+          Select one document, review its local proof, and approve the
+          Algorand TestNet transaction only when you are ready.
         </p>
       </div>
 
       <div className="notarize-workspace">
-        <div className="notarize-row">
+        <div className="notarize-primary-grid">
           <div className="notarize-section">
             <UploadStep onFileChange={handleFileChange} />
-          </div>
-
-          <div className="notarize-section">
             <DocumentSummaryStep
               fileName={fileName}
               fileHash={fileHash}
@@ -492,20 +490,14 @@ function NotarizePage() {
               evidenceRecord={evidenceRecord}
             />
           </div>
+
+          <WalletReadinessPanel
+            wallet={wallet}
+            connecting={walletConnecting}
+            onConnect={handleConnectWallet}
+            onDisconnect={handleDisconnectWallet}
+          />
         </div>
-
-        <WalletReadinessPanel
-          wallet={wallet}
-          connecting={walletConnecting}
-          onConnect={handleConnectWallet}
-          onDisconnect={handleDisconnectWallet}
-        />
-
-        <BlockchainPreparationStep
-          transactionDraft={transactionDraft}
-        />
-
-        <EvidenceReviewStep prettyPayload={prettyPayload} />
 
         {recoveryMessage && (
           <div
@@ -555,39 +547,72 @@ function NotarizePage() {
           </div>
         )}
 
-        <SignSubmitStep
-          hasDocument={Boolean(proof)}
-          walletReady={walletReady}
-          transactionPrepared={Boolean(transactionDraft)}
-          processing={processing}
-          readyForSignature={readyForSignature}
-          signingMessage={signingMessage}
-          submissionMessage={submissionMessage}
-          confirmationMessage={confirmationMessage}
-          signedTransaction={signedTransaction}
-          submissionResult={submissionResult}
-          confirmationResult={confirmationResult}
-          onSignTransaction={handleSignTransaction}
-          onSubmitTransaction={handleSubmitTransaction}
-        />
+        <div className="notarize-action-grid">
+          <SignSubmitStep
+            hasDocument={Boolean(proof)}
+            walletReady={walletReady}
+            transactionPrepared={Boolean(transactionDraft)}
+            processing={processing}
+            readyForSignature={readyForSignature}
+            signingMessage={signingMessage}
+            submissionMessage={submissionMessage}
+            confirmationMessage={confirmationMessage}
+            signedTransaction={signedTransaction}
+            submissionResult={submissionResult}
+            confirmationResult={confirmationResult}
+            onSignTransaction={handleSignTransaction}
+            onSubmitTransaction={handleSubmitTransaction}
+          />
+        </div>
 
         <NotarizationSuccessPanel
           confirmationResult={confirmationResult}
           evidenceRecord={evidenceRecord}
         />
 
-        <ProgressTimeline
-          fileName={fileName}
-          fileHash={fileHash}
-          proof={proof}
-          evidenceRecord={evidenceRecord}
-          serializedProofPayload={serializedProofPayload}
-          walletReady={walletReady}
-          transactionDraft={transactionDraft}
-          signedTransaction={signedTransaction}
-          submissionResult={submissionResult}
-          confirmationResult={confirmationResult}
-        />
+        <details
+          className="notarize-disclosure"
+          open={Boolean(
+            transactionDraft ||
+              signedTransaction ||
+              submissionResult ||
+              confirmationResult
+          )}
+        >
+          <summary>
+            <span>
+              <strong>Proof and transaction details</strong>
+              <small>
+                Review the prepared transaction, proof payload, and
+                workflow progress.
+              </small>
+            </span>
+            <span className="notarize-disclosure-action">
+              View details
+            </span>
+          </summary>
+
+          <div className="notarize-disclosure-content">
+            <BlockchainPreparationStep
+              transactionDraft={transactionDraft}
+            />
+
+            <EvidenceReviewStep prettyPayload={prettyPayload} />
+
+            <ProgressTimeline
+              fileName={fileName}
+              fileHash={fileHash}
+              proof={proof}
+              evidenceRecord={evidenceRecord}
+              serializedProofPayload={serializedProofPayload}
+              walletReady={walletReady}
+              transactionDraft={transactionDraft}
+              signedTransaction={signedTransaction}
+              submissionResult={submissionResult}
+              confirmationResult={confirmationResult}
+            />
+          </div>
+        </details>
       </div>
     </section>
   );

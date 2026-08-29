@@ -84,7 +84,7 @@ function SignSubmitStep({
 
   return (
     <>
-      <div className="notarize-result">
+      <div className="notarize-result notarize-action-step">
         <strong>Step 1 — Sign Transaction</strong>
 
         <p>
@@ -121,7 +121,7 @@ function SignSubmitStep({
         </button>
       </div>
 
-      <div className="notarize-result">
+      <div className="notarize-result notarize-action-step">
         <strong>Step 2 — Submit Transaction</strong>
 
         <p>{submitGuidance}</p>

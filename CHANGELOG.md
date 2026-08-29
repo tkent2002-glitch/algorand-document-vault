@@ -23,11 +23,19 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
 - Accessibility labels, landmarks, focus management, responsive navigation, and regression tests
 - CI lint enforcement
 
+### Changed
+
+- Simplified the Notarize, Verify, and Vault routes with task-first layouts,
+  compact record cards, and progressive disclosure for transaction details and
+  backup controls.
+
 ### In progress
 
 - Manual stable Firefox, Safari/iOS, and representative mobile-device checks
 - Real zoom, operating-system visual-mode, and per-browser backup UX checks
 - Current post-redesign screenshots
+- Focused keyboard and zoom recheck of the simplified Notarize, Verify, and
+  Vault routes
 - Independent security review and product-owner release approval
 - Public-alpha hosting selection and deployed HTTPS validation
 

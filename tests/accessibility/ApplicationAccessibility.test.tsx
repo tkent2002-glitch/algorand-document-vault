@@ -112,6 +112,15 @@ describe("application accessibility boundaries", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Vault" }));
 
+    const toolsSummary = (await screen.findByText("Vault tools", {
+      exact: true,
+    })).closest("summary");
+
+    expect(toolsSummary).not.toBeNull();
+    expect(toolsSummary?.closest("details")).not.toHaveAttribute("open");
+    fireEvent.click(toolsSummary!);
+    expect(toolsSummary?.closest("details")).toHaveAttribute("open");
+
     expect(
       await screen.findByLabelText(
         "Search evidence by filename or fingerprint"
@@ -130,6 +139,11 @@ describe("application accessibility boundaries", () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: "Vault" }));
+
+    const toolsSummary = (await screen.findByText("Vault tools", {
+      exact: true,
+    })).closest("summary");
+    fireEvent.click(toolsSummary!);
 
     const exportButton = await screen.findByRole("button", {
       name: "Export Encrypted Backup",

@@ -8,6 +8,15 @@ async function openVault(page: Page) {
   await expect(
     page.getByRole("heading", { name: "Evidence Vault" })
   ).toBeVisible();
+
+  const vaultTools = page.locator("details.vault-tools");
+  const toolsOpen = await vaultTools.evaluate(
+    (details) => (details as HTMLDetailsElement).open
+  );
+
+  if (!toolsOpen) {
+    await vaultTools.locator("summary").click();
+  }
 }
 
 async function expectOnePersistedRecord(page: Page) {
