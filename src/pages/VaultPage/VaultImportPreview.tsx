@@ -216,20 +216,27 @@ function VaultImportPreview({
       </div>
 
       <div className="vault-import-file-picker">
-        <label htmlFor="vault-backup-file">Evidence Vault backup file</label>
+        <strong>Evidence Vault backup file</strong>
+        <div className="vault-import-file-control">
+          <label
+            className="vault-import-file-button"
+            htmlFor="vault-backup-file"
+          >
+            Select backup file
+          </label>
+          <span role="status">
+            {fileName || "No file selected"}
+          </span>
+        </div>
         <input
           id="vault-backup-file"
+          className="visually-hidden"
           type="file"
           accept="application/json"
+          aria-label="Evidence Vault backup file"
           onChange={handleFileChange}
         />
       </div>
-
-      {fileName && (
-        <p>
-          <strong>Selected Backup:</strong> {fileName}
-        </p>
-      )}
 
       {encryptedBackup && !backup && (
         <div className="vault-import-decryption">

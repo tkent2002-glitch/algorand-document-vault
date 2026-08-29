@@ -63,7 +63,7 @@ async function restoreBackup(
   try {
     await page.goto(BASE_URL);
     await openVaultTools(page);
-    await page.getByRole("tab", { name: "Restore backup" }).click();
+    await page.getByRole("tab", { name: "Restore from file" }).click();
     await page
       .getByLabel("Evidence Vault backup file")
       .setInputFiles(backupPath);

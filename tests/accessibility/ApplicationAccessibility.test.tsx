@@ -152,7 +152,7 @@ describe("application accessibility boundaries", () => {
       "true"
     );
 
-    fireEvent.click(screen.getByRole("tab", { name: "Restore backup" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Restore from file" }));
     expect(
       screen.getByLabelText("Evidence Vault backup file")
     ).toHaveAttribute("type", "file");

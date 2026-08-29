@@ -216,7 +216,7 @@ function VaultPage() {
               aria-controls="vault-restore-panel"
               onClick={() => setActiveTool("restore")}
             >
-              Restore backup
+              Restore from file
             </button>
           </div>
 
