@@ -32,6 +32,8 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
 - Combined wallet approval, TestNet submission, and confirmation into one
   user-facing notarization action while retaining transaction-policy checks,
   safe retry handling, and uncertain-status resubmission protection.
+- Made the active Notarize navigation restart a completed workflow while
+  preserving unfinished notarization work.
 
 ### In progress
 

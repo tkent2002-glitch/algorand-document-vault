@@ -29,6 +29,10 @@ const WalletPage = lazy(
 
 function App() {
   const [activePage, setActivePage] = useState<Page>("dashboard");
+  const [notarizationComplete, setNotarizationComplete] =
+    useState(false);
+  const [notarizeSessionKey, setNotarizeSessionKey] =
+    useState(0);
   const mainRef = useRef<HTMLElement>(null);
   const initialRender = useRef(true);
   const preventScrollOnNextFocus = useRef(false);
@@ -37,6 +41,15 @@ function App() {
     page: Page,
     options?: { preventScroll?: boolean }
   ) {
+    if (
+      page === "notarize" &&
+      activePage === "notarize" &&
+      notarizationComplete
+    ) {
+      setNotarizeSessionKey((currentKey) => currentKey + 1);
+      setNotarizationComplete(false);
+    }
+
     preventScrollOnNextFocus.current =
       options?.preventScroll ?? false;
     setActivePage(page);
@@ -105,7 +118,12 @@ function App() {
             {activePage === "dashboard" && (
               <DashboardPage onNavigate={handleNavigate} />
             )}
-            {activePage === "notarize" && <NotarizePage />}
+            {activePage === "notarize" && (
+              <NotarizePage
+                key={notarizeSessionKey}
+                onCompletionChange={setNotarizationComplete}
+              />
+            )}
             {activePage === "verify" && <VerifyPage />}
             {activePage === "vault" && <VaultPage />}
             {activePage === "wallet" && <WalletPage />}

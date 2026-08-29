@@ -39,7 +39,13 @@ import UploadStep from "./components/UploadStep";
 import WalletReadinessPanel from "./components/WalletReadinessPanel";
 import "./NotarizePage.css";
 
-function NotarizePage() {
+type NotarizePageProps = {
+  onCompletionChange?: (complete: boolean) => void;
+};
+
+function NotarizePage({
+  onCompletionChange,
+}: NotarizePageProps) {
   const [fileName, setFileName] = useState<string>("");
   const [fileHash, setFileHash] = useState<string>("");
   const [proof, setProof] = useState<NotarizationProof | null>(null);
@@ -91,6 +97,10 @@ function NotarizePage() {
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    onCompletionChange?.(Boolean(confirmationResult));
+  }, [confirmationResult, onCompletionChange]);
 
   async function handleConnectWallet() {
     try {
