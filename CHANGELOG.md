@@ -29,6 +29,9 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
   a compact post-confirmation receipt, compact record cards, and progressive
   disclosure for transaction details plus focused, tabbed backup and restore
   controls.
+- Combined wallet approval, TestNet submission, and confirmation into one
+  user-facing notarization action while retaining transaction-policy checks,
+  safe retry handling, and uncertain-status resubmission protection.
 
 ### In progress
 

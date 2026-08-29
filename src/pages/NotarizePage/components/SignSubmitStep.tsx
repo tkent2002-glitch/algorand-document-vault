@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   AlgorandConfirmationResult,
   AlgorandSignedProofTransaction,
   AlgorandSubmissionResult,
@@ -16,8 +16,8 @@ type SignSubmitStepProps = {
   signedTransaction: AlgorandSignedProofTransaction | null;
   submissionResult: AlgorandSubmissionResult | null;
   confirmationResult: AlgorandConfirmationResult | null;
-  onSignTransaction: () => void;
-  onSubmitTransaction: () => void;
+  actionBlocked: boolean;
+  onApproveAndNotarize: () => void;
 };
 
 function SignSubmitStep({
@@ -32,186 +32,173 @@ function SignSubmitStep({
   signedTransaction,
   submissionResult,
   confirmationResult,
-  onSignTransaction,
-  onSubmitTransaction,
+  actionBlocked,
+  onApproveAndNotarize,
 }: SignSubmitStepProps) {
-  let signGuidance =
-    "Choose a document before requesting a wallet signature.";
+  const walletApproved = Boolean(signedTransaction);
+  const submitted = Boolean(submissionResult);
+  const confirmed = Boolean(confirmationResult);
+  const submissionComplete =
+    submitted || (processing && Boolean(confirmationMessage));
+  const canResume = walletApproved && !submitted;
+  const actionDisabled =
+    actionBlocked ||
+    processing ||
+    submitted ||
+    confirmed ||
+    (!readyForSignature && !canResume);
+
+  let guidance =
+    "Choose a document before starting notarization.";
 
   if (hasDocument && !walletReady) {
-    signGuidance =
-      "Connect Pera Wallet before requesting a signature.";
-  } else if (
-    hasDocument &&
-    walletReady &&
-    !transactionPrepared
-  ) {
-    signGuidance =
+    guidance = "Connect Pera Wallet before starting notarization.";
+  } else if (hasDocument && walletReady && !transactionPrepared) {
+    guidance =
       "The wallet is connected, but the transaction is not prepared yet.";
+  } else if (actionBlocked) {
+    guidance =
+      "Review the existing transaction status before attempting another submission.";
+  } else if (processing && !walletApproved) {
+    guidance = "Approve the transaction in Pera Wallet to continue.";
+  } else if (processing && walletApproved) {
+    guidance =
+      "Wallet approval is complete. The app is submitting and confirming the transaction.";
+  } else if (submitted && !confirmed) {
+    guidance =
+      "The transaction is submitted. Wait for confirmation before taking another action.";
+  } else if (canResume) {
+    guidance =
+      "Wallet approval is complete. Resume the interrupted TestNet submission without signing again.";
   } else if (readyForSignature) {
-    signGuidance =
-      "The transaction is ready. Review it carefully in Pera Wallet before approving.";
-  } else if (processing && !signedTransaction) {
-    signGuidance =
-      "Waiting for the wallet operation to complete.";
+    guidance =
+      "Pera will ask for approval once. The app will then submit to Algorand TestNet and wait for confirmation automatically.";
   }
 
-  const signDisabled =
-    !readyForSignature || processing;
+  const actionState = processing
+    ? "processing"
+    : !submitted && (readyForSignature || canResume)
+      ? "ready"
+      : "inactive";
 
-  const submitDisabled =
-    !signedTransaction ||
-    Boolean(submissionResult) ||
-    processing;
+  let buttonLabel = "Approve and notarize";
 
-  const signStepState =
-    processing && !signedTransaction
-      ? "processing"
-      : readyForSignature
-        ? "ready"
-        : "inactive";
-
-  const submitStepState =
-    processing && signedTransaction && !submissionResult
-      ? "processing"
-      : signedTransaction && !submissionResult
-        ? "ready"
-        : "inactive";
-
-  let submitGuidance =
-    "Sign the transaction before it can be submitted.";
-
-  if (signedTransaction && !submissionResult && !processing) {
-    submitGuidance =
-      "The transaction is signed but still local. Submitting it will send it to Algorand TestNet.";
-  } else if (
-    signedTransaction &&
-    processing &&
-    !submissionResult
-  ) {
-    submitGuidance =
-      "Submission or confirmation is currently in progress.";
-  } else if (submissionResult) {
-    submitGuidance =
-      "This transaction has already been submitted. Another submission is not allowed from this action.";
+  if (processing && !walletApproved) {
+    buttonLabel = "Waiting for Pera Wallet...";
+  } else if (processing && walletApproved) {
+    buttonLabel = "Submitting and confirming...";
+  } else if (canResume) {
+    buttonLabel = "Resume notarization";
+  } else if (submitted && !confirmed) {
+    buttonLabel = "Waiting for confirmation";
+  } else if (confirmed) {
+    buttonLabel = "Notarization complete";
   }
+
+  const progressStages = [
+    {
+      label: "Wallet approval",
+      complete: walletApproved,
+      active: processing && !walletApproved,
+    },
+    {
+      label: "TestNet submission",
+      complete: submissionComplete,
+      active: processing && walletApproved && !submissionComplete,
+    },
+    {
+      label: "Confirmation",
+      complete: confirmed,
+      active: processing && submissionComplete && !confirmed,
+    },
+  ];
 
   return (
-    <>
-      <div
-        className={`notarize-result notarize-action-step ${signStepState}`}
-      >
-        <strong>Step 1 — Sign Transaction</strong>
-
-        <div className="notarize-action-meta">
-          <span className={walletReady ? "complete" : "pending"}>
-            Wallet {walletReady ? "connected" : "not connected"}
-          </span>
-          <span className={transactionPrepared ? "complete" : "pending"}>
-            Transaction {transactionPrepared ? "prepared" : "not prepared"}
-          </span>
+    <div
+      className={`notarize-result notarize-action-step ${actionState}`}
+    >
+      <div className="notarize-action-heading">
+        <div>
+          <span className="notarize-action-kicker">One secure action</span>
+          <strong>Approve and notarize</strong>
         </div>
-
-        <p>{signGuidance}</p>
-
-        {signingMessage && (
-          <p role="status">
-            <strong>Signing Status:</strong>{" "}
-            {signingMessage}
-          </p>
-        )}
-
-        <button
-          type="button"
-          onClick={onSignTransaction}
-          disabled={signDisabled}
-        >
-          {processing && !signedTransaction
-            ? "Waiting for Pera Wallet..."
-            : signedTransaction
-              ? "Transaction Signed"
-              : "Sign with Pera Wallet"}
-        </button>
+        <span className="notarize-action-network">Algorand TestNet</span>
       </div>
 
-      <div
-        className={`notarize-result notarize-action-step ${submitStepState}`}
-      >
-        <strong>Step 2 — Submit Transaction</strong>
+      <div className="notarize-action-meta">
+        <span className={walletReady ? "complete" : "pending"}>
+          Wallet {walletReady ? "connected" : "not connected"}
+        </span>
+        <span className={transactionPrepared ? "complete" : "pending"}>
+          Transaction {transactionPrepared ? "prepared" : "not prepared"}
+        </span>
+      </div>
 
-        <p>{submitGuidance}</p>
+      <p>{guidance}</p>
 
-        {signedTransaction ? (
-          <div className="notarize-signed-summary">
-            <span>Signed transaction ready</span>
-            <span>{signedTransaction.signedTransactionByteLength} bytes</span>
-          </div>
-        ) : null}
+      <ol className="notarize-action-progress" aria-label="Notarization progress">
+        {progressStages.map((stage, index) => (
+          <li
+            key={stage.label}
+            className={
+              stage.complete
+                ? "complete"
+                : stage.active
+                  ? "active"
+                  : "pending"
+            }
+          >
+            <span aria-hidden="true">
+              {stage.complete ? "✓" : index + 1}
+            </span>
+            <small>{stage.label}</small>
+          </li>
+        ))}
+      </ol>
+
+      <div className="notarize-action-status" aria-live="polite">
+        {signingMessage && (
+          <p>
+            <strong>Wallet:</strong> {signingMessage}
+          </p>
+        )}
 
         {submissionMessage && (
-          <p role="status">
-            <strong>Submission Status:</strong>{" "}
-            {submissionMessage}
+          <p>
+            <strong>Network:</strong> {submissionMessage}
           </p>
         )}
 
-        <button
-          type="button"
-          onClick={onSubmitTransaction}
-          disabled={submitDisabled}
-        >
-          {processing && signedTransaction && !submissionResult
-            ? "Processing Algorand Transaction..."
-            : submissionResult
-              ? "Transaction Submitted"
-              : "Submit to Algorand TestNet"}
-        </button>
+        {confirmationMessage && (
+          <p>
+            <strong>Confirmation:</strong> {confirmationMessage}
+          </p>
+        )}
       </div>
 
+      {signedTransaction && !submissionResult ? (
+        <div className="notarize-signed-summary">
+          <span>Wallet approved</span>
+          <span>{signedTransaction.signedTransactionByteLength} bytes</span>
+        </div>
+      ) : null}
+
+      <button
+        type="button"
+        className="notarize-primary-action"
+        onClick={onApproveAndNotarize}
+        disabled={actionDisabled}
+      >
+        {buttonLabel}
+      </button>
+
       {submissionResult && (
-        <div className="notarize-result" role="status">
-          <strong>Algorand Submission</strong>
-
-          <p>
-            Transaction ID:{" "}
-            <code>{submissionResult.transactionId}</code>
-          </p>
-
-          <p>
-            Submitted At:{" "}
-            {submissionResult.submittedAt}
-          </p>
-
-          <p>
-            {confirmationResult
-              ? "Status: Confirmed."
-              : "Status: Submitted. Waiting for confirmation."}
-          </p>
+        <div className="notarize-submission-receipt" role="status">
+          <strong>Transaction submitted</strong>
+          <code>{submissionResult.transactionId}</code>
         </div>
       )}
-
-      {confirmationMessage && (
-        <div className="notarize-result" role="status">
-          <strong>Confirmation Status</strong>
-
-          <p>{confirmationMessage}</p>
-
-          {confirmationResult && (
-            <>
-              <p>
-                Confirmed Round:{" "}
-                {confirmationResult.confirmedRound}
-              </p>
-
-              <p>
-                Confirmed At:{" "}
-                {confirmationResult.confirmedAt}
-              </p>
-            </>
-          )}
-        </div>
-      )}
-    </>
+    </div>
   );
 }
 

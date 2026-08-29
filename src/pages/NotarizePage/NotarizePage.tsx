@@ -169,83 +169,7 @@ function NotarizePage() {
     }
   }
 
-  async function handleSignTransaction() {
-    if (!proof || !wallet.address) {
-      setSigningMessage(
-        "Proof and connected wallet are required before signing."
-      );
-      return;
-    }
-
-    try {
-      setProcessing(true);
-      setRecoveryMessage("");
-      setSigningMessage(
-        "Checking Algorand TestNet readiness..."
-      );
-
-      const preflight =
-        await AlgorandTestNetPreflightService.evaluate();
-
-      if (!preflight.ready) {
-        const reason =
-          preflight.errors.length > 0
-            ? preflight.errors.join(" ")
-            : "Algorand TestNet readiness checks did not pass.";
-
-        setSigningMessage(
-          `Signing blocked. ${reason}`
-        );
-
-        return;
-      }
-
-      setSigningMessage(
-        "Opening Pera Wallet for signature approval..."
-      );
-
-      const signed =
-        await AlgorandTransactionSigningService.signProofTransaction(
-          proof,
-          wallet.address
-        );
-
-      setSignedTransaction(signed);
-      setSubmissionResult(null);
-      setConfirmationResult(null);
-      setUnsafeResubmissionBlocked(false);
-
-      setSigningMessage(
-        "Transaction signed successfully. It has not been submitted yet."
-      );
-
-      setSubmissionMessage("");
-      setConfirmationMessage("");
-    } catch (error) {
-      Logger.error("Transaction signing failed.");
-
-      const failure =
-        TransactionFailureClassificationService.classify(
-          error,
-          { stage: "signing" }
-        );
-
-      const policy =
-        TransactionRetryPolicyService.evaluate(failure);
-
-      setSigningMessage(failure.userMessage);
-      setRecoveryMessage(policy.userMessage);
-
-      setUnsafeResubmissionBlocked(
-        policy.transactionMayHaveBeenSubmitted &&
-          !policy.canRetryImmediately
-      );
-    } finally {
-      setProcessing(false);
-    }
-  }
-
-  async function handleSubmitTransaction() {
+  async function handleApproveAndNotarize() {
     if (unsafeResubmissionBlocked) {
       setRecoveryMessage(
         "Submission is blocked until the existing transaction status has been reviewed."
@@ -253,107 +177,176 @@ function NotarizePage() {
       return;
     }
 
-    if (!signedTransaction) {
-      setSubmissionMessage(
-        "A signed transaction is required before submission."
+    if (!proof || !wallet.address || !evidenceRecord) {
+      setSigningMessage(
+        "A prepared proof, evidence record, and connected wallet are required before notarization."
       );
       return;
     }
 
-    if (!evidenceRecord) {
-      setSubmissionMessage(
-        "An evidence record is required before submission."
-      );
-      return;
-    }
+    let transactionToSubmit = signedTransaction;
 
     try {
       setProcessing(true);
       setRecoveryMessage("");
+      setRecoveryTransactionId(null);
+
+      if (!transactionToSubmit) {
+        setSigningMessage(
+          "Checking Algorand TestNet readiness..."
+        );
+
+        try {
+          const preflight =
+            await AlgorandTestNetPreflightService.evaluate();
+
+          if (!preflight.ready) {
+            const reason =
+              preflight.errors.length > 0
+                ? preflight.errors.join(" ")
+                : "Algorand TestNet readiness checks did not pass.";
+
+            setSigningMessage(
+              `Wallet approval blocked. ${reason}`
+            );
+
+            return;
+          }
+
+          setSigningMessage(
+            "Opening Pera Wallet for transaction approval..."
+          );
+
+          transactionToSubmit =
+            await AlgorandTransactionSigningService.signProofTransaction(
+              proof,
+              wallet.address
+            );
+
+          setSignedTransaction(transactionToSubmit);
+          setSubmissionResult(null);
+          setConfirmationResult(null);
+          setUnsafeResubmissionBlocked(false);
+
+          setSigningMessage(
+            "Wallet approval complete. Submitting to Algorand TestNet..."
+          );
+
+          setSubmissionMessage("");
+          setConfirmationMessage("");
+        } catch (error) {
+          Logger.error("Transaction signing failed.");
+
+          const failure =
+            TransactionFailureClassificationService.classify(
+              error,
+              { stage: "signing" }
+            );
+
+          const policy =
+            TransactionRetryPolicyService.evaluate(failure);
+
+          setSigningMessage(failure.userMessage);
+          setRecoveryMessage(policy.userMessage);
+
+          setUnsafeResubmissionBlocked(
+            policy.transactionMayHaveBeenSubmitted &&
+              !policy.canRetryImmediately
+          );
+          return;
+        }
+      } else {
+        setSigningMessage(
+          "Wallet approval is already complete. Resuming TestNet submission..."
+        );
+      }
+
       setSubmissionResult(null);
       setConfirmationResult(null);
 
-      const result =
-        await AlgorandNotarizationLifecycleService.complete({
-          signedTransaction,
-          evidenceRecord,
-          onProgress: ({ stage, message }) => {
-            if (
-              stage === "submitting" ||
-              stage === "submitted"
-            ) {
-              setSubmissionMessage(message);
-            }
+      try {
+        const result =
+          await AlgorandNotarizationLifecycleService.complete({
+            signedTransaction: transactionToSubmit,
+            evidenceRecord,
+            onProgress: ({ stage, message }) => {
+              if (
+                stage === "submitting" ||
+                stage === "submitted"
+              ) {
+                setSubmissionMessage(message);
+              }
 
-            if (
-              stage === "confirming" ||
-              stage === "confirmed"
-            ) {
-              setConfirmationMessage(message);
-            }
-          },
-        });
+              if (
+                stage === "confirming" ||
+                stage === "confirmed"
+              ) {
+                setConfirmationMessage(message);
+              }
+            },
+          });
 
-      setSubmissionResult(result.submissionResult);
-      setConfirmationResult(result.confirmationResult);
-      setEvidenceRecord(result.confirmedRecord);
-      setUnsafeResubmissionBlocked(false);
-      setRecoveryMessage("");
-    } catch (error) {
-      Logger.error("End-to-end Algorand notarization failed.");
+        setSubmissionResult(result.submissionResult);
+        setConfirmationResult(result.confirmationResult);
+        setEvidenceRecord(result.confirmedRecord);
+        setUnsafeResubmissionBlocked(false);
+        setRecoveryMessage("");
+      } catch (error) {
+        Logger.error("End-to-end Algorand notarization failed.");
 
-      const lifecycleStage =
-        error instanceof AlgorandNotarizationLifecycleError
-          ? error.stage
-          : "unknown";
+        const lifecycleStage =
+          error instanceof AlgorandNotarizationLifecycleError
+            ? error.stage
+            : "unknown";
 
-      const sourceError =
-        error instanceof AlgorandNotarizationLifecycleError
-          ? error.causeValue
-          : error;
+        const sourceError =
+          error instanceof AlgorandNotarizationLifecycleError
+            ? error.causeValue
+            : error;
 
-      const failedTransactionId =
-        error instanceof AlgorandNotarizationLifecycleError
-          ? error.transactionId
-          : null;
+        const failedTransactionId =
+          error instanceof AlgorandNotarizationLifecycleError
+            ? error.transactionId
+            : null;
 
-      setRecoveryTransactionId(failedTransactionId);
+        setRecoveryTransactionId(failedTransactionId);
 
-      let stage: TransactionFailureStage = "unknown";
+        let stage: TransactionFailureStage = "unknown";
 
-      if (
-        lifecycleStage === "submitting" ||
-        lifecycleStage === "submitted"
-      ) {
-        stage = "submitting";
-      } else if (
-        lifecycleStage === "confirming" ||
-        lifecycleStage === "confirmed"
-      ) {
-        stage = "confirming";
-      }
+        if (
+          lifecycleStage === "submitting" ||
+          lifecycleStage === "submitted"
+        ) {
+          stage = "submitting";
+        } else if (
+          lifecycleStage === "confirming" ||
+          lifecycleStage === "confirmed"
+        ) {
+          stage = "confirming";
+        }
 
-      const failure =
-        TransactionFailureClassificationService.classify(
-          sourceError,
-          { stage }
+        const failure =
+          TransactionFailureClassificationService.classify(
+            sourceError,
+            { stage }
+          );
+
+        const policy =
+          TransactionRetryPolicyService.evaluate(failure);
+
+        if (stage === "submitting") {
+          setSubmissionMessage(failure.userMessage);
+        } else {
+          setConfirmationMessage(failure.userMessage);
+        }
+
+        setRecoveryMessage(policy.userMessage);
+
+        setUnsafeResubmissionBlocked(
+          policy.transactionMayHaveBeenSubmitted &&
+            !policy.canRetryImmediately
         );
-
-      const policy =
-        TransactionRetryPolicyService.evaluate(failure);
-
-      if (stage === "submitting") {
-        setSubmissionMessage(failure.userMessage);
-      } else {
-        setConfirmationMessage(failure.userMessage);
       }
-
-      setRecoveryMessage(policy.userMessage);
-
-      setUnsafeResubmissionBlocked(
-        policy.transactionMayHaveBeenSubmitted &&
-          !policy.canRetryImmediately
-      );
     } finally {
       setProcessing(false);
     }
@@ -568,8 +561,8 @@ function NotarizePage() {
               signedTransaction={signedTransaction}
               submissionResult={submissionResult}
               confirmationResult={confirmationResult}
-              onSignTransaction={handleSignTransaction}
-              onSubmitTransaction={handleSubmitTransaction}
+              actionBlocked={unsafeResubmissionBlocked}
+              onApproveAndNotarize={handleApproveAndNotarize}
             />
           </div>
         )}

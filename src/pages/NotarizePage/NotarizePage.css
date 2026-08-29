@@ -30,12 +30,16 @@
   gap: 1rem;
 }
 
-.notarize-primary-grid,
-.notarize-action-grid {
+.notarize-primary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   align-items: start;
+}
+
+.notarize-action-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .notarize-section {
@@ -177,6 +181,7 @@
 
 .notarize-action-step {
   height: 100%;
+  padding: 1.15rem 1.25rem;
 }
 
 .notarize-action-step.inactive {
@@ -194,6 +199,43 @@
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent-bg) 55%, var(--social-bg));
   box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.notarize-action-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.notarize-action-heading > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.notarize-action-heading strong {
+  color: var(--text-h);
+  font-size: 1.08rem;
+}
+
+.notarize-action-kicker {
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.notarize-action-network {
+  flex: 0 0 auto;
+  padding: 0.3rem 0.58rem;
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  background: var(--accent-bg);
+  color: var(--accent-strong);
+  font-size: 0.72rem;
+  font-weight: 750;
 }
 
 .notarize-action-meta,
@@ -219,6 +261,83 @@
   border-color: var(--accent-border);
   background: var(--accent-bg);
   color: var(--text-h);
+}
+
+.notarize-action-progress {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notarize-action-progress li {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 74%, transparent);
+  color: var(--text);
+}
+
+.notarize-action-progress li > span {
+  display: grid;
+  flex: 0 0 1.45rem;
+  width: 1.45rem;
+  height: 1.45rem;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.notarize-action-progress li small {
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.notarize-action-progress li.complete,
+.notarize-action-progress li.active {
+  border-color: var(--accent-border);
+  color: var(--text-h);
+}
+
+.notarize-action-progress li.complete > span {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent-strong);
+}
+
+.notarize-action-progress li.active {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.notarize-action-status:empty {
+  display: none;
+}
+
+.notarize-action-status p {
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--accent-border);
+}
+
+.notarize-primary-action {
+  min-width: min(100%, 15rem);
+}
+
+.notarize-submission-receipt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.75rem;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
 }
 
 .wallet-connection-action.secondary {
@@ -539,8 +658,7 @@
 }
 
 @media (max-width: 960px) {
-  .notarize-primary-grid,
-  .notarize-action-grid {
+  .notarize-primary-grid {
     grid-template-columns: 1fr;
   }
 
