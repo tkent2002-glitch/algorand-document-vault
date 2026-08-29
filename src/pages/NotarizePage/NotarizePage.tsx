@@ -465,39 +465,46 @@ function NotarizePage() {
     <section className="page notarize-page">
       <div className="notarize-header">
         <p className="notarize-eyebrow">TestNet Notarization</p>
-        <h2>Notarize Document</h2>
+        <h2>
+          {confirmationResult
+            ? "Notarization Receipt"
+            : "Notarize Document"}
+        </h2>
         <p>
-          Select one document, review its local proof, and approve the
-          Algorand TestNet transaction only when you are ready.
+          {confirmationResult
+            ? "Your document fingerprint is confirmed on Algorand TestNet. Review the receipt or begin another notarization."
+            : "Select one document, review its local proof, and approve the Algorand TestNet transaction only when you are ready."}
         </p>
       </div>
 
       <div className="notarize-workspace">
-        <div className="notarize-primary-grid">
-          <div className="notarize-section">
-            <UploadStep onFileChange={handleFileChange} />
-            <DocumentSummaryStep
-              fileName={fileName}
-              fileHash={fileHash}
-              errors={errors}
-            />
+        {!confirmationResult && (
+          <div className="notarize-primary-grid">
+            <div className="notarize-section">
+              <UploadStep onFileChange={handleFileChange} />
+              <DocumentSummaryStep
+                fileName={fileName}
+                fileHash={fileHash}
+                errors={errors}
+              />
 
-            <DuplicateEvidenceWarning
-              duplicateRecord={duplicateRecord}
-            />
+              <DuplicateEvidenceWarning
+                duplicateRecord={duplicateRecord}
+              />
 
-            <EvidenceRecordPreview
-              evidenceRecord={evidenceRecord}
+              <EvidenceRecordPreview
+                evidenceRecord={evidenceRecord}
+              />
+            </div>
+
+            <WalletReadinessPanel
+              wallet={wallet}
+              connecting={walletConnecting}
+              onConnect={handleConnectWallet}
+              onDisconnect={handleDisconnectWallet}
             />
           </div>
-
-          <WalletReadinessPanel
-            wallet={wallet}
-            connecting={walletConnecting}
-            onConnect={handleConnectWallet}
-            onDisconnect={handleDisconnectWallet}
-          />
-        </div>
+        )}
 
         {recoveryMessage && (
           <div
@@ -547,44 +554,61 @@ function NotarizePage() {
           </div>
         )}
 
-        <div className="notarize-action-grid">
-          <SignSubmitStep
-            hasDocument={Boolean(proof)}
-            walletReady={walletReady}
-            transactionPrepared={Boolean(transactionDraft)}
-            processing={processing}
-            readyForSignature={readyForSignature}
-            signingMessage={signingMessage}
-            submissionMessage={submissionMessage}
-            confirmationMessage={confirmationMessage}
-            signedTransaction={signedTransaction}
-            submissionResult={submissionResult}
-            confirmationResult={confirmationResult}
-            onSignTransaction={handleSignTransaction}
-            onSubmitTransaction={handleSubmitTransaction}
-          />
-        </div>
+        {!confirmationResult && (
+          <div className="notarize-action-grid">
+            <SignSubmitStep
+              hasDocument={Boolean(proof)}
+              walletReady={walletReady}
+              transactionPrepared={Boolean(transactionDraft)}
+              processing={processing}
+              readyForSignature={readyForSignature}
+              signingMessage={signingMessage}
+              submissionMessage={submissionMessage}
+              confirmationMessage={confirmationMessage}
+              signedTransaction={signedTransaction}
+              submissionResult={submissionResult}
+              confirmationResult={confirmationResult}
+              onSignTransaction={handleSignTransaction}
+              onSubmitTransaction={handleSubmitTransaction}
+            />
+          </div>
+        )}
 
         <NotarizationSuccessPanel
           confirmationResult={confirmationResult}
           evidenceRecord={evidenceRecord}
         />
 
+        {confirmationResult && (
+          <div className="notarize-completed-next">
+            <UploadStep
+              onFileChange={handleFileChange}
+              title="Notarize another document"
+              description="Choose a new document to begin a fresh TestNet notarization. Your confirmed record will remain in the Vault."
+            />
+          </div>
+        )}
+
         <details
           className="notarize-disclosure"
           open={Boolean(
-            transactionDraft ||
+            !confirmationResult &&
+              (transactionDraft ||
               signedTransaction ||
-              submissionResult ||
-              confirmationResult
+              submissionResult)
           )}
         >
           <summary>
             <span>
-              <strong>Proof and transaction details</strong>
+              <strong>
+                {confirmationResult
+                  ? "Completed transaction details"
+                  : "Proof and transaction details"}
+              </strong>
               <small>
-                Review the prepared transaction, proof payload, and
-                workflow progress.
+                {confirmationResult
+                  ? "Review the proof payload and completed workflow only when needed."
+                  : "Review the prepared transaction, proof payload, and workflow progress."}
               </small>
             </span>
             <span className="notarize-disclosure-action">

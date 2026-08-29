@@ -1,13 +1,19 @@
-﻿import { AlgorandExplorerService } from "../../../services";
-import type {
-  AlgorandConfirmationResult,
-} from "../../../types";
+import { AlgorandExplorerService } from "../../../services";
 import type { EvidenceRecord } from "../../../services";
+import type { AlgorandConfirmationResult } from "../../../types";
 
 type NotarizationSuccessPanelProps = {
   confirmationResult: AlgorandConfirmationResult | null;
   evidenceRecord: EvidenceRecord | null;
 };
+
+function shorten(value: string): string {
+  if (value.length <= 18) {
+    return value;
+  }
+
+  return `${value.slice(0, 8)}…${value.slice(-6)}`;
+}
 
 function NotarizationSuccessPanel({
   confirmationResult,
@@ -17,17 +23,13 @@ function NotarizationSuccessPanel({
     return null;
   }
 
-  const explorerUrl =
-    AlgorandExplorerService.getTransactionUrl(
-      confirmationResult.transactionId
-    );
+  const explorerUrl = AlgorandExplorerService.getTransactionUrl(
+    confirmationResult.transactionId
+  );
 
   return (
-    <div
-      className="notarize-result notarization-success"
-      role="status"
-    >
-      <div className="notarization-success-header">
+    <div className="notarize-result notarization-success">
+      <div className="notarization-success-header" role="status">
         <div
           className="notarization-success-marker"
           aria-hidden="true"
@@ -36,60 +38,87 @@ function NotarizationSuccessPanel({
         </div>
 
         <div>
-          <strong>Notarization Complete</strong>
+          <strong>Notarization complete</strong>
           <p>
-            The transaction has been confirmed on Algorand
-            TestNet.
+            Confirmed on Algorand TestNet and saved to your local Vault.
           </p>
         </div>
       </div>
 
-      <div className="notarization-success-details">
-        <p>
-          <strong>Transaction ID:</strong>{" "}
-          <code>{confirmationResult.transactionId}</code>
-        </p>
-
-        <p>
-          <strong>Confirmed Round:</strong>{" "}
-          {confirmationResult.confirmedRound}
-        </p>
-
-        <p>
-          <strong>Confirmed At:</strong>{" "}
-          {confirmationResult.confirmedAt}
-        </p>
+      <dl className="notarization-success-receipt">
+        {evidenceRecord && (
+          <div>
+            <dt>Document</dt>
+            <dd>{evidenceRecord.documentName}</dd>
+          </div>
+        )}
 
         {evidenceRecord && (
-          <>
-            <p>
-              <strong>Evidence Record:</strong>{" "}
-              <code>{evidenceRecord.id}</code>
-            </p>
-
-            <p>
-              Your confirmed evidence record has been saved
-              locally and is available from the Vault.
-            </p>
-          </>
+          <div>
+            <dt>Fingerprint</dt>
+            <dd>
+              <code title={evidenceRecord.hashValue}>
+                {shorten(evidenceRecord.hashValue)}
+              </code>
+            </dd>
+          </div>
         )}
+
+        <div>
+          <dt>Transaction</dt>
+          <dd>
+            <code title={confirmationResult.transactionId}>
+              {shorten(confirmationResult.transactionId)}
+            </code>
+          </dd>
+        </div>
+
+        <div>
+          <dt>Confirmed round</dt>
+          <dd>{confirmationResult.confirmedRound}</dd>
+        </div>
+
+        <div>
+          <dt>Confirmed</dt>
+          <dd>
+            <time dateTime={confirmationResult.confirmedAt}>
+              {new Date(confirmationResult.confirmedAt).toLocaleString()}
+            </time>
+          </dd>
+        </div>
+
+        {evidenceRecord && (
+          <div>
+            <dt>Evidence record</dt>
+            <dd>
+              <code title={evidenceRecord.id}>
+                {shorten(evidenceRecord.id)}
+              </code>
+            </dd>
+          </div>
+        )}
+      </dl>
+
+      <div className="notarization-success-actions">
+        <a
+          className="explorer-link"
+          href={explorerUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View on Pera Explorer
+        </a>
       </div>
 
-      <a
-        className="explorer-link"
-        href={explorerUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        View Confirmed Transaction on Pera Explorer
-      </a>
-
-      <p className="notarization-success-boundary">
-        The blockchain confirmation establishes evidence of the
-        document fingerprint at this point in time. It does not
-        establish the document's legal validity, ownership, or
-        truthfulness.
-      </p>
+      <details className="notarization-success-boundary">
+        <summary>What this confirmation proves</summary>
+        <p>
+          The blockchain confirmation establishes evidence of the
+          document fingerprint at this point in time. It does not
+          establish the document's legal validity, ownership, or
+          truthfulness.
+        </p>
+      </details>
     </div>
   );
 }

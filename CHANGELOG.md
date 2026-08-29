@@ -26,8 +26,8 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
 ### Changed
 
 - Simplified the Notarize, Verify, and Vault routes with task-first layouts,
-  compact record cards, and progressive disclosure for transaction details and
-  backup controls.
+  a compact post-confirmation receipt, compact record cards, and progressive
+  disclosure for transaction details and backup controls.
 
 ### In progress
 

@@ -337,14 +337,16 @@
 }
 
 .notarization-success {
-  padding: 1.25rem;
+  padding: 1.1rem;
+  border-color: color-mix(in srgb, #16a34a 42%, var(--border));
+  background: color-mix(in srgb, #16a34a 5%, var(--social-bg));
 }
 
 .notarization-success-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
 }
 
 .notarization-success-marker {
@@ -360,30 +362,100 @@
   font-weight: 700;
 }
 
-.notarization-success-header p,
-.notarization-success-details p {
+.notarization-success-header p {
   margin: 0.35rem 0 0;
 }
 
-.notarization-success-details {
-  margin: 0.85rem 0;
+.notarization-success-receipt {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0;
 }
 
-.notarization-success-details code {
+.notarization-success-receipt > div {
+  min-width: 0;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 76%, transparent);
+}
+
+.notarization-success-receipt dt {
+  margin-bottom: 0.2rem;
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.notarization-success-receipt dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.notarization-success-receipt code {
   overflow-wrap: anywhere;
 }
 
-.notarization-success .explorer-link {
-  display: inline-block;
-  margin-top: 0.45rem;
+.notarization-success-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
 }
 
 .notarization-success-boundary {
-  margin-top: 1rem;
-  padding-top: 0.85rem;
-  border-top: 1px solid currentColor;
+  margin-top: 0.85rem;
+  border-top: 1px solid var(--border);
   font-size: 0.84rem;
-  opacity: 0.7;
+}
+
+.notarization-success-boundary summary {
+  width: fit-content;
+  cursor: pointer;
+  padding-top: 0.75rem;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.notarization-success-boundary p {
+  max-width: 700px;
+  margin: 0.55rem 0 0;
+  color: var(--text);
+}
+
+.notarize-completed-next .notarize-result {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.8fr);
+  grid-template-rows: auto auto;
+  gap: 0.25rem 1.25rem;
+  align-items: end;
+  padding: 0.85rem 1rem;
+}
+
+.notarize-completed-next strong {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.notarize-completed-next p {
+  grid-column: 1;
+  grid-row: 2;
+  margin: 0;
+}
+
+.notarize-completed-next label {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.notarize-completed-next input {
+  grid-column: 2;
+  grid-row: 2;
 }
 
 @media (max-width: 960px) {
@@ -393,6 +465,10 @@
   }
 
   .notarize-progress-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .notarization-success-receipt {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -421,5 +497,21 @@
 
   .notarize-progress-list {
     grid-template-columns: 1fr;
+  }
+
+  .notarization-success-receipt {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .notarize-completed-next .notarize-result {
+    grid-template-columns: 1fr;
+  }
+
+  .notarize-completed-next strong,
+  .notarize-completed-next p,
+  .notarize-completed-next label,
+  .notarize-completed-next input {
+    grid-column: 1;
+    grid-row: auto;
   }
 }
