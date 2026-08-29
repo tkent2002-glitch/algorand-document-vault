@@ -30,13 +30,32 @@ describe("EvidenceCard", () => {
     };
     const onViewDetails = vi.fn();
 
-    render(
+    const { rerender } = render(
       <EvidenceCard record={record} onViewDetails={onViewDetails} />
     );
 
     expect(screen.queryByRole("button", { name: /verify/i })).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "View Details" }));
+    const viewDetails = screen.getByRole("button", { name: "View Details" });
+    expect(viewDetails.getAttribute("aria-expanded")).toBe("false");
+    expect(viewDetails.getAttribute("aria-controls")).toBe(
+      "evidence-details-evidence-record-1"
+    );
+
+    fireEvent.click(viewDetails);
     expect(onViewDetails).toHaveBeenCalledWith(record);
+
+    rerender(
+      <EvidenceCard
+        record={record}
+        detailsOpen
+        onViewDetails={onViewDetails}
+      />
+    );
+
+    const hideDetails = screen.getByRole("button", { name: "Hide Details" });
+    expect(hideDetails.getAttribute("aria-expanded")).toBe("true");
+    fireEvent.click(hideDetails);
+    expect(onViewDetails).toHaveBeenCalledTimes(2);
   });
 });

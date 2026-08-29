@@ -244,11 +244,19 @@ function VerifyPage() {
           <h2>Matching Evidence Record</h2>
           <EvidenceCard
             record={match}
-            onViewDetails={setSelectedRecord}
+            detailsOpen={selectedRecord?.id === match.id}
+            onViewDetails={(record) =>
+              setSelectedRecord((currentRecord) =>
+                currentRecord?.id === record.id ? null : record
+              )
+            }
           />
 
           {selectedRecord && (
-            <div className="verify-details">
+            <div
+              className="verify-details"
+              id={`evidence-details-${selectedRecord.id}`}
+            >
               <EvidenceDetailsPanel record={selectedRecord} />
             </div>
           )}
