@@ -54,6 +54,12 @@ Manual accessibility evidence recorded August 28, 2026:
   wide) preserved every workflow without horizontal page overflow, clipped
   controls, or controls positioned outside the viewport. Zoom was restored to
   100% after the test.
+- Physical Edge and Firefox zoom at 200% and 400% preserved all five routes
+  without horizontal page overflow, overlap, clipped text, hidden controls, or
+  unreachable actions. Exact Safari 200%/400% page zoom remains open because the
+  available physical iPhone exposes website text sizing and screen magnification
+  rather than those desktop-style zoom levels; automated WebKit 320-CSS-pixel
+  reflow remains supporting evidence only.
 - The physical Windows light and dark modes kept Dashboard, Wallet, and Vault
   text, form controls, status treatments, and navigation readable without
   horizontal overflow. Windows was restored to light mode after the test.
@@ -78,12 +84,13 @@ Manual accessibility evidence recorded August 28, 2026:
 - [x] Test the current stable Edge release on Windows.
 - [x] Test the current stable Firefox release.
 - [x] Test the current stable Safari release on macOS or iOS.
-- [ ] Test a representative physical Android layout.
+- [ ] Test a representative physical Android layout. Deferred because no
+  representative Android device is currently available.
 - [x] Test a representative physical iOS layout.
 - [x] Verify IndexedDB persistence after reload in clean Chromium, Edge, and WebKit contexts.
 - [x] Verify IndexedDB persistence after a full browser restart.
 - [x] Automate plain and encrypted backup download/restore in Chromium, Edge, and WebKit.
-- [ ] Manually verify backup download and restore UX in each supported browser.
+- [x] Manually verify backup download and restore UX in each supported browser.
 
 Manual responsive evidence recorded August 28, 2026:
 
@@ -121,6 +128,10 @@ Manual responsive evidence recorded August 28, 2026:
   Private Browsing sessions, and retained the expected Draft state. The
   encrypted restore rejected an incorrect password before accepting the test
   password; both previews reported one new record and zero conflicts.
+- Installed Chrome and Edge on Windows each exported a disposable one-record
+  plain backup and encrypted backup, restored both formats into separate clean
+  Incognito or InPrivate sessions, rejected an incorrect encrypted-backup
+  password, and restored the expected Draft with the correct password.
 - Current Safari on an iPhone 17 Pro Max running iOS 26.6 loaded all five routes
   over a temporary HTTPS origin without horizontal overflow or blocked content.
   The first pass exposed a touch-navigation defect: moving focus to `main`
