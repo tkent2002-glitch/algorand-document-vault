@@ -485,19 +485,6 @@ function NotarizePage({
           <div className="notarize-primary-grid">
             <div className="notarize-section">
               <UploadStep onFileChange={handleFileChange} />
-              <DocumentSummaryStep
-                fileName={fileName}
-                fileHash={fileHash}
-                errors={errors}
-              />
-
-              <DuplicateEvidenceWarning
-                duplicateRecord={duplicateRecord}
-              />
-
-              <EvidenceRecordPreview
-                evidenceRecord={evidenceRecord}
-              />
             </div>
 
             <WalletReadinessPanel
@@ -576,6 +563,28 @@ function NotarizePage({
             />
           </div>
         )}
+
+        {!confirmationResult &&
+          (fileName || errors.length > 0 || evidenceRecord) && (
+            <div
+              className="notarize-document-information"
+              aria-label="Selected document information"
+            >
+              <DocumentSummaryStep
+                fileName={fileName}
+                fileHash={fileHash}
+                errors={errors}
+              />
+
+              <EvidenceRecordPreview
+                evidenceRecord={evidenceRecord}
+              />
+
+              <DuplicateEvidenceWarning
+                duplicateRecord={duplicateRecord}
+              />
+            </div>
+          )}
 
         <NotarizationSuccessPanel
           confirmationResult={confirmationResult}

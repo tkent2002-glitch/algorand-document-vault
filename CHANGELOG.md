@@ -34,6 +34,8 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
   safe retry handling, and uncertain-status resubmission protection.
 - Made the active Notarize navigation restart a completed workflow while
   preserving unfinished notarization work.
+- Moved selected-document metadata below the primary notarization action and
+  condensed it into a responsive information row.
 
 ### In progress
 

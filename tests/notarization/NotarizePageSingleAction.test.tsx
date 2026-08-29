@@ -156,6 +156,16 @@ describe("NotarizePage single-action transaction flow", () => {
     });
 
     await waitFor(() => expect(action).toBeEnabled());
+    const actionPanel = screen
+      .getByText("One secure action")
+      .closest(".notarize-action-step");
+    const selectedFile = screen.getByText("Selected File:");
+
+    expect(actionPanel).not.toBeNull();
+    expect(
+      (actionPanel?.compareDocumentPosition(selectedFile) ?? 0) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
     expect(
       screen.queryByRole("button", { name: "Sign with Pera Wallet" })
     ).not.toBeInTheDocument();

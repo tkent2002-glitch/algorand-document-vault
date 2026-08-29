@@ -42,6 +42,22 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+.notarize-document-information {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.notarize-document-information > .notarize-result {
+  background: color-mix(in srgb, var(--social-bg) 62%, transparent);
+}
+
+.notarize-document-information > .duplicate-warning,
+.notarize-document-information > .notarize-errors {
+  grid-column: 1 / -1;
+}
+
 .notarize-section {
   display: flex;
   min-width: 0;
@@ -658,7 +674,8 @@
 }
 
 @media (max-width: 960px) {
-  .notarize-primary-grid {
+  .notarize-primary-grid,
+  .notarize-document-information {
     grid-template-columns: 1fr;
   }
 
