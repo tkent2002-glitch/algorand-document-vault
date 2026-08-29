@@ -347,6 +347,19 @@
   min-width: min(100%, 15rem);
 }
 
+.notarize-action-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.notarize-result .notarize-cancel-action {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
 .notarize-submission-receipt {
   display: flex;
   flex-wrap: wrap;

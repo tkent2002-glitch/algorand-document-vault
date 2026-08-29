@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from "react";
+import { useRef } from "react";
 import { Logger, NotarizationWorkflow } from "../../core";
 import { EvidenceRepository } from "../../repositories";
 import {
@@ -78,11 +79,15 @@ function NotarizePage({
   const [checkingTransactionStatus, setCheckingTransactionStatus] =
     useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
+  const [walletApprovalPending, setWalletApprovalPending] =
+    useState<boolean>(false);
   const [walletConnecting, setWalletConnecting] =
     useState<boolean>(false);
   const [wallet, setWallet] = useState<WalletConnection>({
     status: "disconnected",
   });
+  const walletApprovalAbortController =
+    useRef<AbortController | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -95,6 +100,7 @@ function NotarizePage({
 
     return () => {
       mounted = false;
+      walletApprovalAbortController.current?.abort();
     };
   }, []);
 
@@ -227,11 +233,25 @@ function NotarizePage({
             "Opening Pera Wallet for transaction approval..."
           );
 
-          transactionToSubmit =
-            await AlgorandTransactionSigningService.signProofTransaction(
-              proof,
-              wallet.address
-            );
+          const approvalController = new AbortController();
+          walletApprovalAbortController.current = approvalController;
+          setWalletApprovalPending(true);
+
+          try {
+            transactionToSubmit =
+              await AlgorandTransactionSigningService.signProofTransaction(
+                proof,
+                wallet.address,
+                { signal: approvalController.signal }
+              );
+          } finally {
+            if (
+              walletApprovalAbortController.current === approvalController
+            ) {
+              walletApprovalAbortController.current = null;
+            }
+            setWalletApprovalPending(false);
+          }
 
           setSignedTransaction(transactionToSubmit);
           setSubmissionResult(null);
@@ -360,6 +380,15 @@ function NotarizePage({
     } finally {
       setProcessing(false);
     }
+  }
+
+  function handleCancelWalletApproval() {
+    if (!walletApprovalAbortController.current) {
+      return;
+    }
+
+    setSigningMessage("Cancelling the wallet approval wait...");
+    walletApprovalAbortController.current.abort();
   }
 
   async function handleCheckTransactionStatus() {
@@ -551,6 +580,7 @@ function NotarizePage({
               walletReady={walletReady}
               transactionPrepared={Boolean(transactionDraft)}
               processing={processing}
+              walletApprovalPending={walletApprovalPending}
               readyForSignature={readyForSignature}
               signingMessage={signingMessage}
               submissionMessage={submissionMessage}
@@ -560,6 +590,7 @@ function NotarizePage({
               confirmationResult={confirmationResult}
               actionBlocked={unsafeResubmissionBlocked}
               onApproveAndNotarize={handleApproveAndNotarize}
+              onCancelWalletApproval={handleCancelWalletApproval}
             />
           </div>
         )}

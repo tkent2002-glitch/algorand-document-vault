@@ -36,6 +36,8 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
   preserving unfinished notarization work.
 - Moved selected-document metadata below the primary notarization action and
   condensed it into a responsive information row.
+- Added a bounded Pera approval wait with a same-page cancel and safe retry
+  path when a mobile wallet request does not arrive.
 
 ### In progress
 

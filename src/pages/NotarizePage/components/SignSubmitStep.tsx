@@ -9,6 +9,7 @@ type SignSubmitStepProps = {
   walletReady: boolean;
   transactionPrepared: boolean;
   processing: boolean;
+  walletApprovalPending: boolean;
   readyForSignature: boolean;
   signingMessage: string;
   submissionMessage: string;
@@ -18,6 +19,7 @@ type SignSubmitStepProps = {
   confirmationResult: AlgorandConfirmationResult | null;
   actionBlocked: boolean;
   onApproveAndNotarize: () => void;
+  onCancelWalletApproval: () => void;
 };
 
 function SignSubmitStep({
@@ -25,6 +27,7 @@ function SignSubmitStep({
   walletReady,
   transactionPrepared,
   processing,
+  walletApprovalPending,
   readyForSignature,
   signingMessage,
   submissionMessage,
@@ -34,6 +37,7 @@ function SignSubmitStep({
   confirmationResult,
   actionBlocked,
   onApproveAndNotarize,
+  onCancelWalletApproval,
 }: SignSubmitStepProps) {
   const walletApproved = Boolean(signedTransaction);
   const submitted = Boolean(submissionResult);
@@ -59,8 +63,12 @@ function SignSubmitStep({
   } else if (actionBlocked) {
     guidance =
       "Review the existing transaction status before attempting another submission.";
+  } else if (walletApprovalPending && !walletApproved) {
+    guidance =
+      "Approve in Pera Wallet to continue. If no request appears, cancel waiting; the request also ends automatically after 90 seconds.";
   } else if (processing && !walletApproved) {
-    guidance = "Approve the transaction in Pera Wallet to continue.";
+    guidance =
+      "The app is checking TestNet readiness before opening Pera Wallet.";
   } else if (processing && walletApproved) {
     guidance =
       "Wallet approval is complete. The app is submitting and confirming the transaction.";
@@ -83,8 +91,10 @@ function SignSubmitStep({
 
   let buttonLabel = "Approve and notarize";
 
-  if (processing && !walletApproved) {
+  if (walletApprovalPending && !walletApproved) {
     buttonLabel = "Waiting for Pera Wallet...";
+  } else if (processing && !walletApproved) {
+    buttonLabel = "Preparing secure transaction...";
   } else if (processing && walletApproved) {
     buttonLabel = "Submitting and confirming...";
   } else if (canResume) {
@@ -183,14 +193,26 @@ function SignSubmitStep({
         </div>
       ) : null}
 
-      <button
-        type="button"
-        className="notarize-primary-action"
-        onClick={onApproveAndNotarize}
-        disabled={actionDisabled}
-      >
-        {buttonLabel}
-      </button>
+      <div className="notarize-action-controls">
+        <button
+          type="button"
+          className="notarize-primary-action"
+          onClick={onApproveAndNotarize}
+          disabled={actionDisabled}
+        >
+          {buttonLabel}
+        </button>
+
+        {walletApprovalPending && !walletApproved && (
+          <button
+            type="button"
+            className="notarize-cancel-action"
+            onClick={onCancelWalletApproval}
+          >
+            Cancel waiting
+          </button>
+        )}
+      </div>
 
       {submissionResult && (
         <div className="notarize-submission-receipt" role="status">
