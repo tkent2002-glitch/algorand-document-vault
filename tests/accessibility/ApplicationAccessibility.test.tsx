@@ -201,5 +201,22 @@ describe("application accessibility boundaries", () => {
     expect(
       screen.getByRole("status", { name: "Backup export status" })
     ).toBe(statusRegion);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Close backup controls" })
+    );
+    expect(
+      screen.getByRole("button", { name: "Back up records" })
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.queryByText("Encrypted backup", { exact: true })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Back up records" })
+    );
+    expect(
+      screen.getByText("Encrypted backup", { exact: true })
+    ).toBeVisible();
   });
 });

@@ -45,6 +45,7 @@ interface VaultBackupActionsProps {
 }
 
 function VaultBackupActions({ recordCount }: VaultBackupActionsProps) {
+  const [panelOpen, setPanelOpen] = useState<boolean>(true);
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [message, setMessage] = useState<string>("");
@@ -120,6 +121,27 @@ function VaultBackupActions({ recordCount }: VaultBackupActionsProps) {
   const passwordLongEnough =
     password.length >= MINIMUM_PASSWORD_LENGTH;
 
+  function closePanel(): void {
+    setPanelOpen(false);
+    setPassword("");
+    setConfirmPassword("");
+    setMessage("");
+  }
+
+  if (!panelOpen) {
+    return (
+      <button
+        className="vault-backup-reopen"
+        type="button"
+        aria-expanded="false"
+        onClick={() => setPanelOpen(true)}
+      >
+        <span aria-hidden="true">+</span>
+        <strong>Back up records</strong>
+      </button>
+    );
+  }
+
   return (
     <section className="vault-backup-actions">
       <div className="vault-backup-header">
@@ -130,6 +152,15 @@ function VaultBackupActions({ recordCount }: VaultBackupActionsProps) {
             {recordCount === 1 ? "" : "s"} before changing browsers or devices.
           </p>
         </div>
+
+        <button
+          className="vault-backup-close"
+          type="button"
+          aria-label="Close backup controls"
+          onClick={closePanel}
+        >
+          Close
+        </button>
       </div>
 
       <div className="vault-backup-choices">
