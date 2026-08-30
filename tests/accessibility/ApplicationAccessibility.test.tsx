@@ -134,7 +134,7 @@ describe("application accessibility boundaries", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Vault" }));
 
-    const toolsSummary = (await screen.findByText("Backup and restore", {
+    const toolsSummary = (await screen.findByText("Restore records", {
       exact: true,
     })).closest("summary");
 
@@ -144,15 +144,9 @@ describe("application accessibility boundaries", () => {
     expect(toolsSummary?.closest("details")).toHaveAttribute("open");
 
     expect(
-      screen.queryByLabelText("Search evidence by filename or fingerprint")
-    ).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("Filter evidence by status")).not.toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Export backup" })).toHaveAttribute(
-      "aria-selected",
-      "true"
-    );
-
-    fireEvent.click(screen.getByRole("tab", { name: "Restore from file" }));
+      screen.getByLabelText("Search evidence by filename or fingerprint")
+    ).toHaveAttribute("type", "search");
+    expect(screen.getByLabelText("Filter evidence by status")).toBeVisible();
     expect(
       screen.getByLabelText("Evidence Vault backup file")
     ).toHaveAttribute("type", "file");
@@ -169,17 +163,31 @@ describe("application accessibility boundaries", () => {
   it("keeps the backup status region mounted when validation updates", async () => {
     render(<App />);
 
+    fireEvent.click(screen.getByRole("button", { name: "Notarize" }));
+    fireEvent.change(await screen.findByLabelText("Document to notarize"), {
+      target: {
+        files: [
+          new File(["backup test"], "backup-test.txt", {
+            type: "text/plain",
+          }),
+        ],
+      },
+    });
+
+    await screen.findByText("backup-test.txt", { exact: true });
     fireEvent.click(screen.getByRole("button", { name: "Vault" }));
 
-    const toolsSummary = (await screen.findByText("Backup and restore", {
+    const encryptedSummary = (await screen.findByText("Encrypted backup", {
       exact: true,
     })).closest("summary");
-    fireEvent.click(toolsSummary!);
+    fireEvent.click(encryptedSummary!);
 
     const exportButton = await screen.findByRole("button", {
       name: "Export Encrypted Backup",
     });
-    const statusRegion = screen.getByRole("status");
+    const statusRegion = screen.getByRole("status", {
+      name: "Backup export status",
+    });
 
     expect(statusRegion).toBeEmptyDOMElement();
     expect(statusRegion).toHaveAttribute("aria-live", "polite");
@@ -190,6 +198,8 @@ describe("application accessibility boundaries", () => {
     expect(statusRegion).toHaveTextContent(
       "Password must contain at least 12 characters."
     );
-    expect(screen.getByRole("status")).toBe(statusRegion);
+    expect(
+      screen.getByRole("status", { name: "Backup export status" })
+    ).toBe(statusRegion);
   });
 });

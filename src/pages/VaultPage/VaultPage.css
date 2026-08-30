@@ -114,6 +114,18 @@
   scrollbar-gutter: stable;
 }
 
+.evidence-index-body {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 320px);
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.evidence-workspace.detail-open .evidence-index-body {
+  grid-template-columns: 1fr;
+}
+
 .evidence-workspace.detail-open .evidence-index-list {
   grid-template-columns: 1fr;
 }
@@ -449,6 +461,10 @@
 
 @media (max-width: 900px) {
   .vault-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .evidence-index-body {
     grid-template-columns: 1fr;
   }
 

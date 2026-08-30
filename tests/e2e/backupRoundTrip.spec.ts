@@ -10,7 +10,7 @@ async function openVaultPage(page: Page) {
   ).toBeVisible();
 }
 
-async function openVaultTools(page: Page) {
+async function openRestoreTools(page: Page) {
   await openVaultPage(page);
 
   const vaultTools = page.locator("details.vault-tools");
@@ -24,11 +24,6 @@ async function openVaultTools(page: Page) {
 }
 
 async function expectOnePersistedRecord(page: Page) {
-  const vaultTools = page.locator("details.vault-tools");
-  if (await vaultTools.evaluate((details) => (details as HTMLDetailsElement).open)) {
-    await vaultTools.locator("summary").click();
-  }
-
   const totalRecords = page
     .getByLabel("Vault summary")
     .locator("span")
@@ -62,8 +57,7 @@ async function restoreBackup(
 
   try {
     await page.goto(BASE_URL);
-    await openVaultTools(page);
-    await page.getByRole("tab", { name: "Restore from file" }).click();
+    await openRestoreTools(page);
     await page
       .getByLabel("Evidence Vault backup file")
       .setInputFiles(backupPath);
@@ -122,7 +116,7 @@ test("round-trips plain and encrypted backups through clean profiles", async ({
     page.getByText("backup-round-trip.txt", { exact: true })
   ).toBeVisible();
 
-  await openVaultTools(page);
+  await openVaultPage(page);
 
   const plainDownloadPromise = page.waitForEvent("download");
   await page
@@ -132,6 +126,7 @@ test("round-trips plain and encrypted backups through clean profiles", async ({
   const plainBackupPath = await plainDownload.path();
   expect(plainBackupPath).not.toBeNull();
 
+  await page.getByText("Encrypted backup", { exact: true }).click();
   await page.getByLabel("Backup Password").first().fill(BACKUP_PASSWORD);
   await page
     .getByLabel("Confirm Password")

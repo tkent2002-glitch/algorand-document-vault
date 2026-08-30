@@ -41,7 +41,6 @@ function VaultPage() {
   const [historyPage, setHistoryPage] = useState<number>(1);
   const [detailOpen, setDetailOpen] = useState<boolean>(false);
   const [toolsOpen, setToolsOpen] = useState<boolean>(false);
-  const [activeTool, setActiveTool] = useState<"export" | "restore">("export");
   const deferredSearchText = useDeferredValue(searchText);
 
   async function reloadRecords(): Promise<void> {
@@ -148,16 +147,11 @@ function VaultPage() {
         <p className="vault-eyebrow">Evidence Repository</p>
         <h2>Evidence Vault</h2>
 
-        <p>
-          {toolsOpen
-            ? "Export or restore local evidence records. Original documents are never included."
-            : "Search and review document fingerprints stored on this device. Open backup and restore tools only when you need them."}
-        </p>
+        <p>Search and review document fingerprints stored on this device.</p>
 
       </div>
 
-      {!toolsOpen && (
-        <div className="vault-summary-strip" aria-label="Vault summary">
+      <div className="vault-summary-strip" aria-label="Vault summary">
           <span>
             <strong>{evidenceIndex.length}</strong> documents
           </span>
@@ -170,8 +164,7 @@ function VaultPage() {
           <span>
             <strong>{draftCount}</strong> drafts
           </span>
-        </div>
-      )}
+      </div>
 
       <details
         className="vault-tools"
@@ -184,64 +177,19 @@ function VaultPage() {
           }}
         >
           <span>
-            <strong>Backup and restore</strong>
-            <small>Manage evidence-record backup files</small>
+            <strong>Restore records</strong>
+            <small>Import records from an Evidence Vault backup</small>
           </span>
           <span className="vault-tools-action">
-            {toolsOpen ? "Close tools" : "Open tools"}
+            {toolsOpen ? "Close" : "Restore"}
           </span>
         </summary>
 
         <div className="vault-tools-content">
-          <div
-            className="vault-tools-tabs"
-            role="tablist"
-            aria-label="Backup and restore tools"
-          >
-            <button
-              id="vault-export-tab"
-              type="button"
-              role="tab"
-              aria-selected={activeTool === "export"}
-              aria-controls="vault-export-panel"
-              onClick={() => setActiveTool("export")}
-            >
-              Export backup
-            </button>
-            <button
-              id="vault-restore-tab"
-              type="button"
-              role="tab"
-              aria-selected={activeTool === "restore"}
-              aria-controls="vault-restore-panel"
-              onClick={() => setActiveTool("restore")}
-            >
-              Restore from file
-            </button>
-          </div>
-
-          {activeTool === "export" ? (
-            <div
-              id="vault-export-panel"
-              role="tabpanel"
-              aria-labelledby="vault-export-tab"
-            >
-              <VaultBackupActions />
-            </div>
-          ) : (
-            <div
-              id="vault-restore-panel"
-              role="tabpanel"
-              aria-labelledby="vault-restore-tab"
-            >
-              <VaultImportPreview onImportComplete={reloadRecords} />
-            </div>
-          )}
+          <VaultImportPreview onImportComplete={reloadRecords} />
         </div>
       </details>
 
-      {!toolsOpen && (
-        <>
       <div className="vault-toolbar">
         <label className="visually-hidden" htmlFor="vault-search">
           Search evidence by filename or fingerprint
@@ -327,8 +275,9 @@ function VaultPage() {
               </p>
             </div>
 
-            <div className="evidence-index-list">
-              {pagination.items.map((item) => (
+            <div className="evidence-index-body">
+              <div className="evidence-index-list">
+                {pagination.items.map((item) => (
                 <button
                   className={
                     selectedItem?.hashValue === item.hashValue
@@ -355,7 +304,12 @@ function VaultPage() {
                     </span>
                   </span>
                 </button>
-              ))}
+                ))}
+              </div>
+
+              {!detailOpen && (
+                <VaultBackupActions recordCount={records.length} />
+              )}
             </div>
 
             <nav className="vault-pagination" aria-label="Vault document pages">
@@ -570,8 +524,6 @@ function VaultPage() {
             </div>
           )}
         </div>
-      )}
-        </>
       )}
     </section>
   );
