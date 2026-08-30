@@ -36,6 +36,8 @@ export {
 export { VerificationService } from "./verification";
 export { WalletService } from "./wallet";
 
+export { ShareableVerificationProofService } from "./shareable-proof";
+
 export type {
   BackupIntegrityMetadata,
   BackupIntegrityValidationResult,
@@ -60,6 +62,15 @@ export type {
   EncryptedBackupMetadata,
   EncryptedEvidenceBackupFile,
 } from "./security";
+
+export type {
+  ShareableVerificationProofEvidence,
+  ShareableVerificationProofFile,
+  ShareableVerificationProofPayload,
+  ShareableVerificationProofValidationResult,
+  ShareableVerificationProofVerificationResult,
+  ShareableVerificationProofVerificationStatus,
+} from "./shareable-proof";
 
 
 

@@ -12,6 +12,7 @@ import {
 } from "../../services";
 import VaultBackupActions from "./VaultBackupActions";
 import VaultImportPreview from "./VaultImportPreview";
+import ShareableProofDownloadButton from "./ShareableProofDownloadButton";
 import {
   buildEvidenceIndex,
   DEFAULT_VAULT_PAGE_SIZE,
@@ -99,9 +100,15 @@ function VaultPage() {
   const selectedItem = selectedHash
     ? pagination.items.find((item) => item.hashValue === selectedHash) ?? null
     : null;
-  const selectedExplorerUrl = selectedItem?.latestRecord.algorandTransactionId
+  const selectedConfirmedRecord = selectedItem?.records.find(
+    (record) =>
+      record.status === "confirmed" &&
+      Boolean(record.algorandTransactionId) &&
+      Boolean(record.confirmedRound)
+  ) ?? null;
+  const selectedExplorerUrl = selectedConfirmedRecord?.algorandTransactionId
     ? AlgorandExplorerService.getTransactionUrl(
-        selectedItem.latestRecord.algorandTransactionId
+        selectedConfirmedRecord.algorandTransactionId
       )
     : null;
 
@@ -407,15 +414,22 @@ function VaultPage() {
                     </div>
                   </dl>
 
-                  {selectedExplorerUrl && (
-                    <a
-                      className="explorer-link"
-                      href={selectedExplorerUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      View confirmed transaction
-                    </a>
+                  {selectedConfirmedRecord && (
+                    <div className="vault-selected-actions">
+                      {selectedExplorerUrl && (
+                        <a
+                          className="explorer-link"
+                          href={selectedExplorerUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          View confirmed transaction
+                        </a>
+                      )}
+                      <ShareableProofDownloadButton
+                        record={selectedConfirmedRecord}
+                      />
+                    </div>
                   )}
                 </div>
 

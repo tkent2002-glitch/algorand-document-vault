@@ -41,6 +41,7 @@ The system proves document existence and integrity at a point in time. It does n
 | Plain backup export and import | Complete |
 | Backup integrity and trust verification | Complete |
 | AES-GCM encrypted backups and recovery | Complete |
+| Shareable single-record verification proofs | Complete |
 | Algorand SDK transaction construction | Implemented |
 | Pera Wallet integration | Desktop QR and same-device HTTPS mobile handoff validated on TestNet |
 | TestNet submission and confirmation flow | Live validation complete |
@@ -83,6 +84,13 @@ The system proves document existence and integrity at a point in time. It does n
 - Confirmation monitoring
 - Pera Explorer transaction links
 
+### Shareable verification
+
+- Minimal single-record JSON proof export from confirmed Vault evidence
+- No original document, filename, wallet address, or local record ID in the share file
+- Recipient-side SHA-256 comparison without uploading the document
+- Independent Algorand TestNet receipt, canonical note, and transaction-policy checks
+
 ## How it works
 
 1. Select a document in the browser.
@@ -93,6 +101,8 @@ The system proves document existence and integrity at a point in time. It does n
 6. The signed transaction is submitted to Algorand TestNet and monitored for confirmation.
 7. The transaction ID, timestamps, and confirmation round are stored in the local Evidence Vault.
 8. The original document can later be verified by recomputing its fingerprint.
+9. A confirmed record can be exported as a minimal verification proof so a
+   recipient can verify the document locally without restoring the owner's Vault.
 
 ## Architecture
 

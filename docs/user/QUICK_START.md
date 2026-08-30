@@ -9,6 +9,17 @@
 7. Open **Vault** to review the stored evidence record.
 8. Open **Verify** and select the same document to recompute its hash.
 
+## Share a verification proof
+
+1. Open **Vault** and select a document with a confirmed record.
+2. Choose **Download verification proof**.
+3. Send the JSON proof and the original document through the channels you
+   choose. The JSON proof itself does not contain the document or its filename.
+4. The recipient opens **Verify**, selects the document, and selects the JSON
+   under **Verify with a shared proof**.
+5. A successful result confirms both the local fingerprint match and the
+   referenced Algorand TestNet transaction.
+
 ## Backup
 
 Use the Vault backup controls to export either:

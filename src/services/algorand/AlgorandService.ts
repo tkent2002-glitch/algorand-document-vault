@@ -1,5 +1,5 @@
 import algosdk from "algosdk";
-import { Logger } from "../../core";
+import { Logger } from "../../core/Logger";
 import type { AlgorandNetworkConfig } from "../../types";
 import { DEFAULT_ALGORAND_NETWORK_CONFIG } from "../../types";
 

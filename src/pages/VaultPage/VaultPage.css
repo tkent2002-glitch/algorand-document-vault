@@ -321,6 +321,46 @@
   margin-top: 0.65rem;
 }
 
+.vault-selected-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem 1rem;
+  margin-top: 0.65rem;
+}
+
+.vault-selected-actions .explorer-link {
+  margin-top: 0.55rem;
+}
+
+.vault-share-proof {
+  display: grid;
+  gap: 0.22rem;
+}
+
+.vault-share-proof button {
+  width: fit-content;
+  cursor: pointer;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  padding: 0.55rem 0.75rem;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 750;
+}
+
+.vault-share-proof button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.vault-share-proof small,
+.vault-share-proof span {
+  max-width: 30rem;
+  color: var(--text);
+  font-size: 0.72rem;
+}
+
 .vault-detail-disclosure {
   overflow: hidden;
   border: 1px solid var(--border);

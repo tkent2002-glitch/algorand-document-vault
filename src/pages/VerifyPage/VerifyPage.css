@@ -288,6 +288,129 @@
   margin-top: 1rem;
 }
 
+.shared-proof-verifier {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--social-bg) 82%, transparent);
+}
+
+.shared-proof-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.shared-proof-heading h3 {
+  margin: 0.2rem 0 0;
+  color: var(--text-h);
+}
+
+.shared-proof-heading > span {
+  flex: 0 0 auto;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.shared-proof-verifier > p,
+.shared-proof-result p {
+  margin: 0;
+}
+
+.shared-proof-verifier > label {
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.shared-proof-verifier > input {
+  width: 100%;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.shared-proof-verifier > small {
+  color: var(--text);
+}
+
+.shared-proof-result {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.shared-proof-result strong {
+  color: var(--text-h);
+}
+
+.shared-proof-result.verified {
+  border-color: color-mix(in srgb, #16a34a 58%, var(--border));
+}
+
+.shared-proof-result.failed {
+  border-color: color-mix(in srgb, #ca8a04 58%, var(--border));
+}
+
+.shared-proof-result.ready {
+  border-color: var(--accent-border);
+}
+
+.shared-proof-result dl {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.3fr) minmax(0, 1fr);
+  gap: 0.5rem;
+  margin: 0.25rem 0 0;
+}
+
+.shared-proof-result dl > div {
+  min-width: 0;
+}
+
+.shared-proof-result dt {
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.shared-proof-result dd {
+  margin: 0.15rem 0 0;
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.shared-proof-result code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.shared-proof-verifier > details {
+  border-top: 1px solid var(--border);
+  padding-top: 0.6rem;
+}
+
+.shared-proof-verifier > details summary {
+  cursor: pointer;
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.shared-proof-verifier > details p {
+  margin: 0.6rem 0 0;
+}
+
 @media (max-width: 980px) {
   .verify-primary-grid {
     grid-template-columns: 1fr;
@@ -309,9 +432,14 @@
   }
 
   .verify-progress-header,
-  .verify-progress-stage-header {
+  .verify-progress-stage-header,
+  .shared-proof-heading {
     align-items: flex-start;
     flex-direction: column;
     gap: 0.2rem;
+  }
+
+  .shared-proof-result dl {
+    grid-template-columns: 1fr;
   }
 }

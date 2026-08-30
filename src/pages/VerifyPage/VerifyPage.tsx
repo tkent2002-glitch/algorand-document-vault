@@ -4,6 +4,7 @@ import EvidenceDetailsPanel from "../../components/evidence/EvidenceDetailsPanel
 import { EvidenceRepository } from "../../repositories";
 import { HashService } from "../../services";
 import type { EvidenceRecord } from "../../services";
+import SharedProofVerifier from "./SharedProofVerifier";
 import "./VerifyPage.css";
 
 type VerificationStage = {
@@ -181,6 +182,8 @@ function VerifyPage() {
             </div>
           </div>
         )}
+
+        <SharedProofVerifier documentHash={hashValue} />
 
         <div className="verify-progress">
           <div className="verify-progress-header">
