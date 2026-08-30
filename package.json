@@ -27,6 +27,9 @@
     "react-dom": "^19.2.7",
     "tslib": "^2.8.1"
   },
+  "overrides": {
+    "@perawallet/walletconnect": "1.0.2"
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
