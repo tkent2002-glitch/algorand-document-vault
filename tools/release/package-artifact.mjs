@@ -75,6 +75,8 @@ for (const referencedFile of localReferences) {
 const headers = await readFile(join(artifactRoot, "_headers"), "utf8");
 const requiredHeaders = [
   "Content-Security-Policy:",
+  "wss://*.perawallet.app",
+  "wss://*.bridge.walletconnect.org",
   "Permissions-Policy:",
   "Referrer-Policy:",
   "X-Content-Type-Options: nosniff",
