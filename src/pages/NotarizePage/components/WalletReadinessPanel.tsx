@@ -7,6 +7,14 @@ type WalletReadinessPanelProps = {
   onDisconnect: () => void;
 };
 
+function shortenAddress(address: string): string {
+  if (address.length <= 22) {
+    return address;
+  }
+
+  return `${address.slice(0, 10)}…${address.slice(-8)}`;
+}
+
 function WalletReadinessPanel({
   wallet,
   connecting,
@@ -34,13 +42,19 @@ function WalletReadinessPanel({
           </p>
 
           {wallet.address && (
-            <p>
-              <strong>Address:</strong>{" "}
-              <code>{wallet.address}</code>
+            <p className="wallet-readiness-address">
+              <strong>Address</strong>
+              <code
+                title={wallet.address}
+                aria-label={`Wallet address ${wallet.address}`}
+              >
+                {shortenAddress(wallet.address)}
+              </code>
             </p>
           )}
 
           <button
+            className="wallet-connection-action secondary"
             type="button"
             onClick={onDisconnect}
             disabled={connecting}
@@ -63,6 +77,7 @@ function WalletReadinessPanel({
           </p>
 
           <button
+            className="wallet-connection-action"
             type="button"
             onClick={onConnect}
             disabled={connecting}

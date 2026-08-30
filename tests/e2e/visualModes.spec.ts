@@ -136,6 +136,34 @@ test("retains visible keyboard focus in forced-colors mode", async ({
   await expectNoHorizontalOverflow(page);
 });
 
+test("keeps the Vault tools focus indicator inside its clipped container", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Vault", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Evidence Vault", exact: true })
+  ).toBeVisible();
+  await expect(page.locator("#main-content")).toBeFocused();
+
+  const toolsSummary = page.locator("details.vault-tools > summary");
+  await page.keyboard.press("Tab");
+  await expect(toolsSummary).toBeFocused();
+
+  const focusStyle = await toolsSummary.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      outlineOffset: Number.parseFloat(style.outlineOffset),
+      outlineStyle: style.outlineStyle,
+      outlineWidth: Number.parseFloat(style.outlineWidth),
+    };
+  });
+
+  expect(focusStyle.outlineStyle).not.toBe("none");
+  expect(focusStyle.outlineWidth).toBeGreaterThanOrEqual(1);
+  expect(focusStyle.outlineOffset).toBeLessThanOrEqual(0);
+});
+
 test("reflows every page at a 320 CSS-pixel viewport", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto("/");

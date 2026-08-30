@@ -4,6 +4,7 @@ import "./EvidenceCard.css";
 
 type EvidenceCardProps = {
   record: EvidenceRecord;
+  detailsOpen?: boolean;
   onViewDetails?: (record: EvidenceRecord) => void;
 };
 
@@ -15,7 +16,11 @@ function shortenHash(hash: string): string {
   return `${hash.slice(0, 10)}...${hash.slice(-8)}`;
 }
 
-function EvidenceCard({ record, onViewDetails }: EvidenceCardProps) {
+function EvidenceCard({
+  record,
+  detailsOpen = false,
+  onViewDetails,
+}: EvidenceCardProps) {
   return (
     <article className="evidence-card">
       <div className="evidence-card-header">
@@ -57,11 +62,13 @@ function EvidenceCard({ record, onViewDetails }: EvidenceCardProps) {
       )}
 
       <div className="evidence-card-actions">
-        <button type="button" onClick={() => onViewDetails?.(record)}>
-          View Details
-        </button>
-        <button type="button" disabled>
-          Verify Coming Soon
+        <button
+          type="button"
+          aria-expanded={detailsOpen}
+          aria-controls={`evidence-details-${record.id}`}
+          onClick={() => onViewDetails?.(record)}
+        >
+          {detailsOpen ? "Hide Details" : "View Details"}
         </button>
       </div>
     </article>

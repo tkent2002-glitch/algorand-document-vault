@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from "react";
+import { useRef } from "react";
 import { Logger, NotarizationWorkflow } from "../../core";
 import { EvidenceRepository } from "../../repositories";
 import {
@@ -39,7 +40,13 @@ import UploadStep from "./components/UploadStep";
 import WalletReadinessPanel from "./components/WalletReadinessPanel";
 import "./NotarizePage.css";
 
-function NotarizePage() {
+type NotarizePageProps = {
+  onCompletionChange?: (complete: boolean) => void;
+};
+
+function NotarizePage({
+  onCompletionChange,
+}: NotarizePageProps) {
   const [fileName, setFileName] = useState<string>("");
   const [fileHash, setFileHash] = useState<string>("");
   const [proof, setProof] = useState<NotarizationProof | null>(null);
@@ -72,11 +79,15 @@ function NotarizePage() {
   const [checkingTransactionStatus, setCheckingTransactionStatus] =
     useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
+  const [walletApprovalPending, setWalletApprovalPending] =
+    useState<boolean>(false);
   const [walletConnecting, setWalletConnecting] =
     useState<boolean>(false);
   const [wallet, setWallet] = useState<WalletConnection>({
     status: "disconnected",
   });
+  const walletApprovalAbortController =
+    useRef<AbortController | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -89,8 +100,13 @@ function NotarizePage() {
 
     return () => {
       mounted = false;
+      walletApprovalAbortController.current?.abort();
     };
   }, []);
+
+  useEffect(() => {
+    onCompletionChange?.(Boolean(confirmationResult));
+  }, [confirmationResult, onCompletionChange]);
 
   async function handleConnectWallet() {
     try {
@@ -169,83 +185,7 @@ function NotarizePage() {
     }
   }
 
-  async function handleSignTransaction() {
-    if (!proof || !wallet.address) {
-      setSigningMessage(
-        "Proof and connected wallet are required before signing."
-      );
-      return;
-    }
-
-    try {
-      setProcessing(true);
-      setRecoveryMessage("");
-      setSigningMessage(
-        "Checking Algorand TestNet readiness..."
-      );
-
-      const preflight =
-        await AlgorandTestNetPreflightService.evaluate();
-
-      if (!preflight.ready) {
-        const reason =
-          preflight.errors.length > 0
-            ? preflight.errors.join(" ")
-            : "Algorand TestNet readiness checks did not pass.";
-
-        setSigningMessage(
-          `Signing blocked. ${reason}`
-        );
-
-        return;
-      }
-
-      setSigningMessage(
-        "Opening Pera Wallet for signature approval..."
-      );
-
-      const signed =
-        await AlgorandTransactionSigningService.signProofTransaction(
-          proof,
-          wallet.address
-        );
-
-      setSignedTransaction(signed);
-      setSubmissionResult(null);
-      setConfirmationResult(null);
-      setUnsafeResubmissionBlocked(false);
-
-      setSigningMessage(
-        "Transaction signed successfully. It has not been submitted yet."
-      );
-
-      setSubmissionMessage("");
-      setConfirmationMessage("");
-    } catch (error) {
-      Logger.error("Transaction signing failed.");
-
-      const failure =
-        TransactionFailureClassificationService.classify(
-          error,
-          { stage: "signing" }
-        );
-
-      const policy =
-        TransactionRetryPolicyService.evaluate(failure);
-
-      setSigningMessage(failure.userMessage);
-      setRecoveryMessage(policy.userMessage);
-
-      setUnsafeResubmissionBlocked(
-        policy.transactionMayHaveBeenSubmitted &&
-          !policy.canRetryImmediately
-      );
-    } finally {
-      setProcessing(false);
-    }
-  }
-
-  async function handleSubmitTransaction() {
+  async function handleApproveAndNotarize() {
     if (unsafeResubmissionBlocked) {
       setRecoveryMessage(
         "Submission is blocked until the existing transaction status has been reviewed."
@@ -253,110 +193,202 @@ function NotarizePage() {
       return;
     }
 
-    if (!signedTransaction) {
-      setSubmissionMessage(
-        "A signed transaction is required before submission."
+    if (!proof || !wallet.address || !evidenceRecord) {
+      setSigningMessage(
+        "A prepared proof, evidence record, and connected wallet are required before notarization."
       );
       return;
     }
 
-    if (!evidenceRecord) {
-      setSubmissionMessage(
-        "An evidence record is required before submission."
-      );
-      return;
-    }
+    let transactionToSubmit = signedTransaction;
 
     try {
       setProcessing(true);
       setRecoveryMessage("");
+      setRecoveryTransactionId(null);
+
+      if (!transactionToSubmit) {
+        setSigningMessage(
+          "Checking Algorand TestNet readiness..."
+        );
+
+        try {
+          const preflight =
+            await AlgorandTestNetPreflightService.evaluate();
+
+          if (!preflight.ready) {
+            const reason =
+              preflight.errors.length > 0
+                ? preflight.errors.join(" ")
+                : "Algorand TestNet readiness checks did not pass.";
+
+            setSigningMessage(
+              `Wallet approval blocked. ${reason}`
+            );
+
+            return;
+          }
+
+          setSigningMessage(
+            "Opening Pera Wallet for transaction approval..."
+          );
+
+          const approvalController = new AbortController();
+          walletApprovalAbortController.current = approvalController;
+          setWalletApprovalPending(true);
+
+          try {
+            transactionToSubmit =
+              await AlgorandTransactionSigningService.signProofTransaction(
+                proof,
+                wallet.address,
+                { signal: approvalController.signal }
+              );
+          } finally {
+            if (
+              walletApprovalAbortController.current === approvalController
+            ) {
+              walletApprovalAbortController.current = null;
+            }
+            setWalletApprovalPending(false);
+          }
+
+          setSignedTransaction(transactionToSubmit);
+          setSubmissionResult(null);
+          setConfirmationResult(null);
+          setUnsafeResubmissionBlocked(false);
+
+          setSigningMessage(
+            "Wallet approval complete. Submitting to Algorand TestNet..."
+          );
+
+          setSubmissionMessage("");
+          setConfirmationMessage("");
+        } catch (error) {
+          Logger.error("Transaction signing failed.");
+
+          const failure =
+            TransactionFailureClassificationService.classify(
+              error,
+              { stage: "signing" }
+            );
+
+          const policy =
+            TransactionRetryPolicyService.evaluate(failure);
+
+          setSigningMessage(failure.userMessage);
+          setRecoveryMessage(policy.userMessage);
+
+          setUnsafeResubmissionBlocked(
+            policy.transactionMayHaveBeenSubmitted &&
+              !policy.canRetryImmediately
+          );
+          return;
+        }
+      } else {
+        setSigningMessage(
+          "Wallet approval is already complete. Resuming TestNet submission..."
+        );
+      }
+
       setSubmissionResult(null);
       setConfirmationResult(null);
 
-      const result =
-        await AlgorandNotarizationLifecycleService.complete({
-          signedTransaction,
-          evidenceRecord,
-          onProgress: ({ stage, message }) => {
-            if (
-              stage === "submitting" ||
-              stage === "submitted"
-            ) {
-              setSubmissionMessage(message);
-            }
+      try {
+        const result =
+          await AlgorandNotarizationLifecycleService.complete({
+            signedTransaction: transactionToSubmit,
+            evidenceRecord,
+            onProgress: ({ stage, message }) => {
+              if (
+                stage === "submitting" ||
+                stage === "submitted"
+              ) {
+                setSubmissionMessage(message);
+              }
 
-            if (
-              stage === "confirming" ||
-              stage === "confirmed"
-            ) {
-              setConfirmationMessage(message);
-            }
-          },
-        });
+              if (
+                stage === "confirming" ||
+                stage === "confirmed"
+              ) {
+                setConfirmationMessage(message);
+              }
+            },
+          });
 
-      setSubmissionResult(result.submissionResult);
-      setConfirmationResult(result.confirmationResult);
-      setEvidenceRecord(result.confirmedRecord);
-      setUnsafeResubmissionBlocked(false);
-      setRecoveryMessage("");
-    } catch (error) {
-      Logger.error("End-to-end Algorand notarization failed.");
+        setSubmissionResult(result.submissionResult);
+        setConfirmationResult(result.confirmationResult);
+        setEvidenceRecord(result.confirmedRecord);
+        setUnsafeResubmissionBlocked(false);
+        setRecoveryMessage("");
+      } catch (error) {
+        Logger.error("End-to-end Algorand notarization failed.");
 
-      const lifecycleStage =
-        error instanceof AlgorandNotarizationLifecycleError
-          ? error.stage
-          : "unknown";
+        const lifecycleStage =
+          error instanceof AlgorandNotarizationLifecycleError
+            ? error.stage
+            : "unknown";
 
-      const sourceError =
-        error instanceof AlgorandNotarizationLifecycleError
-          ? error.causeValue
-          : error;
+        const sourceError =
+          error instanceof AlgorandNotarizationLifecycleError
+            ? error.causeValue
+            : error;
 
-      const failedTransactionId =
-        error instanceof AlgorandNotarizationLifecycleError
-          ? error.transactionId
-          : null;
+        const failedTransactionId =
+          error instanceof AlgorandNotarizationLifecycleError
+            ? error.transactionId
+            : null;
 
-      setRecoveryTransactionId(failedTransactionId);
+        setRecoveryTransactionId(failedTransactionId);
 
-      let stage: TransactionFailureStage = "unknown";
+        let stage: TransactionFailureStage = "unknown";
 
-      if (
-        lifecycleStage === "submitting" ||
-        lifecycleStage === "submitted"
-      ) {
-        stage = "submitting";
-      } else if (
-        lifecycleStage === "confirming" ||
-        lifecycleStage === "confirmed"
-      ) {
-        stage = "confirming";
-      }
+        if (
+          lifecycleStage === "submitting" ||
+          lifecycleStage === "submitted"
+        ) {
+          stage = "submitting";
+        } else if (
+          lifecycleStage === "confirming" ||
+          lifecycleStage === "confirmed"
+        ) {
+          stage = "confirming";
+        }
 
-      const failure =
-        TransactionFailureClassificationService.classify(
-          sourceError,
-          { stage }
+        const failure =
+          TransactionFailureClassificationService.classify(
+            sourceError,
+            { stage }
+          );
+
+        const policy =
+          TransactionRetryPolicyService.evaluate(failure);
+
+        if (stage === "submitting") {
+          setSubmissionMessage(failure.userMessage);
+        } else {
+          setConfirmationMessage(failure.userMessage);
+        }
+
+        setRecoveryMessage(policy.userMessage);
+
+        setUnsafeResubmissionBlocked(
+          policy.transactionMayHaveBeenSubmitted &&
+            !policy.canRetryImmediately
         );
-
-      const policy =
-        TransactionRetryPolicyService.evaluate(failure);
-
-      if (stage === "submitting") {
-        setSubmissionMessage(failure.userMessage);
-      } else {
-        setConfirmationMessage(failure.userMessage);
       }
-
-      setRecoveryMessage(policy.userMessage);
-
-      setUnsafeResubmissionBlocked(
-        policy.transactionMayHaveBeenSubmitted &&
-          !policy.canRetryImmediately
-      );
     } finally {
       setProcessing(false);
     }
+  }
+
+  function handleCancelWalletApproval() {
+    if (!walletApprovalAbortController.current) {
+      return;
+    }
+
+    setSigningMessage("Cancelling the wallet approval wait...");
+    walletApprovalAbortController.current.abort();
   }
 
   async function handleCheckTransactionStatus() {
@@ -464,48 +496,34 @@ function NotarizePage() {
   return (
     <section className="page notarize-page">
       <div className="notarize-header">
-        <h2>Notarize Document</h2>
+        <p className="notarize-eyebrow">TestNet Notarization</p>
+        <h2>
+          {confirmationResult
+            ? "Notarization Receipt"
+            : "Notarize Document"}
+        </h2>
         <p>
-          Create cryptographic evidence for one document and prepare it
-          for Algorand TestNet notarization.
+          {confirmationResult
+            ? "Your document fingerprint is confirmed on Algorand TestNet. Review the receipt or begin another notarization."
+            : "Select one document, review its local proof, and approve the Algorand TestNet transaction only when you are ready."}
         </p>
       </div>
 
       <div className="notarize-workspace">
-        <div className="notarize-row">
-          <div className="notarize-section">
-            <UploadStep onFileChange={handleFileChange} />
-          </div>
+        {!confirmationResult && (
+          <div className="notarize-primary-grid">
+            <div className="notarize-section">
+              <UploadStep onFileChange={handleFileChange} />
+            </div>
 
-          <div className="notarize-section">
-            <DocumentSummaryStep
-              fileName={fileName}
-              fileHash={fileHash}
-              errors={errors}
-            />
-
-            <DuplicateEvidenceWarning
-              duplicateRecord={duplicateRecord}
-            />
-
-            <EvidenceRecordPreview
-              evidenceRecord={evidenceRecord}
+            <WalletReadinessPanel
+              wallet={wallet}
+              connecting={walletConnecting}
+              onConnect={handleConnectWallet}
+              onDisconnect={handleDisconnectWallet}
             />
           </div>
-        </div>
-
-        <WalletReadinessPanel
-          wallet={wallet}
-          connecting={walletConnecting}
-          onConnect={handleConnectWallet}
-          onDisconnect={handleDisconnectWallet}
-        />
-
-        <BlockchainPreparationStep
-          transactionDraft={transactionDraft}
-        />
-
-        <EvidenceReviewStep prettyPayload={prettyPayload} />
+        )}
 
         {recoveryMessage && (
           <div
@@ -555,39 +573,113 @@ function NotarizePage() {
           </div>
         )}
 
-        <SignSubmitStep
-          hasDocument={Boolean(proof)}
-          walletReady={walletReady}
-          transactionPrepared={Boolean(transactionDraft)}
-          processing={processing}
-          readyForSignature={readyForSignature}
-          signingMessage={signingMessage}
-          submissionMessage={submissionMessage}
-          confirmationMessage={confirmationMessage}
-          signedTransaction={signedTransaction}
-          submissionResult={submissionResult}
-          confirmationResult={confirmationResult}
-          onSignTransaction={handleSignTransaction}
-          onSubmitTransaction={handleSubmitTransaction}
-        />
+        {!confirmationResult && (
+          <div className="notarize-action-grid">
+            <SignSubmitStep
+              hasDocument={Boolean(proof)}
+              walletReady={walletReady}
+              transactionPrepared={Boolean(transactionDraft)}
+              processing={processing}
+              walletApprovalPending={walletApprovalPending}
+              readyForSignature={readyForSignature}
+              signingMessage={signingMessage}
+              submissionMessage={submissionMessage}
+              confirmationMessage={confirmationMessage}
+              signedTransaction={signedTransaction}
+              submissionResult={submissionResult}
+              confirmationResult={confirmationResult}
+              actionBlocked={unsafeResubmissionBlocked}
+              onApproveAndNotarize={handleApproveAndNotarize}
+              onCancelWalletApproval={handleCancelWalletApproval}
+            />
+          </div>
+        )}
+
+        {!confirmationResult &&
+          (fileName || errors.length > 0 || evidenceRecord) && (
+            <div
+              className="notarize-document-information"
+              aria-label="Selected document information"
+            >
+              <DocumentSummaryStep
+                fileName={fileName}
+                fileHash={fileHash}
+                errors={errors}
+              />
+
+              <EvidenceRecordPreview
+                evidenceRecord={evidenceRecord}
+              />
+
+              <DuplicateEvidenceWarning
+                duplicateRecord={duplicateRecord}
+              />
+            </div>
+          )}
 
         <NotarizationSuccessPanel
           confirmationResult={confirmationResult}
           evidenceRecord={evidenceRecord}
         />
 
-        <ProgressTimeline
-          fileName={fileName}
-          fileHash={fileHash}
-          proof={proof}
-          evidenceRecord={evidenceRecord}
-          serializedProofPayload={serializedProofPayload}
-          walletReady={walletReady}
-          transactionDraft={transactionDraft}
-          signedTransaction={signedTransaction}
-          submissionResult={submissionResult}
-          confirmationResult={confirmationResult}
-        />
+        {confirmationResult && (
+          <div className="notarize-completed-next">
+            <UploadStep
+              onFileChange={handleFileChange}
+              title="Notarize another document"
+              description="Choose a new document to begin a fresh TestNet notarization. Your confirmed record will remain in the Vault."
+            />
+          </div>
+        )}
+
+        <details
+          className="notarize-disclosure"
+          open={Boolean(
+            !confirmationResult &&
+              (transactionDraft ||
+              signedTransaction ||
+              submissionResult)
+          )}
+        >
+          <summary>
+            <span>
+              <strong>
+                {confirmationResult
+                  ? "Completed transaction details"
+                  : "Proof and transaction details"}
+              </strong>
+              <small>
+                {confirmationResult
+                  ? "Review the proof payload and completed workflow only when needed."
+                  : "Review the prepared transaction, proof payload, and workflow progress."}
+              </small>
+            </span>
+            <span className="notarize-disclosure-action">
+              View details
+            </span>
+          </summary>
+
+          <div className="notarize-disclosure-content">
+            <BlockchainPreparationStep
+              transactionDraft={transactionDraft}
+            />
+
+            <EvidenceReviewStep prettyPayload={prettyPayload} />
+
+            <ProgressTimeline
+              fileName={fileName}
+              fileHash={fileHash}
+              proof={proof}
+              evidenceRecord={evidenceRecord}
+              serializedProofPayload={serializedProofPayload}
+              walletReady={walletReady}
+              transactionDraft={transactionDraft}
+              signedTransaction={signedTransaction}
+              submissionResult={submissionResult}
+              confirmationResult={confirmationResult}
+            />
+          </div>
+        </details>
       </div>
     </section>
   );

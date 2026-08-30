@@ -12,6 +12,7 @@ import {
 import { afterEach, describe, expect, it, vi } from "vitest";
 import App from "../../src/App";
 import UploadStep from "../../src/pages/NotarizePage/components/UploadStep";
+import WalletReadinessPanel from "../../src/pages/NotarizePage/components/WalletReadinessPanel";
 
 vi.mock("@perawallet/connect", () => ({
   PeraWalletConnect: class {
@@ -69,6 +70,27 @@ describe("application accessibility boundaries", () => {
     ).toHaveAttribute("type", "file");
   });
 
+  it("keeps the viewport stable after pointer navigation", async () => {
+    render(<App />);
+
+    const main = screen.getByRole("main");
+    const focus = vi.spyOn(main, "focus");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Verify" }),
+      { detail: 1 }
+    );
+
+    await waitFor(() => {
+      expect(document.title).toBe(
+        "Verify | Algorand Document Vault"
+      );
+      expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+    });
+
+    expect(main).toHaveFocus();
+  });
+
   it("provides a keyboard skip link to the main landmark", () => {
     render(<App />);
 
@@ -86,22 +108,61 @@ describe("application accessibility boundaries", () => {
     ).toHaveAttribute("type", "file");
   });
 
+  it("keeps a shortened connected-wallet address fully accessible", () => {
+    const address =
+      "UQWCJ6BW2GY6S2WORUZX7SGKAHDS4PPHSDWCSHZCS7ZNPOZEUX7UV6X4ZI";
+
+    render(
+      <WalletReadinessPanel
+        wallet={{ status: "connected", address }}
+        connecting={false}
+        onConnect={vi.fn()}
+        onDisconnect={vi.fn()}
+      />
+    );
+
+    const displayedAddress = screen.getByLabelText(
+      `Wallet address ${address}`
+    );
+
+    expect(displayedAddress).toHaveTextContent("UQWCJ6BW2G…7UV6X4ZI");
+    expect(displayedAddress).toHaveAttribute("title", address);
+  });
+
   it("labels Vault controls without nesting main landmarks", async () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: "Vault" }));
 
+    const toolsSummary = (await screen.findByText("Backup and restore", {
+      exact: true,
+    })).closest("summary");
+
+    expect(toolsSummary).not.toBeNull();
+    expect(toolsSummary?.closest("details")).not.toHaveAttribute("open");
+    fireEvent.click(toolsSummary!);
+    expect(toolsSummary?.closest("details")).toHaveAttribute("open");
+
+    expect(
+      screen.queryByLabelText("Search evidence by filename or fingerprint")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Filter evidence by status")).not.toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Export backup" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Restore from file" }));
+    expect(
+      screen.getByLabelText("Evidence Vault backup file")
+    ).toHaveAttribute("type", "file");
+
+    fireEvent.click(toolsSummary!);
     expect(
       await screen.findByLabelText(
         "Search evidence by filename or fingerprint"
       )
     ).toHaveAttribute("type", "search");
-    expect(
-      screen.getByLabelText("Filter evidence by status")
-    ).toHaveValue("all");
-    expect(
-      screen.getByLabelText("Evidence Vault backup file")
-    ).toHaveAttribute("type", "file");
     expect(screen.getAllByRole("main")).toHaveLength(1);
   });
 
@@ -109,6 +170,11 @@ describe("application accessibility boundaries", () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: "Vault" }));
+
+    const toolsSummary = (await screen.findByText("Backup and restore", {
+      exact: true,
+    })).closest("summary");
+    fireEvent.click(toolsSummary!);
 
     const exportButton = await screen.findByRole("button", {
       name: "Export Encrypted Backup",

@@ -29,6 +29,16 @@ describe("TransactionRetryPolicyService", () => {
     expect(policy.transactionMayHaveBeenSubmitted).toBe(false);
   });
 
+  it("allows retry after an unresponsive wallet request", () => {
+    const policy = TransactionRetryPolicyService.evaluate(
+      createFailure("wallet_unresponsive", "signing")
+    );
+
+    expect(policy.decision).toBe("retry_allowed");
+    expect(policy.canRetryImmediately).toBe(true);
+    expect(policy.transactionMayHaveBeenSubmitted).toBe(false);
+  });
+
   it("waits for connectivity after a network failure", () => {
     const policy = TransactionRetryPolicyService.evaluate(
       createFailure("network_unavailable", "submitting")

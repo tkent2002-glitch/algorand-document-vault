@@ -4,7 +4,7 @@ All notable changes to Algorand Document Vault will be documented in this file.
 
 The project follows [Semantic Versioning](https://semver.org/) when versioned releases begin.
 
-## [Unreleased]
+## [0.1.0-alpha] - 2026-08-30
 
 ### Added
 
@@ -23,13 +23,34 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
 - Accessibility labels, landmarks, focus management, responsive navigation, and regression tests
 - CI lint enforcement
 
-### In progress
+### Changed
 
-- Full Algorand TestNet end-to-end notarization validation
-- Current Pera Mobile connection handoff validation
-- Cross-browser, screen-reader, and performance validation
-- Public alpha release preparation
+- Simplified the Notarize, Verify, and Vault routes with task-first layouts,
+  a compact post-confirmation receipt, compact record cards, and progressive
+  disclosure for transaction details plus focused, tabbed backup and restore
+  controls.
+- Combined wallet approval, TestNet submission, and confirmation into one
+  user-facing notarization action while retaining transaction-policy checks,
+  safe retry handling, and uncertain-status resubmission protection.
+- Made the active Notarize navigation restart a completed workflow while
+  preserving unfinished notarization work.
+- Moved selected-document metadata below the primary notarization action and
+  condensed it into a responsive information row.
+- Added a bounded Pera approval wait with a same-page cancel and safe retry
+  path when a mobile wallet request does not arrive.
+- Kept the Vault backup-and-restore keyboard focus outline visible inside its
+  rounded tools container.
 
-## [0.1.0-alpha] - Planned
+### Accepted release-candidate limitations
 
-First public alpha release after TestNet validation and release review.
+- Physical Android validation is deferred because no representative device is
+  available.
+- Exact Safari 200%/400% page-zoom coverage and the supported-mobile visual-mode
+  retest are deferred until a controlled HTTPS deployment is available.
+- Independent security review has not begun; this version remains an unaudited
+  pre-release public alpha.
+
+### Post-approval work
+
+- Public-alpha hosting selection and deployed HTTPS validation
+- Independent security review before any production-readiness claim

@@ -6,7 +6,10 @@ import {
 } from "react";
 import EvidenceDetailsPanel from "../../components/evidence/EvidenceDetailsPanel";
 import { EvidenceRepository } from "../../repositories";
-import type { EvidenceRecord } from "../../services";
+import {
+  AlgorandExplorerService,
+  type EvidenceRecord,
+} from "../../services";
 import VaultBackupActions from "./VaultBackupActions";
 import VaultImportPreview from "./VaultImportPreview";
 import {
@@ -37,6 +40,8 @@ function VaultPage() {
   const [selectedHash, setSelectedHash] = useState<string>("");
   const [historyPage, setHistoryPage] = useState<number>(1);
   const [detailOpen, setDetailOpen] = useState<boolean>(false);
+  const [toolsOpen, setToolsOpen] = useState<boolean>(false);
+  const [activeTool, setActiveTool] = useState<"export" | "restore">("export");
   const deferredSearchText = useDeferredValue(searchText);
 
   async function reloadRecords(): Promise<void> {
@@ -92,10 +97,14 @@ function VaultPage() {
     [currentPage, filteredIndex]
   );
 
-  const selectedItem =
-    pagination.items.find((item) => item.hashValue === selectedHash) ??
-    pagination.items[0] ??
-    null;
+  const selectedItem = selectedHash
+    ? pagination.items.find((item) => item.hashValue === selectedHash) ?? null
+    : null;
+  const selectedExplorerUrl = selectedItem?.latestRecord.algorandTransactionId
+    ? AlgorandExplorerService.getTransactionUrl(
+        selectedItem.latestRecord.algorandTransactionId
+      )
+    : null;
 
   const historyTotalPages = selectedItem
     ? Math.max(
@@ -140,43 +149,99 @@ function VaultPage() {
         <h2>Evidence Vault</h2>
 
         <p>
-          Review cryptographic evidence records organized by unique
-          document fingerprint. The Vault stores evidence metadata and
-          blockchain references, not the original documents.
+          {toolsOpen
+            ? "Export or restore local evidence records. Original documents are never included."
+            : "Search and review document fingerprints stored on this device. Open backup and restore tools only when you need them."}
         </p>
 
-        <div className="vault-boundary-summary">
-          <span>Evidence records: Stored locally</span>
-          <span>Original documents: Not stored</span>
-          <span>Fingerprint: SHA-256</span>
-        </div>
       </div>
 
-      <VaultBackupActions />
-      <VaultImportPreview onImportComplete={reloadRecords} />
-
-      <div className="vault-stats">
-        <div>
-          <span>Total Records</span>
-          <strong>{records.length}</strong>
+      {!toolsOpen && (
+        <div className="vault-summary-strip" aria-label="Vault summary">
+          <span>
+            <strong>{evidenceIndex.length}</strong> documents
+          </span>
+          <span>
+            <strong>{records.length}</strong> evidence records
+          </span>
+          <span>
+            <strong>{confirmedCount}</strong> confirmed
+          </span>
+          <span>
+            <strong>{draftCount}</strong> drafts
+          </span>
         </div>
+      )}
 
-        <div>
-          <span>Unique Documents</span>
-          <strong>{evidenceIndex.length}</strong>
+      <details
+        className="vault-tools"
+        open={toolsOpen}
+      >
+        <summary
+          onClick={(event) => {
+            event.preventDefault();
+            setToolsOpen((isOpen) => !isOpen);
+          }}
+        >
+          <span>
+            <strong>Backup and restore</strong>
+            <small>Manage evidence-record backup files</small>
+          </span>
+          <span className="vault-tools-action">
+            {toolsOpen ? "Close tools" : "Open tools"}
+          </span>
+        </summary>
+
+        <div className="vault-tools-content">
+          <div
+            className="vault-tools-tabs"
+            role="tablist"
+            aria-label="Backup and restore tools"
+          >
+            <button
+              id="vault-export-tab"
+              type="button"
+              role="tab"
+              aria-selected={activeTool === "export"}
+              aria-controls="vault-export-panel"
+              onClick={() => setActiveTool("export")}
+            >
+              Export backup
+            </button>
+            <button
+              id="vault-restore-tab"
+              type="button"
+              role="tab"
+              aria-selected={activeTool === "restore"}
+              aria-controls="vault-restore-panel"
+              onClick={() => setActiveTool("restore")}
+            >
+              Restore from file
+            </button>
+          </div>
+
+          {activeTool === "export" ? (
+            <div
+              id="vault-export-panel"
+              role="tabpanel"
+              aria-labelledby="vault-export-tab"
+            >
+              <VaultBackupActions />
+            </div>
+          ) : (
+            <div
+              id="vault-restore-panel"
+              role="tabpanel"
+              aria-labelledby="vault-restore-tab"
+            >
+              <VaultImportPreview onImportComplete={reloadRecords} />
+            </div>
+          )}
         </div>
+      </details>
 
-        <div>
-          <span>Drafts</span>
-          <strong>{draftCount}</strong>
-        </div>
-
-        <div>
-          <span>Confirmed</span>
-          <strong>{confirmedCount}</strong>
-        </div>
-      </div>
-
+      {!toolsOpen && (
+        <>
       <div className="vault-toolbar">
         <label className="visually-hidden" htmlFor="vault-search">
           Search evidence by filename or fingerprint
@@ -250,11 +315,7 @@ function VaultPage() {
         >
           <aside className="evidence-index" aria-label="Document fingerprints">
             <div className="evidence-index-header">
-              <h3>Document Fingerprints</h3>
-              <p>
-                Select a fingerprint to inspect its latest evidence
-                record and history.
-              </p>
+              <h3>Documents</h3>
               <p className="evidence-index-range" role="status">
                 Showing{" "}
                 {(pagination.page - 1) * pagination.pageSize + 1}–
@@ -276,16 +337,23 @@ function VaultPage() {
                   }
                   key={item.hashValue}
                   type="button"
+                  aria-pressed={selectedItem?.hashValue === item.hashValue}
                   onClick={() => selectDocument(item.hashValue)}
                 >
-                  <strong>{item.documentName}</strong>
-                  <span>Status: {item.latestRecord.status}</span>
-                  <span>{item.records.length} evidence records</span>
-                  <span>
-                    Last Updated:{" "}
-                    {new Date(item.latestRecord.createdAt).toLocaleDateString()}
+                  <span className="evidence-index-item-heading">
+                    <strong>{item.documentName}</strong>
+                    <span className={`evidence-status ${item.latestRecord.status}`}>
+                      <span className="visually-hidden">Status: </span>
+                      {item.latestRecord.status}
+                    </span>
                   </span>
                   <code>{shorten(item.hashValue)}</code>
+                  <span className="evidence-index-item-meta">
+                    <span>
+                      {item.records.length} evidence record
+                      {item.records.length === 1 ? "" : "s"}
+                    </span>
+                  </span>
                 </button>
               ))}
             </div>
@@ -312,40 +380,117 @@ function VaultPage() {
             </nav>
           </aside>
 
-          <div className="evidence-workspace-detail">
-            {selectedItem && (
+          {selectedItem && (
+            <div
+              className="evidence-workspace-detail"
+              key={selectedItem.hashValue}
+            >
               <>
                 <button
                   className="vault-mobile-back"
                   type="button"
-                  onClick={() => setDetailOpen(false)}
+                  onClick={() => {
+                    setSelectedHash("");
+                    setDetailOpen(false);
+                  }}
                 >
                   Back to document list
                 </button>
                 <div className="evidence-workspace-summary">
-                  <p className="vault-index-label">Selected Unique Document Fingerprint</p>
-                  <h3>{selectedItem.documentName}</h3>
-                  <p>Evidence records for this fingerprint: {selectedItem.records.length}</p>
-                  <code>{selectedItem.hashValue}</code>
+                  <div className="vault-selected-heading">
+                    <div>
+                      <p className="vault-index-label">Selected document</p>
+                      <h3>{selectedItem.documentName}</h3>
+                    </div>
+                    <span
+                      className={`evidence-status ${selectedItem.latestRecord.status}`}
+                    >
+                      {selectedItem.latestRecord.status}
+                    </span>
+                  </div>
+
+                  <dl className="vault-document-receipt">
+                    <div>
+                      <dt>Fingerprint</dt>
+                      <dd>
+                        <code
+                          title={selectedItem.hashValue}
+                          aria-label={`Fingerprint ${selectedItem.hashValue}`}
+                        >
+                          {shorten(selectedItem.hashValue)}
+                        </code>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Evidence records</dt>
+                      <dd>{selectedItem.records.length}</dd>
+                    </div>
+                    <div>
+                      <dt>Latest update</dt>
+                      <dd>
+                        <time
+                          dateTime={selectedItem.latestRecord.createdAt}
+                          title={new Date(
+                            selectedItem.latestRecord.createdAt
+                          ).toLocaleString()}
+                        >
+                          {new Date(
+                            selectedItem.latestRecord.createdAt
+                          ).toLocaleDateString()}
+                        </time>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Record ID</dt>
+                      <dd>
+                        <code
+                          title={selectedItem.latestRecord.id}
+                          aria-label={`Record ID ${selectedItem.latestRecord.id}`}
+                        >
+                          {shorten(selectedItem.latestRecord.id)}
+                        </code>
+                      </dd>
+                    </div>
+                  </dl>
+
+                  {selectedExplorerUrl && (
+                    <a
+                      className="explorer-link"
+                      href={selectedExplorerUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      View confirmed transaction
+                    </a>
+                  )}
                 </div>
 
-                <EvidenceDetailsPanel record={selectedItem.latestRecord} />
-
-                <div className="evidence-history">
-                  <div className="evidence-history-header">
-                    <div>
-                      <h3>Evidence Record History</h3>
-                      <p>
-                        Chronological evidence records sharing this exact
-                        document fingerprint.
-                      </p>
-                    </div>
-
+                <details className="vault-detail-disclosure">
+                  <summary>
                     <span>
+                      <strong>Technical evidence</strong>
+                      <small>Fingerprint, blockchain metadata, and proof boundary</small>
+                    </span>
+                    <span className="vault-detail-disclosure-action">
+                      Open
+                    </span>
+                  </summary>
+                  <EvidenceDetailsPanel record={selectedItem.latestRecord} />
+                </details>
+
+                <details className="vault-detail-disclosure">
+                  <summary>
+                    <span>
+                      <strong>Evidence history</strong>
+                      <small>Chronological records for this fingerprint</small>
+                    </span>
+                    <span className="vault-detail-disclosure-action">
                       {selectedItem.records.length} record
                       {selectedItem.records.length === 1 ? "" : "s"}
                     </span>
-                  </div>
+                  </summary>
+
+                  <div className="evidence-history">
 
                   {visibleHistory.map((record) => (
                     <div className="evidence-history-item" key={record.id}>
@@ -419,11 +564,14 @@ function VaultPage() {
                       </button>
                     </nav>
                   )}
-                </div>
+                  </div>
+                </details>
               </>
-            )}
-          </div>
+            </div>
+          )}
         </div>
+      )}
+        </>
       )}
     </section>
   );

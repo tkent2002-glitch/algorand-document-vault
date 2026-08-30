@@ -129,14 +129,33 @@ test("keeps a 10,000-document Vault bounded and navigable", async ({
   expect(searchReadyMs).toBeLessThan(2_000);
   expect(sortReadyMs).toBeLessThan(2_000);
 
-  await page.setViewportSize({ width: 390, height: 844 });
   await page.locator(".evidence-index-item").first().click();
+  const selectedDetail = page.locator(".evidence-workspace-detail");
+  await expect(selectedDetail).toBeVisible();
+  await expect
+    .poll(() =>
+      selectedDetail.evaluate((element) => {
+        const styles = getComputedStyle(element);
+        return `${styles.overflowY}:${styles.maxHeight}`;
+      })
+    )
+    .toBe("visible:none");
+
+  await page.setViewportSize({ width: 390, height: 844 });
   await expect(
     page.getByRole("button", { name: "Back to document list" })
   ).toBeVisible();
   await expect(
     page.getByRole("complementary", { name: "Document fingerprints" })
   ).toBeHidden();
+
+  const detailDisclosures = page.locator("details.vault-detail-disclosure");
+  await expect(detailDisclosures).toHaveCount(2);
+  await expect(detailDisclosures.nth(0)).not.toHaveAttribute("open", "");
+  await expect(detailDisclosures.nth(1)).not.toHaveAttribute("open", "");
+
+  await detailDisclosures.nth(0).locator("summary").click();
+  await expect(detailDisclosures.nth(0)).toHaveAttribute("open", "");
 
   await page.getByRole("button", { name: "Back to document list" }).click();
   await expect(

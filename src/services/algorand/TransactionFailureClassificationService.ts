@@ -1,5 +1,6 @@
 ﻿export type TransactionFailureType =
   | "wallet_rejected"
+  | "wallet_unresponsive"
   | "network_unavailable"
   | "submission_failed"
   | "confirmation_timeout"
@@ -29,6 +30,11 @@ const WALLET_REJECTION_PATTERNS = [
   "declined",
   "user rejected",
   "user denied",
+];
+
+const WALLET_UNRESPONSIVE_PATTERNS = [
+  "wallet approval timed out",
+  "wallet approval wait was cancelled",
 ];
 
 const NETWORK_FAILURE_PATTERNS = [
@@ -80,6 +86,19 @@ export class TransactionFailureClassificationService {
   ): TransactionFailureClassification {
     const stage = context.stage ?? "unknown";
     const message = getErrorMessage(error);
+
+    if (
+      stage === "signing" &&
+      containsPattern(message, WALLET_UNRESPONSIVE_PATTERNS)
+    ) {
+      return {
+        type: "wallet_unresponsive",
+        stage,
+        userMessage:
+          "The wallet approval request did not complete. No transaction was submitted.",
+        originalError: error,
+      };
+    }
 
     if (
       stage === "signing" &&

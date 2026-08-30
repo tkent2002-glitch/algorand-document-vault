@@ -2,26 +2,31 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1.25rem;
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--accent);
-  border-radius: 16px;
-  background: var(--social-bg);
-  box-shadow: var(--shadow);
+  margin-bottom: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
-.vault-backup-actions strong,
+.vault-backup-header h3,
 .vault-backup-option h3 {
+  margin: 0;
   color: var(--text-h);
+}
+
+.vault-backup-header p {
+  margin: 0.3rem 0 0;
 }
 
 .vault-backup-option {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
 }
 
 .vault-backup-option label {
@@ -59,8 +64,10 @@
 }
 
 .vault-backup-warning {
+  margin: 0;
   max-width: 680px;
-  font-size: 0.9rem;
+  color: var(--text);
+  font-size: 0.82rem;
 }
 
 .vault-backup-message {
@@ -74,34 +81,18 @@
 
 /* Phase 5.3B - Backup UX Polish */
 
-.vault-backup-header,
-.vault-import-header {
+.vault-backup-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
 }
 
-.vault-backup-security-label,
-.vault-import-header > span {
-  flex: 0 0 auto;
-  padding: 0.35rem 0.65rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
 .vault-backup-options-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
   gap: 1rem;
-}
-
-.vault-backup-option {
-  padding: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 14px;
 }
 
 .vault-backup-option-header {
@@ -125,13 +116,11 @@
   font-weight: 700;
 }
 
-.vault-backup-properties {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.vault-backup-properties p {
+.vault-backup-option-security {
   margin: 0;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .vault-backup-password-status {
@@ -144,7 +133,7 @@
   margin: 0;
   padding-top: 1rem;
   border-top: 1px solid var(--border);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   opacity: 0.8;
 }
 

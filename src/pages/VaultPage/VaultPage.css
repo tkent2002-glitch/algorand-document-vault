@@ -4,11 +4,12 @@
 
 .vault-header {
   max-width: 820px;
-  margin: 0 auto 1.5rem;
-  text-align: center;
+  margin: 0 0 1.25rem;
+  text-align: left;
 }
 
 .vault-eyebrow {
+  margin: 0;
   color: var(--accent);
   font-size: 0.8rem;
   font-weight: 800;
@@ -16,14 +17,17 @@
   text-transform: uppercase;
 }
 
-.vault-stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-  margin: 1.5rem 0;
+.vault-summary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 1.15rem;
+  margin: 0 0 0.85rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--social-bg) 62%, transparent);
 }
 
-.vault-stats div,
 .vault-toolbar,
 .vault-empty,
 .evidence-index,
@@ -37,28 +41,25 @@
   box-shadow: var(--shadow);
 }
 
-.vault-stats div {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.vault-stats span,
+.vault-summary-strip span,
 .vault-index-label {
   color: var(--text);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
-.vault-stats strong {
+.vault-summary-strip strong {
   color: var(--text-h);
-  font-size: 1.5rem;
+  font-size: 0.95rem;
 }
 
 .vault-toolbar {
   display: grid;
   grid-template-columns: minmax(260px, 1fr) 190px 220px;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  border-radius: 14px;
+  box-shadow: none;
 }
 
 .vault-toolbar input,
@@ -77,27 +78,59 @@
 
 .evidence-workspace {
   display: grid;
-  grid-template-columns: minmax(280px, 360px) 1fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
   align-items: start;
 }
 
+.evidence-workspace.detail-open {
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+}
+
 .evidence-index {
   display: flex;
+  width: 100%;
+  min-width: 0;
   flex-direction: column;
   gap: 0.75rem;
+  padding: 1rem;
+  box-shadow: none;
+}
+
+.evidence-workspace.detail-open .evidence-index {
   position: sticky;
   top: 1rem;
 }
 
 .evidence-index-list {
   display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 0.65rem;
   max-height: min(62vh, 720px);
   padding: 0.15rem 0.35rem 0.15rem 0.15rem;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
+}
+
+.evidence-workspace.detail-open .evidence-index-list {
+  grid-template-columns: 1fr;
+}
+
+.evidence-workspace.detail-open .evidence-index-header {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.evidence-workspace.detail-open .evidence-index-item code,
+.evidence-workspace.detail-open .evidence-index-item-meta {
+  display: none;
+}
+
+.evidence-workspace.detail-open .vault-detail-disclosure summary small {
+  display: none;
 }
 
 .evidence-index-header .evidence-index-range {
@@ -115,13 +148,14 @@
 .evidence-index-item {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.5rem;
   width: 100%;
+  min-width: 0;
   text-align: left;
   cursor: pointer;
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 1rem;
+  border-radius: 12px;
+  padding: 0.8rem;
   background: var(--surface);
   color: var(--text-h);
 }
@@ -131,10 +165,41 @@
   background: var(--accent-bg);
 }
 
-.evidence-index-item span {
-  color: var(--text);
-  font-size: 0.85rem;
+.evidence-index-item-heading,
+.evidence-index-item-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.evidence-index-item-heading strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.evidence-status {
+  flex: 0 0 auto;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-h);
+  font-size: 0.68rem;
+  font-weight: 750;
   text-transform: capitalize;
+}
+
+.evidence-status.confirmed {
+  border-color: color-mix(in srgb, #16a34a 55%, var(--border));
+  background: color-mix(in srgb, #16a34a 10%, transparent);
+}
+
+.evidence-index-item-meta {
+  justify-content: flex-start;
+  color: var(--text);
+  font-size: 0.74rem;
 }
 
 .evidence-index-item code,
@@ -147,11 +212,9 @@
 .evidence-workspace-detail {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  max-height: calc(100vh - 6rem);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
+  gap: 0.8rem;
+  padding: 1rem;
+  box-shadow: none;
 }
 
 .vault-mobile-back {
@@ -193,7 +256,129 @@
 .evidence-workspace-summary {
   display: flex;
   flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.85rem;
+  box-shadow: none;
+}
+
+.vault-selected-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.vault-selected-heading .vault-index-label {
+  margin-bottom: 0.2rem;
+}
+
+.vault-document-receipt {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
+  margin: 0.45rem 0 0;
+}
+
+.vault-document-receipt > div {
+  min-width: 0;
+  padding: 0.55rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+}
+
+.vault-document-receipt dt {
+  margin-bottom: 0.18rem;
+  color: var(--text);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.vault-document-receipt dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--text-h);
+  font-size: 0.82rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.evidence-workspace-summary .explorer-link {
+  margin-top: 0.65rem;
+}
+
+.vault-detail-disclosure {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--social-bg) 64%, transparent);
+}
+
+.vault-detail-disclosure > summary {
+  display: flex;
+  min-height: 3.75rem;
+  cursor: pointer;
+  list-style: none;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.8rem;
+}
+
+.vault-detail-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.vault-detail-disclosure > summary::before {
+  content: "+";
+  display: grid;
+  flex: 0 0 1.55rem;
+  width: 1.55rem;
+  height: 1.55rem;
+  place-items: center;
+  border: 1px solid var(--accent-border);
+  border-radius: 50%;
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.vault-detail-disclosure[open] > summary::before {
+  content: "−";
+}
+
+.vault-detail-disclosure > summary > span:first-of-type {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.vault-detail-disclosure summary strong {
+  color: var(--text-h);
+}
+
+.vault-detail-disclosure summary small,
+.vault-detail-disclosure-action {
+  color: var(--text);
+  font-size: 0.74rem;
+}
+
+.vault-detail-disclosure-action {
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.vault-detail-disclosure > .evidence-details-panel,
+.vault-detail-disclosure > .evidence-history {
+  padding: 0.85rem;
+  border-top: 1px solid var(--border);
+}
+
+.vault-detail-disclosure .evidence-details-header,
+.vault-detail-disclosure .blockchain-section .explorer-link {
+  display: none;
 }
 
 .vault-index-label {
@@ -230,7 +415,7 @@
 }
 
 @media (max-width: 1000px) {
-  .evidence-workspace {
+  .evidence-workspace.detail-open {
     grid-template-columns: 1fr;
   }
 
@@ -251,6 +436,11 @@
     overflow: visible;
   }
 
+  .evidence-index-list,
+  .evidence-workspace.detail-open .evidence-index-list {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
   .vault-mobile-back {
     display: block;
     width: fit-content;
@@ -258,10 +448,6 @@
 }
 
 @media (max-width: 900px) {
-  .vault-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .vault-toolbar {
     grid-template-columns: 1fr;
   }
@@ -272,28 +458,30 @@
 }
 
 @media (max-width: 560px) {
-  .vault-stats {
+  .evidence-index-list,
+  .evidence-workspace.detail-open .evidence-index-list {
+    grid-template-columns: 1fr;
+  }
+
+  .vault-document-receipt {
     grid-template-columns: 1fr;
   }
 }
 
+.evidence-workspace-detail > .evidence-workspace-summary {
+  padding: 0.85rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.evidence-workspace-detail .evidence-history {
+  border-bottom: 0;
+}
+
 /* Phase 5.3A - Vault Workspace Clarity */
-
-.vault-boundary-summary {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.vault-boundary-summary span {
-  padding: 0.4rem 0.7rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--social-bg);
-  font-size: 0.8rem;
-}
 
 .vault-empty {
   padding: 2rem;
@@ -312,9 +500,119 @@
 
 .evidence-index-header {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
   margin-bottom: 0.25rem;
+}
+
+.vault-tools {
+  overflow: hidden;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--social-bg) 70%, transparent);
+}
+
+.vault-tools[open] {
+  background: color-mix(in srgb, var(--social-bg) 88%, transparent);
+}
+
+.vault-tools > summary {
+  display: flex;
+  min-height: 4.1rem;
+  cursor: pointer;
+  list-style: none;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.8rem 1rem;
+}
+
+.vault-tools > summary:focus-visible {
+  outline-offset: -3px;
+}
+
+.vault-tools > summary::-webkit-details-marker {
+  display: none;
+}
+
+.vault-tools > summary::before {
+  content: "+";
+  display: grid;
+  flex: 0 0 1.8rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  border: 1px solid var(--accent-border);
+  border-radius: 50%;
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.vault-tools[open] > summary::before {
+  content: "−";
+}
+
+.vault-tools > summary > span:first-of-type {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.16rem;
+}
+
+.vault-tools summary strong {
+  color: var(--text-h);
+}
+
+.vault-tools summary small {
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.vault-tools-action {
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.vault-tools-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.vault-tools-tabs {
+  display: grid;
+  width: min(100%, 400px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.vault-tools-tabs button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 9px;
+  padding: 0.65rem 0.8rem;
+  background: transparent;
+  color: var(--text);
+  font-weight: 750;
+}
+
+.vault-tools-tabs button[aria-selected="true"] {
+  background: var(--accent-bg);
+  color: var(--text-h);
+  box-shadow: inset 0 0 0 1px var(--accent-border);
+}
+
+.vault-tools-content [role="tabpanel"] {
+  min-width: 0;
 }
 
 .evidence-index-header p {
@@ -345,25 +643,6 @@
 }
 
 /* Phase 5.3C - Evidence Record History Clarity */
-
-.evidence-history-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.evidence-history-header p {
-  margin: 0.35rem 0 0;
-  color: var(--text);
-  font-size: 0.85rem;
-}
-
-.evidence-history-header > span {
-  flex: 0 0 auto;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
 
 .evidence-history-item {
   grid-template-columns: 110px 1fr 130px;
@@ -413,7 +692,4 @@
     grid-template-columns: 1fr;
   }
 
-  .evidence-history-header {
-    flex-direction: column;
-  }
 }

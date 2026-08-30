@@ -27,6 +27,23 @@ test("accepts the approved alpha identity and TestNet-only boundary", () => {
   assert.deepEqual(validateReleaseReadiness(validInput()), []);
 });
 
+test("accepts a finalized ISO-dated alpha changelog heading", () => {
+  const input = validInput();
+  input.changelog = "## [0.1.0-alpha] - 2026-08-30\n";
+
+  assert.deepEqual(validateReleaseReadiness(input), []);
+});
+
+test("rejects a changelog without the approved alpha heading", () => {
+  const input = validInput();
+  input.changelog = "## [Unreleased]\n";
+
+  assert.match(
+    validateReleaseReadiness(input).join("\n"),
+    /planned or ISO-dated alpha release heading/
+  );
+});
+
 test("rejects release identity drift", () => {
   const input = validInput();
   input.packageJson = JSON.stringify({ version: "0.1.0" });

@@ -3,17 +3,36 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 const BASE_URL = "http://127.0.0.1:4180";
 const BACKUP_PASSWORD = "ADv-clean-profile-test-2026!";
 
-async function openVault(page: Page) {
+async function openVaultPage(page: Page) {
   await page.getByRole("button", { name: "Vault", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Evidence Vault" })
   ).toBeVisible();
 }
 
+async function openVaultTools(page: Page) {
+  await openVaultPage(page);
+
+  const vaultTools = page.locator("details.vault-tools");
+  const toolsOpen = await vaultTools.evaluate(
+    (details) => (details as HTMLDetailsElement).open
+  );
+
+  if (!toolsOpen) {
+    await vaultTools.locator("summary").click();
+  }
+}
+
 async function expectOnePersistedRecord(page: Page) {
+  const vaultTools = page.locator("details.vault-tools");
+  if (await vaultTools.evaluate((details) => (details as HTMLDetailsElement).open)) {
+    await vaultTools.locator("summary").click();
+  }
+
   const totalRecords = page
-    .locator(".vault-stats > div")
-    .filter({ hasText: "Total Records" })
+    .getByLabel("Vault summary")
+    .locator("span")
+    .filter({ hasText: "evidence records" })
     .locator("strong");
 
   await expect(totalRecords).toHaveText("1");
@@ -24,8 +43,13 @@ async function expectOnePersistedRecord(page: Page) {
   ).toBeVisible();
 
   await page.reload();
-  await openVault(page);
+  await openVaultPage(page);
   await expect(totalRecords).toHaveText("1");
+  await expect(
+    page.getByRole("button", {
+      name: /backup-round-trip\.txt Status: draft/,
+    })
+  ).toBeVisible();
 }
 
 async function restoreBackup(
@@ -38,7 +62,8 @@ async function restoreBackup(
 
   try {
     await page.goto(BASE_URL);
-    await openVault(page);
+    await openVaultTools(page);
+    await page.getByRole("tab", { name: "Restore from file" }).click();
     await page
       .getByLabel("Evidence Vault backup file")
       .setInputFiles(backupPath);
@@ -97,7 +122,7 @@ test("round-trips plain and encrypted backups through clean profiles", async ({
     page.getByText("backup-round-trip.txt", { exact: true })
   ).toBeVisible();
 
-  await openVault(page);
+  await openVaultTools(page);
 
   const plainDownloadPromise = page.waitForEvent("download");
   await page
