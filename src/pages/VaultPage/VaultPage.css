@@ -528,6 +528,10 @@
   padding: 0.8rem 1rem;
 }
 
+.vault-tools > summary:focus-visible {
+  outline-offset: -3px;
+}
+
 .vault-tools > summary::-webkit-details-marker {
   display: none;
 }

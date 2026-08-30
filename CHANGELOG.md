@@ -4,7 +4,7 @@ All notable changes to Algorand Document Vault will be documented in this file.
 
 The project follows [Semantic Versioning](https://semver.org/) when versioned releases begin.
 
-## [Unreleased]
+## [0.1.0-alpha] - 2026-08-30
 
 ### Added
 
@@ -38,17 +38,19 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
   condensed it into a responsive information row.
 - Added a bounded Pera approval wait with a same-page cancel and safe retry
   path when a mobile wallet request does not arrive.
+- Kept the Vault backup-and-restore keyboard focus outline visible inside its
+  rounded tools container.
 
-### In progress
+### Accepted release-candidate limitations
 
-- Manual stable Firefox, Safari/iOS, and representative mobile-device checks
-- Real zoom, operating-system visual-mode, and per-browser backup UX checks
-- Current post-redesign screenshots
-- Focused keyboard and zoom recheck of the simplified Notarize, Verify, and
-  Vault routes
-- Independent security review and product-owner release approval
+- Physical Android validation is deferred because no representative device is
+  available.
+- Exact Safari 200%/400% page-zoom coverage and the supported-mobile visual-mode
+  retest are deferred until a controlled HTTPS deployment is available.
+- Independent security review has not begun; this version remains an unaudited
+  pre-release public alpha.
+
+### Post-approval work
+
 - Public-alpha hosting selection and deployed HTTPS validation
-
-## [0.1.0-alpha] - Planned
-
-First public alpha release after TestNet validation and release review.
+- Independent security review before any production-readiness claim

@@ -4,7 +4,7 @@
 - **Candidate base:** `3da7716`
 - **Validation branch:** `codex/phase-10-release-candidate-validation`
 - **Opened:** August 28, 2026
-- **Release status:** Not approved
+- **Release status:** Approved with accepted deferrals; unaudited pre-release
 
 This document is the evidence ledger and operator runbook for the first public
 alpha release candidate. The authoritative gate list remains
@@ -18,17 +18,17 @@ the automated suite passes.
 | Release identity and TestNet boundary | Passed | Version and network fail-closed checks are automated. |
 | Unit, lint, build, and release packaging | Passed | Local gates and both pull-request CI jobs passed. |
 | Installed stable Chrome on Windows | Passed | Chrome `151.0.7922.174`; seven production-preview tests passed. |
-| Accessibility automation and manual validation | Passed with one browser gate open and one device deferral | Narrator, keyboard-only workflows, Windows visual modes, physical Chrome/Edge/Firefox zoom, and the physical iOS navigation fix passed. Exact Safari 200%/400% coverage remains open; physical Android is deferred because no device is available. |
-| Algorand TestNet and Pera Wallet | Passed with one documented deferral | Live confirmation and recovery paths passed; manual timeout induction is deferred. |
+| Accessibility automation and manual validation | Passed with accepted deferrals | Narrator, keyboard-only workflows, Windows visual modes, physical Chrome/Edge/Firefox zoom, and the physical iOS navigation fix passed. Exact Safari 200%/400% coverage and physical Android are deferred with product-owner acceptance. |
+| Algorand TestNet and Pera Wallet | Passed | Live confirmation, wallet cancellation, approval timeout, retry, and persistence paths passed. |
 | Installed stable Firefox on Windows | Passed | Firefox `154.0.1`; all routes, persistence, exports, wrong-password rejection, and isolated plain/encrypted restores passed. |
 | Current Safari on physical iPhone | Passed | iPhone 17 Pro Max, iOS 26.6; routes, storage, file selection, exports, isolated plain/encrypted restores, and secure Pera handoff passed. |
-| Physical Android | Deferred | No representative Android device is available; responsive emulation remains supporting evidence and is not presented as a physical-device result. |
+| Physical Android | Deferred and accepted | No representative Android device is available; responsive emulation remains supporting evidence and is not presented as a physical-device result. |
 | Physical iOS | Passed | iPhone 17 Pro Max on iOS 26.6 passed portrait layout, storage, file selection, backup export, and Pera handoff checks. |
-| Screenshots | Open | Capture after the current interface is declared frozen for RC1. |
-| Independent security review | Not started | No independent reviewer or report is recorded. |
-| Product-owner approval | Open | Approval must be explicit after all blockers are closed or accepted. |
+| Screenshots | Passed | Frozen Dashboard, Verify, Wallet, and confirmed Notarization receipt screenshots were captured on August 30, 2026 without private documents, secrets, or a complete wallet address. |
+| Independent security review | Not started; accepted pre-release limitation | No independent reviewer or report is recorded. The application must remain labeled unaudited and pre-release. |
+| Product-owner approval | Approved | On August 30, 2026, the product owner explicitly accepted the RC1 deferrals and unaudited pre-release status. |
 | Production hosting and HTTPS smoke | Post-approval external gate | Host selection and deployment require a separate approved action. |
-| Post-validation workflow polish | Automated regression passed; focused manual recheck open | Notarize, Verify, and Vault now use task-first layouts and progressive disclosure. Chromium, Edge, and WebKit browser automation passed; the changed routes still require a focused keyboard and physical zoom recheck before interface freeze. |
+| Post-validation workflow polish | Passed | Notarize, Verify, and Vault use task-first layouts and progressive disclosure. Automated regression plus focused keyboard and 200%/400% zoom rechecks passed on the frozen routes. |
 
 ## Verified candidate evidence
 
@@ -41,6 +41,12 @@ The following evidence is already repeatable or recorded:
 - `npm test`, `npm run lint`, `npm run build`, the complete browser-engine
   matrix, exact artifact smoke test, production advisory audit, tracked-content
   scan, and `git diff --check` have passed during candidate preparation.
+- The frozen candidate was revalidated on August 30, 2026: 33 test files and
+  141 tests passed; lint and production build passed; the alpha/TestNet boundary
+  passed across 140 production files; 22 Chromium, Edge, and WebKit browser
+  checks passed with two expected skips; 271 tracked candidate files passed the
+  content scan; the production dependency audit reported zero vulnerabilities;
+  and the packaged artifact passed its direct-load/security-header smoke test.
 - Installed Google Chrome `151.0.7922.174` on Windows passed
   `npm run test:browser:stable-chrome` on August 28, 2026. The seven checks
   covered clean loading, route chunk deferral, console errors, plain and
@@ -71,12 +77,47 @@ The following evidence is already repeatable or recorded:
 - Live TestNet transaction
   `D5QWYDQFAZRL3F7H2I6ELJATMZNI7XYVX3GWR4U6NIGABEEZO3LA` confirmed in round
   `66759442`, and its evidence record persisted after reload and restart.
+- A second hands-on Pera workflow on August 30, 2026 verified the approval
+  recovery boundary. An unapproved request ended automatically after 90 seconds
+  without submission, manual `Cancel Waiting` returned immediately to a safe
+  retry state without submission, and the next approval completed TestNet
+  submission and confirmation in round `66819761`. The disposable `test 6.txt`
+  record then appeared as Confirmed in the Vault and persisted after refresh.
+- Frozen-interface screenshots captured on August 30, 2026:
+  [Dashboard](../images/rc1/dashboard.png),
+  [Verify](../images/rc1/verify.png),
+  [Wallet](../images/rc1/wallet.png), and
+  [Notarization receipt](../images/rc1/notarization-receipt.png). The Wallet
+  image contains only the application's shortened public-address display.
 - The post-validation workflow-polish pass keeps core actions visible while
   collapsing optional transaction and backup details. Unit, accessibility,
   build, lint, Chromium, Edge, and WebKit regression checks passed locally.
   Playwright Firefox could not start in the current Windows Codex host
-  (`spawn UNKNOWN` before page load), so the pull-request Firefox job and the
-  focused physical-browser recheck remain required evidence for this commit.
+  (`spawn UNKNOWN` before page load), so the pull-request Firefox job remains
+  required evidence for this commit. A focused
+  hands-on 200%/400% zoom and reflow recheck of the frozen Notarize, Verify, and
+  Vault routes passed on August 30, 2026 without horizontal scrolling,
+  overlapping or clipped text, hidden controls, or unusable expanded content.
+- A focused keyboard recheck on August 30, 2026 passed Notarize and Verify file
+  selection, reverse navigation, and file-dialog cancellation. Vault focus moved
+  logically through backup/restore, search, filtering, document, detail, and
+  tool controls without a trap. The pass found the first Vault Tools focus
+  outline clipped by its rounded container; the outline now renders inside the
+  container, a browser regression covers the boundary, and the physical retest
+  confirmed visible focus.
+- A focused physical Windows dark-mode recheck on August 30, 2026 passed the
+  frozen Notarize, Verify, and Vault routes, including the open backup/restore
+  tools. Text, borders, selected navigation and tabs, status treatments, inputs,
+  disabled actions, and disclosures remained readable without visible overflow.
+- A focused physical Windows reduced-motion recheck on August 30, 2026 passed
+  navigation across Notarize, Verify, Vault, and Wallet plus Vault Tools and
+  detail disclosure changes. All state changes remained understandable with
+  animation effects disabled, and the operating-system setting was restored.
+- A focused physical Windows High Contrast recheck on August 30, 2026 passed
+  the frozen Notarize, Verify, Vault Tools, and Wallet views. Borders, active
+  navigation, selected states, status indicators, disabled controls, actions,
+  and the corrected Vault Tools keyboard focus remained distinguishable without
+  relying on color. The contrast theme was restored to None.
 
 The final release diff must repeat every automated gate. The statements above
 do not pre-approve a future commit or tag.
@@ -89,11 +130,11 @@ named stable browser or a responsive viewport for a physical device.
 
 | Check | Required environment | Acceptance criteria | Status |
 | --- | --- | --- | --- |
-| Keyboard-only workflow pass | Stable Chrome or Edge on Windows | Every route, field, file control, dialog, validation error, and primary action is reachable and operable; focus order is logical and visible; no trap occurs. Do not disconnect the funded wallet merely to complete the pass. | Passed - Windows Chrome, August 28, 2026; all five routes and workflow controls passed with no trap, and the funded wallet remained connected. |
-| Light and dark modes | Windows plus supported mobile OS | Text, controls, selected states, errors, and focus remain readable; no content disappears or overflows. | Partial - physical Windows Chrome passed light and dark modes on August 28, 2026; supported mobile OS checks remain open. |
-| High contrast | Windows Contrast Theme | Native controls, navigation state, focus, errors, and status indicators remain distinguishable without color alone. | Passed - Windows Aquatic contrast theme, August 28, 2026; `forced-colors` activated, focus and controls remained distinguishable, and no horizontal overflow occurred. Restored to `None`. |
-| Zoom and reflow | Stable Chrome, Edge, Firefox, and Safari at 200% and 400% | 200% preserves normal workflow access; 400% reflows to a narrow layout without two-dimensional page scrolling or hidden controls. | Partial - physical Windows Chrome, Edge, and Firefox passed at 200% and 400% on all five routes with no horizontal overflow, overlap, clipped text, or hidden controls. Exact Safari 200%/400% page zoom remains open because the available physical iPhone exposes website text sizing and screen magnification rather than the required desktop-style zoom levels. Automated WebKit 320-CSS-pixel reflow remains supporting evidence only. |
-| Reduced motion | Physical OS setting | Navigation and feedback remain understandable with nonessential motion suppressed. | Passed - Windows animation effects off, August 28, 2026; `prefers-reduced-motion` activated and visible durations were capped at 0.01 milliseconds. Restored to On. |
+| Keyboard-only workflow pass | Stable Chrome or Edge on Windows | Every route, field, file control, dialog, validation error, and primary action is reachable and operable; focus order is logical and visible; no trap occurs. Do not disconnect the funded wallet merely to complete the pass. | Passed - Windows Chrome, August 28 and 30, 2026; all five routes passed with no trap, and the frozen Notarize, Verify, and Vault routes passed a focused recheck after correcting and physically verifying the clipped Vault Tools focus outline. The funded wallet remained connected. |
+| Light and dark modes | Windows plus supported mobile OS | Text, controls, selected states, errors, and focus remain readable; no content disappears or overflows. | Passed on Windows; mobile deferred - physical Windows Chrome passed light and dark modes on August 28, 2026, and the frozen Notarize, Verify, and Vault routes passed a focused dark-mode recheck on August 30, 2026, including open Vault Tools. Physical iOS retesting is deferred until a controlled HTTPS deployment is available; an account-less quick tunnel was rejected as an unsuitable validation origin and shut down immediately. |
+| High contrast | Windows Contrast Theme | Native controls, navigation state, focus, errors, and status indicators remain distinguishable without color alone. | Passed - Windows Aquatic contrast theme on August 28 and 30, 2026; `forced-colors` activated, the frozen Notarize, Verify, Vault Tools, and Wallet views retained distinguishable focus, controls, selected states, status, and borders without horizontal overflow. Restored to `None`. |
+| Zoom and reflow | Stable Chrome, Edge, Firefox, and Safari at 200% and 400% | 200% preserves normal workflow access; 400% reflows to a narrow layout without two-dimensional page scrolling or hidden controls. | Partial - physical Windows Chrome, Edge, and Firefox passed at 200% and 400% on all five routes with no horizontal overflow, overlap, clipped text, or hidden controls. The frozen Notarize, Verify, and Vault routes passed a focused 200%/400% recheck on August 30, 2026, including expanded content. Exact Safari 200%/400% page zoom remains open because the available physical iPhone exposes website text sizing and screen magnification rather than the required desktop-style zoom levels. Automated WebKit 320-CSS-pixel reflow remains supporting evidence only. |
+| Reduced motion | Physical OS setting | Navigation and feedback remain understandable with nonessential motion suppressed. | Passed - Windows animation effects off on August 28 and 30, 2026; `prefers-reduced-motion` activated, visible durations were capped at 0.01 milliseconds, and frozen-route navigation plus Vault disclosures remained understandable. Restored to On. |
 | Stable Firefox | Current stable desktop Firefox | Dashboard, Notarize, Verify, Vault, and Wallet load without console-visible failure; persistence and backup download/restore work. | Passed - Windows Firefox `154.0.1`, August 28, 2026; all five routes loaded, a disposable draft survived reload and full restart, both backup formats downloaded and restored in isolated sessions, and wrong-password rejection passed. |
 | Stable Safari | Current stable Safari on macOS or iOS | Core routes, storage, file selection, download/share behavior, and Wallet handoff work over a secure origin. | Passed - current Safari on iPhone 17 Pro Max, iOS 26.6, August 28, 2026; HTTPS routes, storage, photo selection, plain/encrypted export and isolated restore, wrong-password rejection, Pera handoff, and post-refresh persistence passed after the verified pointer-navigation fix. |
 | Android layout | Representative physical Android phone | All routes fit, 44-pixel targets remain usable, file selection works, and no fixed panel blocks content. | Deferred - no representative physical Android device is available. Automated responsive coverage is supporting evidence only. |
@@ -129,6 +170,15 @@ policy, and the TestNet-only release boundary.
 
 The application must continue to describe itself as pre-release and not
 independently audited until this status changes.
+
+## Product-owner decision
+
+On August 30, 2026, the product owner stated: "I accept the RC1 deferrals and
+unaudited pre-release status." This accepts the documented physical Android,
+exact Safari zoom, supported-mobile visual-mode, and independent-security-review
+limitations for RC1. It does not authorize a production deployment, release
+tag, MainNet operation, or a claim that the application has been independently
+audited.
 
 ## Promotion rule
 

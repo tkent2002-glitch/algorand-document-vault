@@ -9,7 +9,7 @@ live Pera Wallet workflow can be completed.
 
 - [x] Set `package.json` to the approved alpha version.
 - [ ] Confirm the release commit and tag both use the approved version.
-- [ ] Update `CHANGELOG.md` with the release date and final scope.
+- [x] Update `CHANGELOG.md` with the release date and final scope.
 - [ ] Confirm the working tree is clean before tagging.
 
 ## Automated quality gates
@@ -18,7 +18,7 @@ live Pera Wallet workflow can be completed.
 - [x] `npm run lint` passes locally.
 - [x] `npm run build` produces a production bundle.
 - [x] GitHub Actions runs tests, lint, and the production build.
-- [ ] `git diff --check` passes on the final release diff.
+- [x] `git diff --check` passes on the final release diff.
 - [x] Review and accept or resolve all production-build warnings.
 
 ## Accessibility
@@ -50,6 +50,12 @@ Manual accessibility evidence recorded August 28, 2026:
   Notarize, Verify, Vault, and Wallet. Focus order was logical, focus remained
   visible, disabled signing controls were skipped, and no keyboard trap was
   encountered.
+- A focused frozen-interface keyboard recheck on August 30, 2026 passed
+  Notarize and Verify file-dialog activation/cancellation plus systematic Vault
+  navigation through backup, restore, search, filtering, document, detail, and
+  tool controls. The pass found the Vault Tools summary outline clipped by its
+  rounded container; the outline was moved inside the container, covered by a
+  browser regression, and confirmed visible in the physical retest.
 - Physical Chrome zoom at 200% (960 CSS pixels wide) and 400% (480 CSS pixels
   wide) preserved every workflow without horizontal page overflow, clipped
   controls, or controls positioned outside the viewport. Zoom was restored to
@@ -60,18 +66,35 @@ Manual accessibility evidence recorded August 28, 2026:
   available physical iPhone exposes website text sizing and screen magnification
   rather than those desktop-style zoom levels; automated WebKit 320-CSS-pixel
   reflow remains supporting evidence only.
+- The frozen Notarize, Verify, and Vault routes passed a focused hands-on
+  200%/400% zoom recheck on August 30, 2026. No horizontal page scrolling,
+  overlap, clipped text, hidden controls, or unusable expanded content appeared.
 - The physical Windows light and dark modes kept Dashboard, Wallet, and Vault
   text, form controls, status treatments, and navigation readable without
   horizontal overflow. Windows was restored to light mode after the test.
+- The frozen Notarize, Verify, and Vault routes passed a focused physical
+  Windows dark-mode recheck on August 30, 2026. The open Vault Tools panel,
+  selected tabs, focus treatment, inputs, status labels, and disclosures stayed
+  readable without visible overflow. Windows was restored to light mode.
+- Physical iOS light/dark retesting is deferred until a controlled HTTPS
+  deployment is available. An account-less quick-tunnel origin was rejected as
+  unsuitable after Safari did not render the expected candidate page; the
+  tunnel was shut down immediately and will not be reused.
 - The Windows Aquatic contrast theme activated `forced-colors`, retained
   distinguishable navigation and native controls, and exposed a visible
   three-pixel focus outline on the Vault export action. Dashboard and Vault had
   no horizontal overflow or controls outside the viewport. The contrast theme
   was restored to `None` after the test.
+- A focused Windows Aquatic High Contrast recheck on August 30, 2026 passed the
+  frozen Notarize, Verify, Vault Tools, and Wallet views, including the corrected
+  Vault Tools keyboard focus. The contrast theme was restored to `None`.
 - Turning off Windows animation effects activated `prefers-reduced-motion`; the
   longest visible transition or animation duration was 0.01 milliseconds and
   the workflows remained understandable. Animation effects were restored after
   the test.
+- A focused reduced-motion recheck on August 30, 2026 passed frozen-route
+  navigation and Vault Tools/detail disclosures with all state changes still
+  understandable. Windows animation effects were restored afterward.
 - Windows Narrator announced the primary navigation and current Wallet state,
   the Pera Wallet heading, and the main landmark. An initial minimum-password
   validation announcement failed because the status region was conditionally
@@ -160,9 +183,9 @@ Manual responsive evidence recorded August 28, 2026:
 - [x] Verify the confirmed transaction and proof note in a TestNet explorer.
 - [x] Verify the confirmed evidence record persists after reload.
 - [x] Exercise wallet cancellation, disconnect, and signing retry behavior manually.
-- [ ] Exercise wallet or confirmation timeout behavior manually.
+- [x] Exercise wallet or confirmation timeout behavior manually.
 
-Live validation evidence recorded August 28, 2026:
+Live validation evidence recorded August 28 and 30, 2026:
 
 - TestNet transaction: `D5QWYDQFAZRL3F7H2I6ELJATMZNI7XYVX3GWR4U6NIGABEEZO3LA`
 - Confirmed round: `66759442`
@@ -176,10 +199,13 @@ Live validation evidence recorded August 28, 2026:
 - A same-device HTTPS session in Chrome opened Pera Mobile and returned a
   connected wallet session. Plain LAN HTTP was rejected because WalletConnect
   requires Web Crypto in a secure browser context.
-- Manual timeout induction is deferred: interrupting connectivity after a live
-  broadcast would intentionally create an uncertain submission state. Automated
-  tests cover timeout classification, status lookup, and fail-closed retry
-  behavior without risking a duplicate or ambiguous TestNet transaction.
+- On August 30, an unapproved Pera signing request ended automatically after
+  90 seconds, returned the action to a safe retry state, and reported that no
+  transaction was submitted. A separate manual `Cancel Waiting` attempt returned
+  immediately to the same safe state without submission. The subsequent retry
+  was approved, submitted, and confirmed in TestNet round `66819761`; its
+  disposable `test 6.txt` evidence record appeared as Confirmed in the Vault and
+  persisted after refresh.
 
 ## Data safety and recovery
 
@@ -211,7 +237,7 @@ Manual backup evidence recorded August 28, 2026:
 
 - [x] Confirm README capability claims match the current validation status.
 - [x] Confirm installation, quick-start, testing, and user guides are current.
-- [ ] Capture current screenshots after the UI is frozen.
+- [x] Capture current screenshots after the UI is frozen.
 - [x] Confirm security-reporting instructions and trust boundaries are prominent.
 - [x] Confirm no secrets, wallet recovery material, or private documents are tracked.
 - [x] Complete the local dependency-tree and license review.
@@ -248,10 +274,22 @@ Large-Vault evidence recorded August 28, 2026:
 
 ## Release approval
 
-- [ ] All blocking items above are complete or explicitly deferred with rationale.
+- [x] All blocking items above are complete or explicitly deferred with rationale.
 - [x] Independent security review status is documented.
 - [x] MainNet remains disabled and out of scope for this alpha.
-- [ ] Product owner approves the release candidate.
+- [x] Product owner approves the release candidate.
+
+Product-owner approval recorded August 30, 2026:
+
+- The product owner explicitly stated, "I accept the RC1 deferrals and
+  unaudited pre-release status."
+- The accepted deferrals are physical Android validation, exact Safari
+  200%/400% page-zoom coverage, and the supported-mobile visual-mode retest
+  until a controlled HTTPS deployment is available.
+- The not-started independent security review is accepted only as an accurately
+  disclosed pre-release limitation. The application remains unaudited.
+- This approval does not authorize production deployment, a release tag,
+  MainNet operation, or an independent-audit claim.
 
 Release-identity evidence recorded August 28, 2026:
 

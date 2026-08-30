@@ -66,8 +66,15 @@ export function validateReleaseReadiness(input) {
     }
   }
 
-  if (!input.changelog.includes(`[${approvedVersion}] - Planned`)) {
-    errors.push("CHANGELOG.md does not contain the planned alpha release heading.");
+  const changelogHeading = new RegExp(
+    `^## \\[${approvedVersion.replaceAll(".", "\\.")}\\] - (?:Planned|\\d{4}-\\d{2}-\\d{2})$`,
+    "m"
+  );
+
+  if (!changelogHeading.test(input.changelog)) {
+    errors.push(
+      "CHANGELOG.md does not contain the planned or ISO-dated alpha release heading."
+    );
   }
 
   return errors;
