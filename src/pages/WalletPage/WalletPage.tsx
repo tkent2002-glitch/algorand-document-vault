@@ -11,6 +11,21 @@ function shortenAddress(address: string): string {
   return `${address.slice(0, 10)}...${address.slice(-8)}`;
 }
 
+function getConnectionFailureMessage(
+  connection: WalletConnection
+): string {
+  switch (connection.errorReason) {
+    case "cancelled":
+      return "Pera Wallet connection was cancelled.";
+    case "network_mismatch":
+      return "Pera Wallet must be set to Algorand TestNet.";
+    case "session_unavailable":
+      return "Pera Wallet could not establish a connection session. Generate a new QR code and try again.";
+    default:
+      return "Pera Wallet connection failed.";
+  }
+}
+
 function WalletPage() {
   const [connection, setConnection] = useState<WalletConnection>({
     status: "disconnected",
@@ -46,7 +61,7 @@ function WalletPage() {
       result.status === "connected"
         ? "Pera Wallet connected successfully."
         : result.status === "error"
-          ? "Pera Wallet connection failed."
+          ? getConnectionFailureMessage(result)
           : "Pera Wallet connection was not completed."
     );
   }

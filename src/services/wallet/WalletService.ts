@@ -1,10 +1,58 @@
 import { PeraWalletConnect } from "@perawallet/connect";
 import type { Transaction } from "algosdk";
 import { installBrowserPolyfills } from "../../browser/installBrowserPolyfills";
-import type { WalletConnection } from "../../types/wallet";
+import type {
+  WalletConnection,
+  WalletConnectionErrorReason,
+} from "../../types/wallet";
 import { Logger } from "../../core";
 
 installBrowserPolyfills();
+
+const PERA_TESTNET_CHAIN_ID = 416002;
+
+function getPeraErrorType(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null) {
+    return undefined;
+  }
+
+  const data = (error as { data?: unknown }).data;
+
+  if (typeof data !== "object" || data === null) {
+    return undefined;
+  }
+
+  const type = (data as { type?: unknown }).type;
+
+  return typeof type === "string" ? type : undefined;
+}
+
+function classifyConnectionError(
+  error: unknown
+): WalletConnectionErrorReason {
+  const errorType = getPeraErrorType(error);
+
+  if (
+    errorType === "CONNECT_MODAL_CLOSED" ||
+    errorType === "CONNECT_CANCELLED" ||
+    errorType === "OPERATION_CANCELLED"
+  ) {
+    return "cancelled";
+  }
+
+  if (errorType === "CONNECT_NETWORK_MISMATCH") {
+    return "network_mismatch";
+  }
+
+  if (
+    errorType === "MESSAGE_NOT_RECEIVED" ||
+    errorType?.startsWith("SESSION_")
+  ) {
+    return "session_unavailable";
+  }
+
+  return "unknown";
+}
 
 export class WalletService {
   private static pera: PeraWalletConnect | undefined;
@@ -12,6 +60,7 @@ export class WalletService {
   private static getPera(): PeraWalletConnect {
     WalletService.pera ??= new PeraWalletConnect({
       shouldShowSignTxnToast: false,
+      chainId: PERA_TESTNET_CHAIN_ID,
     });
 
     return WalletService.pera;
@@ -54,11 +103,16 @@ export class WalletService {
       return {
         status: "disconnected",
       };
-    } catch {
-      Logger.error("Pera Wallet connection failed.");
+    } catch (error) {
+      const errorReason = classifyConnectionError(error);
+
+      Logger.error(
+        `Pera Wallet connection failed (${errorReason}).`
+      );
 
       return {
         status: "error",
+        errorReason,
       };
     }
   }
