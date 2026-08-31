@@ -179,12 +179,14 @@ function VerifyPage() {
           {source === "shared" && linkError && (
             <p className="verify-source-error" role="alert">{linkError}</p>
           )}
-          {source === "shared" && !linkLoading && !linkError && (
-            <SharedProofVerifier
-              documentHash={hashValue}
-              initialProof={verificationLink?.proof}
-              documentLabel={verificationLink?.documentLabel}
-            />
+          {!linkLoading && !linkError && (
+            <div hidden={source !== "shared"}>
+              <SharedProofVerifier
+                documentHash={hashValue}
+                initialProof={verificationLink?.proof}
+                documentLabel={verificationLink?.documentLabel}
+              />
+            </div>
           )}
         </section>
 

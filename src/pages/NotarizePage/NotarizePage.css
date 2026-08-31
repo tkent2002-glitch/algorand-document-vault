@@ -636,6 +636,14 @@
   margin-top: 0.85rem;
 }
 
+.notarization-share-actions {
+  margin-top: 0.85rem;
+}
+
+.notarization-share-actions .notarize-disclosure-content > p {
+  margin: 0.75rem 0 0;
+}
+
 .notarization-success-boundary {
   margin-top: 0.85rem;
   border-top: 1px solid var(--border);

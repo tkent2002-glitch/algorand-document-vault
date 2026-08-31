@@ -114,7 +114,7 @@ function NotarizationSuccessPanel({
       </div>
 
       {evidenceRecord && (
-        <details className="notarization-share-actions">
+        <details className="notarize-disclosure notarization-share-actions">
           <summary>
             <span>
               <strong>Share or save this verification</strong>
@@ -122,9 +122,9 @@ function NotarizationSuccessPanel({
                 Only needed when another person or device needs the document.
               </small>
             </span>
-            <span>Open</span>
+            <span className="notarize-disclosure-action">Open</span>
           </summary>
-          <div>
+          <div className="notarize-disclosure-content">
             <p>
               Not sharing this document? You are finished—no JSON download is
               required.

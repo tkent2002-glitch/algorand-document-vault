@@ -52,6 +52,19 @@ describe("NotarizationSuccessPanel", () => {
       "https://testnet.explorer.perawallet.app/tx/ANSRF22NQBN356VOTZPCN7XRC5FUG5KYFHWJHZMKEA4XUISKL42A"
     );
 
+    const sharingSummary = screen
+      .getByText("Share or save this verification")
+      .closest("summary");
+
+    expect(sharingSummary).not.toBeNull();
+    expect(sharingSummary?.closest("details")).toHaveClass(
+      "notarize-disclosure",
+      "notarization-share-actions"
+    );
+    expect(sharingSummary?.querySelector(".notarize-disclosure-action")).toHaveTextContent(
+      "Open"
+    );
+
     const boundarySummary = screen
       .getByText("What this confirmation proves")
       .closest("summary");
