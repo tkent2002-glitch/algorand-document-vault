@@ -48,6 +48,7 @@ function NotarizePage({
   onCompletionChange,
 }: NotarizePageProps) {
   const [fileName, setFileName] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileHash, setFileHash] = useState<string>("");
   const [proof, setProof] = useState<NotarizationProof | null>(null);
   const [evidenceRecord, setEvidenceRecord] =
@@ -154,6 +155,7 @@ function NotarizePage({
     const file = event.target.files?.[0] ?? null;
     const result = await NotarizationWorkflow.execute(file);
 
+    setSelectedFile(file);
     setFileName(result.fileName);
     setFileHash(result.hashValue);
     setProof(result.proof);
@@ -620,6 +622,7 @@ function NotarizePage({
         <NotarizationSuccessPanel
           confirmationResult={confirmationResult}
           evidenceRecord={evidenceRecord}
+          originalDocument={selectedFile}
         />
 
         {confirmationResult && (

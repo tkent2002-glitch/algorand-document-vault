@@ -444,6 +444,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  container-type: inline-size;
 }
 
 .evidence-history-item {
@@ -704,6 +705,10 @@
   grid-template-columns: 110px 1fr 130px;
 }
 
+.evidence-history-item > * {
+  min-width: 0;
+}
+
 .evidence-history-status {
   display: flex;
   align-items: flex-start;
@@ -711,7 +716,7 @@
 
 .evidence-history-meta {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
   gap: 0.75rem;
 }
 
@@ -732,11 +737,19 @@
   color: var(--text-h);
   font-size: 0.85rem;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .evidence-history-record-id code {
   white-space: normal;
   overflow-wrap: anywhere;
+}
+
+@container (max-width: 640px) {
+  .evidence-history-item {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
 }
 
 @media (max-width: 900px) {

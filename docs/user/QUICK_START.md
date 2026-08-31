@@ -9,16 +9,25 @@
 7. Open **Vault** to review the stored evidence record.
 8. Open **Verify** and select the same document to recompute its hash.
 
-## Share a verification proof
+## Share a verification
 
 1. Open **Vault** and select a document with a confirmed record.
-2. Choose **Download verification proof**.
-3. Send the JSON proof and the original document through the channels you
-   choose. The JSON proof itself does not contain the document or its filename.
-4. The recipient opens **Verify**, selects the document, and selects the JSON
-   under **Verify with a shared proof**.
-5. A successful result confirms both the local fingerprint match and the
-   referenced Algorand TestNet transaction.
+2. Choose **Create verification link**.
+3. Send that link together with the original document. The document is not
+   uploaded or contained in the link.
+4. The recipient opens the link, selects the named document in Step 1, and
+   reviews the public result in Step 3.
+5. A successful result confirms the fingerprint and the referenced Algorand
+   TestNet transaction.
+
+The link includes the document name as user guidance plus the minimal proof
+metadata in its URL fragment. The fingerprint—not the displayed name—is the
+authority. **Technical proof JSON** remains available as an advanced fallback.
+
+Immediately after notarization, supported desktop browsers can also save the
+original document and its proof into an **Algorand Document Vault** folder with
+separate **Documents** and **Verification Proofs** subfolders. On iPhone and
+other browsers, use the system share or Files menu when offered.
 
 ## Backup
 

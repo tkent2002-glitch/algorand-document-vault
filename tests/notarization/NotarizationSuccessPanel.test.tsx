@@ -36,6 +36,7 @@ describe("NotarizationSuccessPanel", () => {
           confirmedAt: "2026-08-29T01:27:05.987Z",
         }}
         evidenceRecord={evidenceRecord}
+        originalDocument={null}
       />
     );
 

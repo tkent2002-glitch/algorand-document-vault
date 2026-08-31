@@ -8,6 +8,7 @@ import {
   ShareableVerificationProofService,
   type ShareableVerificationProofFile,
 } from "../../src/services/shareable-proof";
+import { VerificationLinkService } from "../../src/services/verification-link";
 
 const HASH =
   "0a69773de57196532ae089e3f221bdc5261930a71ee90d8f63c5df4691f04134";
@@ -58,13 +59,13 @@ describe("SharedProofVerifier", () => {
     render(<SharedProofVerifier documentHash="" />);
 
     fireEvent.change(
-      screen.getByLabelText("Shared proof file"),
+      screen.getByLabelText("Technical proof file"),
       { target: { files: [createProofFile()] } }
     );
 
-    expect(await screen.findByText("Proof file accepted")).toBeVisible();
+    expect(await screen.findByText("Shared evidence is ready")).toBeVisible();
     expect(
-      screen.getByText("Select the document above to complete public verification.")
+      screen.getByText("Select the document in Step 1 to compare fingerprints.")
     ).toBeVisible();
     expect(verify).not.toHaveBeenCalled();
   });
@@ -87,16 +88,16 @@ describe("SharedProofVerifier", () => {
     render(<SharedProofVerifier documentHash={HASH} />);
 
     fireEvent.change(
-      screen.getByLabelText("Shared proof file"),
+      screen.getByLabelText("Technical proof file"),
       { target: { files: [createProofFile()] } }
     );
 
-    expect(await screen.findByText("Shared proof verified")).toBeVisible();
+    expect(await screen.findByText("Public verification confirmed")).toBeVisible();
     expect(screen.getByText("66826566")).toBeVisible();
     expect(screen.getByText(TRANSACTION_ID)).toBeVisible();
     expect(
       screen.getByRole("link", {
-        name: "View proof transaction on Pera Explorer",
+        name: "View verification transaction on Pera Explorer",
       })
     ).toHaveAttribute(
       "href",
@@ -122,12 +123,38 @@ describe("SharedProofVerifier", () => {
     render(<SharedProofVerifier documentHash={HASH} />);
 
     fireEvent.change(
-      screen.getByLabelText("Shared proof file"),
+      screen.getByLabelText("Technical proof file"),
       { target: { files: [file] } }
     );
 
     expect(
       await screen.findByText("The selected file is not a valid JSON proof.")
     ).toBeVisible();
+  });
+
+  it("loads a pasted verification link without requiring JSON", async () => {
+    vi.spyOn(VerificationLinkService, "parseHash").mockResolvedValue({
+      valid: true,
+      envelope: {
+        version: "adv-verification-link-v1",
+        documentLabel: "test 6 link test.txt",
+        proof: PROOF,
+      },
+      errors: [],
+    });
+
+    render(<SharedProofVerifier documentHash="" />);
+
+    fireEvent.change(screen.getByLabelText("Verification link"), {
+      target: { value: "https://vault.example/#verify=proof" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Load verification link" }));
+
+    expect(await screen.findByText("Verification link loaded")).toBeVisible();
+    expect(
+      screen.getByText("Now select “test 6 link test.txt” in Step 1.")
+    ).toBeVisible();
+    expect(screen.queryByLabelText("Technical proof file")).not.toBeInTheDocument();
+    expect(VerificationLinkService.parseHash).toHaveBeenCalledWith("#verify=proof");
   });
 });

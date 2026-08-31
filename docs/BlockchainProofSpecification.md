@@ -29,11 +29,13 @@ The following data remains off-chain:
 
 ## Verification Process
 
-To verify a document with a shared proof:
+To verify a document with shared evidence:
 
-1. The holder selects the document locally; it is not uploaded.
-2. The application calculates the SHA-256 hash.
-3. The application validates the shared proof structure and integrity digest.
+1. The holder opens a verification link, or uses a technical proof JSON as an
+   advanced fallback.
+2. The holder selects the document locally; it is not uploaded.
+3. The application calculates the SHA-256 hash and validates the proof
+   structure and integrity digest.
 4. The application compares the local hash with the proof fingerprint.
 5. The application retrieves the referenced TestNet transaction and checks its
    transaction ID, confirmed round, canonical proof note, network, zero payment,
@@ -42,7 +44,7 @@ To verify a document with a shared proof:
 6. Verification succeeds only when the document fingerprint and every public
    transaction check match.
 
-The share-file integrity digest is not a signature and does not establish the
+The proof integrity digest is not a signature and does not establish the
 identity of the exporter. The confirmed on-chain transaction is the independent
 public anchor.
 

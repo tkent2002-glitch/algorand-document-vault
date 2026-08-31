@@ -14,6 +14,10 @@ import "./App.css";
 
 type Page = "dashboard" | "notarize" | "verify" | "vault" | "wallet";
 
+function hasVerificationLink(hash: string): boolean {
+  return hash.startsWith("#verify=");
+}
+
 const NotarizePage = lazy(
   () => import("./pages/NotarizePage/NotarizePage")
 );
@@ -28,11 +32,16 @@ const WalletPage = lazy(
 );
 
 function App() {
-  const [activePage, setActivePage] = useState<Page>("dashboard");
+  const [activePage, setActivePage] = useState<Page>(() =>
+    hasVerificationLink(window.location.hash)
+      ? "verify"
+      : "dashboard"
+  );
   const [notarizationComplete, setNotarizationComplete] =
     useState(false);
   const [notarizeSessionKey, setNotarizeSessionKey] =
     useState(0);
+  const [verifySessionKey, setVerifySessionKey] = useState(0);
   const mainRef = useRef<HTMLElement>(null);
   const initialRender = useRef(true);
   const preventScrollOnNextFocus = useRef(false);
@@ -41,6 +50,15 @@ function App() {
     page: Page,
     options?: { preventScroll?: boolean }
   ) {
+    if (hasVerificationLink(window.location.hash)) {
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${window.location.search}`
+      );
+      setVerifySessionKey((currentKey) => currentKey + 1);
+    }
+
     if (
       page === "notarize" &&
       activePage === "notarize" &&
@@ -54,6 +72,18 @@ function App() {
       options?.preventScroll ?? false;
     setActivePage(page);
   }
+
+  useEffect(() => {
+    function handleVerificationLink(): void {
+      if (hasVerificationLink(window.location.hash)) {
+        setVerifySessionKey((currentKey) => currentKey + 1);
+        setActivePage("verify");
+      }
+    }
+
+    window.addEventListener("hashchange", handleVerificationLink);
+    return () => window.removeEventListener("hashchange", handleVerificationLink);
+  }, []);
 
   useEffect(() => {
     const pageNames: Record<Page, string> = {
@@ -124,7 +154,7 @@ function App() {
                 onCompletionChange={setNotarizationComplete}
               />
             )}
-            {activePage === "verify" && <VerifyPage />}
+            {activePage === "verify" && <VerifyPage key={verifySessionKey} />}
             {activePage === "vault" && <VaultPage />}
             {activePage === "wallet" && <WalletPage />}
           </Suspense>

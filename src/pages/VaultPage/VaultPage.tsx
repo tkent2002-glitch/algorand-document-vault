@@ -5,6 +5,7 @@ import {
   useState,
 } from "react";
 import EvidenceDetailsPanel from "../../components/evidence/EvidenceDetailsPanel";
+import ShareVerificationActions from "../../components/verification/ShareVerificationActions";
 import { EvidenceRepository } from "../../repositories";
 import {
   AlgorandExplorerService,
@@ -12,7 +13,6 @@ import {
 } from "../../services";
 import VaultBackupActions from "./VaultBackupActions";
 import VaultImportPreview from "./VaultImportPreview";
-import ShareableProofDownloadButton from "./ShareableProofDownloadButton";
 import {
   buildEvidenceIndex,
   DEFAULT_VAULT_PAGE_SIZE,
@@ -426,7 +426,8 @@ function VaultPage() {
                           View confirmed transaction
                         </a>
                       )}
-                      <ShareableProofDownloadButton
+                      <ShareVerificationActions
+                        key={selectedConfirmedRecord.id}
                         record={selectedConfirmedRecord}
                       />
                     </div>

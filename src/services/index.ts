@@ -37,6 +37,8 @@ export { VerificationService } from "./verification";
 export { WalletService } from "./wallet";
 
 export { ShareableVerificationProofService } from "./shareable-proof";
+export { VerificationLinkService } from "./verification-link";
+export { LocalVaultFolderService } from "./vault-folder";
 
 export type {
   BackupIntegrityMetadata,
@@ -71,6 +73,13 @@ export type {
   ShareableVerificationProofVerificationResult,
   ShareableVerificationProofVerificationStatus,
 } from "./shareable-proof";
+
+export type {
+  VerificationLinkEnvelope,
+  VerificationLinkParseResult,
+} from "./verification-link";
+
+export type { LocalVaultSaveResult } from "./vault-folder";
 
 
 

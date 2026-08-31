@@ -1,10 +1,12 @@
 import { AlgorandExplorerService } from "../../../services";
 import type { EvidenceRecord } from "../../../services";
 import type { AlgorandConfirmationResult } from "../../../types";
+import ShareVerificationActions from "../../../components/verification/ShareVerificationActions";
 
 type NotarizationSuccessPanelProps = {
   confirmationResult: AlgorandConfirmationResult | null;
   evidenceRecord: EvidenceRecord | null;
+  originalDocument: File | null;
 };
 
 function shorten(value: string): string {
@@ -18,6 +20,7 @@ function shorten(value: string): string {
 function NotarizationSuccessPanel({
   confirmationResult,
   evidenceRecord,
+  originalDocument,
 }: NotarizationSuccessPanelProps) {
   if (!confirmationResult) {
     return null;
@@ -109,6 +112,30 @@ function NotarizationSuccessPanel({
           View on Pera Explorer
         </a>
       </div>
+
+      {evidenceRecord && (
+        <details className="notarization-share-actions">
+          <summary>
+            <span>
+              <strong>Share or save this verification</strong>
+              <small>
+                Only needed when another person or device needs the document.
+              </small>
+            </span>
+            <span>Open</span>
+          </summary>
+          <div>
+            <p>
+              Not sharing this document? You are finished—no JSON download is
+              required.
+            </p>
+            <ShareVerificationActions
+              record={evidenceRecord}
+              originalDocument={originalDocument}
+            />
+          </div>
+        </details>
+      )}
 
       <details className="notarization-success-boundary">
         <summary>What this confirmation proves</summary>

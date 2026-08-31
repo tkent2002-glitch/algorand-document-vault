@@ -62,28 +62,39 @@ Any next storage phase must preserve these boundaries:
 
 The implementation sequence is:
 
-1. **Shareable verification proof — implemented.** A confirmed record can be
-   exported as `adv-shareable-verification-proof-v1`. The file contains the
+1. **Verification links and technical proofs — implemented.** A confirmed
+   record can create a verification link containing an
+   `adv-shareable-verification-proof-v1` envelope in the URL fragment. The
+   proof contains the
    SHA-256 fingerprint, transaction ID, confirmed round, TestNet network label,
    export timestamp, and SHA-256 integrity metadata. It deliberately omits the
-   original document, filename, wallet address, local record ID, and full Vault
-   history. A recipient selects the document locally, opens the proof, and the
+   original document, wallet address, local record ID, and full Vault history.
+   The surrounding link includes a document-name label only as selection
+   guidance; the fingerprint remains authoritative. A recipient opens the link,
+   selects the document locally, and the
    verifier compares the fingerprint before independently checking the
    transaction ID, confirmation round, canonical `adv-proof-v1` note, and
    approved zero-amount TestNet transaction policy. No cloud account or Vault
-   restore is required. The file integrity digest is corruption/tampering
-   detection, not an identity or authorship signature.
+   restore is required. Technical proof JSON remains an advanced fallback. The
+   integrity digest is corruption/tampering detection, not an identity or
+   authorship signature.
 2. **Optional encrypted device sync.** Synchronize client-encrypted evidence
    envelopes for users who want their Vault on multiple devices. Encryption and
    decryption remain client-side; the service stores ciphertext and minimal
    operational metadata. Key recovery, device revocation, conflict handling,
    deletion, and quota behavior require a separate threat model and ADR.
-3. **Optional verification links.** A user may deliberately publish a minimal,
-   immutable verification record behind an opaque share identifier. The
-   recipient supplies the document locally; the portal retrieves evidence by the
-   opaque identifier, compares the fingerprint in the browser, and validates the
-   Algorand transaction. The service must not offer unauthenticated global search
-   by raw document hash.
+3. **Optional hosted verification records — not implemented.** A future service
+   could place immutable evidence behind an opaque share identifier. The
+   current verification link is self-contained in its URL fragment and is not a
+   cloud database record. Any future service must not offer unauthenticated
+   global search by raw document hash.
+
+The confirmation screen can also place the original document and proof into a
+user-approved local folder. On browsers with the File System Access API it
+creates **Algorand Document Vault/Documents** and **Verification Proofs** below
+the selected parent. Other browsers may expose their system share or Files
+menu. This is user-directed file organization, not browser Vault persistence or
+cloud synchronization.
 
 No cloud storage or hosted public verification service is implemented. Before
 implementing later phases, record separate decisions for the encrypted evidence
