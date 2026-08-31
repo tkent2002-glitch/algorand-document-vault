@@ -100,6 +100,20 @@ describe("application accessibility boundaries", () => {
     expect(screen.getAllByRole("main")).toHaveLength(1);
   });
 
+  it("offers a privacy-conscious public alpha feedback channel", () => {
+    render(<App />);
+
+    expect(
+      screen.getByRole("link", { name: "Report a problem" })
+    ).toHaveAttribute(
+      "href",
+      "https://github.com/tkent2002-glitch/algorand-document-vault/issues/new/choose"
+    );
+    expect(
+      screen.getByRole("link", { name: "Report a problem" })
+    ).toHaveAttribute("target", "_blank");
+  });
+
   it("labels the notarization file input", () => {
     render(<UploadStep onFileChange={vi.fn()} />);
 

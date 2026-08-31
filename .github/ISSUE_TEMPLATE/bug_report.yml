@@ -1,0 +1,87 @@
+name: Alpha bug report
+description: Report reproducible incorrect behavior in the public alpha
+title: "[Bug] "
+labels:
+  - bug
+  - alpha-feedback
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing the public alpha.
+
+        **Do not attach original documents, document fingerprints, verification links, wallet addresses, signed transactions, private keys, seed phrases, or backup passwords.** Report suspected vulnerabilities through the private security channel instead.
+  - type: dropdown
+    id: workflow
+    attributes:
+      label: Affected workflow
+      options:
+        - Notarize a document
+        - Verify with this device's Vault
+        - Verify with a shared link
+        - Vault backup or restore
+        - Wallet connection
+        - Navigation or layout
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the problem without including private evidence or document contents.
+      placeholder: A concise description of the incorrect behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use a disposable test document when reproduction requires a file.
+      placeholder: |
+        1. Opened...
+        2. Selected...
+        3. Observed...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: release
+    attributes:
+      label: Application release or commit
+      description: The current public alpha is v0.1.0-alpha.
+      placeholder: v0.1.0-alpha
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and operating system
+      placeholder: Chrome 151 on Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: redacted_evidence
+    attributes:
+      label: Redacted screenshots or logs
+      description: Remove all sensitive values before attaching anything.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I removed documents, fingerprints, proof links, wallet information, secrets, and backup passwords from this report.
+          required: true
+        - label: This is not a suspected security vulnerability.
+          required: true

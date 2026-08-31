@@ -135,6 +135,15 @@ function App() {
           <div>
             <span className="app-topbar-pill">TestNet only</span>
             <span className="app-topbar-pill">Documents stay local</span>
+            <a
+              className="app-feedback-link"
+              href="https://github.com/tkent2002-glitch/algorand-document-vault/issues/new/choose"
+              rel="noreferrer"
+              target="_blank"
+            >
+              Report a problem
+              <span aria-hidden="true">↗</span>
+            </a>
           </div>
         </div>
 

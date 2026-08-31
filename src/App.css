@@ -92,6 +92,38 @@
   text-transform: none;
 }
 
+.app-feedback-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 55%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 9%, var(--surface-strong));
+  color: var(--primary);
+  font-size: 0.65rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  text-transform: none;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.app-feedback-link:hover {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 16%, var(--surface-strong));
+  color: var(--text);
+}
+
+.app-feedback-link:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 40%, transparent);
+  outline-offset: 2px;
+}
+
 .app-main {
   min-width: 0;
   min-height: calc(100vh - 4rem);
