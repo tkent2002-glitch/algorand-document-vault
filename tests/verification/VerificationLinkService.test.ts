@@ -5,6 +5,7 @@ import {
   type ShareableVerificationProofFile,
 } from "../../src/services/shareable-proof";
 import { VerificationLinkService } from "../../src/services/verification-link";
+import { INPUT_SECURITY_LIMITS } from "../../src/services/security/InputSecurityLimits";
 
 const PROOF = {
   schema: "adv-shareable-verification-proof-v1",
@@ -58,5 +59,24 @@ describe("VerificationLinkService", () => {
     expect(result.valid).toBe(false);
     expect(result.envelope).toBeNull();
     expect(result.errors.length).toBeGreaterThan(0);
+  });
+
+  it("rejects an oversized link before decoding it", async () => {
+    const result = await VerificationLinkService.parseHash(
+      `#verify=${"A".repeat(INPUT_SECURITY_LIMITS.verificationLinkCharacters)}`
+    );
+
+    expect(result).toEqual({
+      valid: false,
+      envelope: null,
+      errors: ["The verification link is too large."],
+    });
+  });
+
+  it("rejects malformed UTF-8 in a Base64url payload", async () => {
+    const result = await VerificationLinkService.parseHash("#verify=_w");
+
+    expect(result.valid).toBe(false);
+    expect(result.envelope).toBeNull();
   });
 });

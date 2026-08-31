@@ -10,3 +10,8 @@ export type {
   EncryptedBackupMetadata,
   EncryptedEvidenceBackupFile,
 } from "./EncryptionTypes";
+
+export {
+  INPUT_SECURITY_LIMITS,
+  formatByteLimit,
+} from "./InputSecurityLimits";

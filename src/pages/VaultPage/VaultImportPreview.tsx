@@ -14,6 +14,10 @@ import {
   type IntegrityProtectedEvidenceBackupFile,
 } from "../../services";
 import "./VaultImportPreview.css";
+import {
+  INPUT_SECURITY_LIMITS,
+  formatByteLimit,
+} from "../../services/security/InputSecurityLimits";
 
 type VaultImportPreviewProps = {
   onImportComplete: () => void;
@@ -110,6 +114,18 @@ function VaultImportPreview({
     setImportResult(null);
 
     if (!file) {
+      return;
+    }
+
+    if (file.size > INPUT_SECURITY_LIMITS.backupFileBytes) {
+      setValidation({
+        valid: false,
+        errors: [
+          `Backup file must be ${formatByteLimit(
+            INPUT_SECURITY_LIMITS.backupFileBytes
+          )} or smaller.`,
+        ],
+      });
       return;
     }
 
@@ -233,6 +249,7 @@ function VaultImportPreview({
           className="visually-hidden"
           type="file"
           accept="application/json"
+          data-max-bytes={INPUT_SECURITY_LIMITS.backupFileBytes}
           aria-label="Evidence Vault backup file"
           onChange={handleFileChange}
         />

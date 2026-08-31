@@ -3,6 +3,7 @@ import { SecureRandomService } from "./SecureRandomService";
 import type {
   EncryptedEvidenceBackupFile,
 } from "./EncryptionTypes";
+import { INPUT_SECURITY_LIMITS } from "./InputSecurityLimits";
 
 const PBKDF2_ITERATIONS = 250000;
 const SALT_LENGTH_BYTES = 16;
@@ -61,6 +62,10 @@ export class BackupEncryptionService {
       throw new Error("Backup encryption password must contain at least 12 characters.");
     }
 
+    if (password.length > INPUT_SECURITY_LIMITS.passwordCharacters) {
+      throw new Error("Backup encryption password is too long.");
+    }
+
     const salt = SecureRandomService.randomBytes(SALT_LENGTH_BYTES);
     const iv = SecureRandomService.randomBytes(IV_LENGTH_BYTES);
 
@@ -102,16 +107,42 @@ export class BackupEncryptionService {
       throw new Error("Backup decryption password is required.");
     }
 
+    if (password.length > INPUT_SECURITY_LIMITS.passwordCharacters) {
+      throw new Error("Backup decryption password is too long.");
+    }
+
+    if (!backup || typeof backup !== "object") {
+      throw new Error("Invalid encrypted backup file.");
+    }
+
     if (backup.schema !== "adv-encrypted-evidence-backup-v1") {
       throw new Error("Unsupported encrypted backup schema.");
     }
 
     if (
+      !backup.encryption ||
+      typeof backup.encryption !== "object" ||
       backup.encryption.algorithm !== "AES-GCM" ||
       backup.encryption.keyDerivation !== "PBKDF2-SHA-256" ||
       backup.encryption.iterations !== PBKDF2_ITERATIONS
     ) {
       throw new Error("Unsupported backup encryption configuration.");
+    }
+
+    if (
+      typeof backup.ciphertext !== "string" ||
+      backup.ciphertext.length > INPUT_SECURITY_LIMITS.encryptedCiphertextCharacters
+    ) {
+      throw new Error("Encrypted backup payload is invalid or too large.");
+    }
+
+    if (
+      typeof backup.encryption.salt !== "string" ||
+      backup.encryption.salt.length > 64 ||
+      typeof backup.encryption.iv !== "string" ||
+      backup.encryption.iv.length > 64
+    ) {
+      throw new Error("Invalid backup encryption metadata.");
     }
 
     const salt = decodeBackupBase64(backup.encryption.salt);
