@@ -3,8 +3,10 @@
 - **Candidate version:** `0.1.0-alpha`
 - **Candidate base:** `3da7716`
 - **Validation branch:** `codex/phase-10-release-candidate-validation`
+- **Production commit:** `86988b3`
+- **Production origin:** `https://algorand-document-vault.pages.dev/`
 - **Opened:** August 28, 2026
-- **Release status:** Approved with accepted deferrals; unaudited pre-release
+- **Release status:** Deployed public alpha with accepted deferrals; unaudited pre-release
 
 This document is the evidence ledger and operator runbook for the first public
 alpha release candidate. The authoritative gate list remains
@@ -27,7 +29,7 @@ the automated suite passes.
 | Screenshots | Passed | Frozen Dashboard, Verify, Wallet, and confirmed Notarization receipt screenshots were captured on August 30, 2026 without private documents, secrets, or a complete wallet address. |
 | Independent security review | Not started; accepted pre-release limitation | No independent reviewer or report is recorded. The application must remain labeled unaudited and pre-release. |
 | Product-owner approval | Approved | On August 30, 2026, the product owner explicitly accepted the RC1 deferrals and unaudited pre-release status. |
-| Production hosting and HTTPS smoke | Post-approval external gate | Host selection and deployment require a separate approved action. |
+| Production hosting and HTTPS smoke | Passed | Cloudflare Pages production at commit `86988b3` passed route loading, Pera pairing, TestNet notarization, local and shared-link verification, encrypted cross-browser recovery, modified-document rejection, and verification-source state persistence. |
 | Post-validation workflow polish | Passed | Notarize, Verify, and Vault use task-first layouts and progressive disclosure. Automated regression plus focused keyboard and 200%/400% zoom rechecks passed on the frozen routes. |
 
 ## Verified candidate evidence
@@ -47,6 +49,12 @@ The following evidence is already repeatable or recorded:
   checks passed with two expected skips; 271 tracked candidate files passed the
   content scan; the production dependency audit reported zero vulnerabilities;
   and the packaged artifact passed its direct-load/security-header smoke test.
+- The final tag gate run on August 30, 2026 passed 40 test files and 162 tests,
+  lint, production build, the alpha/TestNet boundary across 150 production
+  source files, 25 Chromium/Edge/WebKit core checks with two expected skips,
+  the scan of 289 tracked candidate files, and the production dependency audit
+  with zero vulnerabilities. The exact 23-file release package was regenerated
+  with a SHA-256 manifest and passed both packaged-artifact browser checks.
 - Installed Google Chrome `151.0.7922.174` on Windows passed
   `npm run test:browser:stable-chrome` on August 28, 2026. The seven checks
   covered clean loading, route chunk deferral, console errors, plain and
@@ -77,6 +85,40 @@ The following evidence is already repeatable or recorded:
 - Live TestNet transaction
   `D5QWYDQFAZRL3F7H2I6ELJATMZNI7XYVX3GWR4U6NIGABEEZO3LA` confirmed in round
   `66759442`, and its evidence record persisted after reload and restart.
+- The approved public-alpha changes were promoted to Cloudflare Pages production
+  at `https://algorand-document-vault.pages.dev/` on August 30, 2026. Production
+  commit `86988b3` retains the Pera primary secure-WebSocket relay and the
+  WalletConnect numbered fallback relays introduced in `1344203` through the
+  deployed Content Security Policy. The packaged-artifact regression opens the
+  Pera relay and fails on a relay CSP violation. The production browser check
+  opened Pera Connect with no Pera or WalletConnect relay-policy block.
+- The production origin completed an end-to-end notarization of the disposable
+  `deployment-smoke.txt` fixture. TestNet transaction
+  `YPM7SPY7376DMS5F7NJI3BD4MMTWXAUT6ZNND2APLCHMD275BCQA` confirmed in round
+  `66826566`; evidence record `d7c25398-b64a-480a-b385-ccfb7f147ef2` was saved
+  as Confirmed with SHA-256 fingerprint
+  `0a69773de57196532ae089e3f221bdc5261930a71ee90d8f63c5df4691f04134`.
+- The confirmed production record was exported as a password-encrypted backup,
+  validated in a fresh Chrome Incognito session as one total and one new record
+  with zero existing records, duplicate fingerprints, or conflicting IDs, and
+  imported successfully. Selecting the unchanged fixture in that isolated
+  session found the transferred Confirmed record and Algorand transaction.
+  Selecting modified content with SHA-256 fingerprint
+  `906197a24cee634210b36504cada18c4566f8fbcefb9e09d4485a5f842b50280`
+  correctly returned no local evidence match while preserving the confirmed
+  record.
+- Production commit `86988b3` completed the public shared-verification workflow
+  in a fresh Incognito session without access to the owner's local Vault. The
+  disposable `dev server test 1.txt` document with SHA-256 fingerprint
+  `401a3b72458c17621120290fdbc840a4f43e9537406cad2170cc67dc8d3441d2`
+  verified against TestNet transaction
+  `KFMQTPL3Z6V6NP6AOPGWRCWZULIGMRX3JCEETZQ5PYJ5BPTTSNXQ`, confirmed in round
+  `66833022`. A mismatched document/link pair and modified content with SHA-256
+  fingerprint
+  `5cf660bcde0171dbc8fe6e1c2d86ac84d137a3fdf15478e119f11a7b788a4c4a`
+  were both rejected. Switching from shared verification to the empty Incognito
+  Vault and back preserved the loaded link and successful public result without
+  requiring a second load.
 - A second hands-on Pera workflow on August 30, 2026 verified the approval
   recovery boundary. An unapproved request ended automatically after 90 seconds
   without submission, manual `Cancel Waiting` returned immediately to a safe
@@ -179,6 +221,10 @@ exact Safari zoom, supported-mobile visual-mode, and independent-security-review
 limitations for RC1. It does not authorize a production deployment, release
 tag, MainNet operation, or a claim that the application has been independently
 audited.
+
+After the final production shared-verification smoke passed on August 30, 2026,
+the product owner separately authorized updating the release evidence, running
+the final gates, and creating and pushing `v0.1.0-alpha` if every gate passed.
 
 ## Promotion rule
 

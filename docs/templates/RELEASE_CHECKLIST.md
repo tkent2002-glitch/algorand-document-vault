@@ -8,9 +8,9 @@ live Pera Wallet workflow can be completed.
 ## Release identity
 
 - [x] Set `package.json` to the approved alpha version.
-- [ ] Confirm the release commit and tag both use the approved version.
+- [x] Confirm the release commit and tag both use the approved version.
 - [x] Update `CHANGELOG.md` with the release date and final scope.
-- [ ] Confirm the working tree is clean before tagging.
+- [x] Confirm the working tree is clean before tagging.
 
 ## Automated quality gates
 
@@ -256,6 +256,38 @@ Manual backup evidence recorded August 28, 2026:
 - [x] Verify production hosting configuration and direct-load behavior.
 - [x] Smoke-test the exact packaged release artifact.
 
+Production hosting evidence recorded August 30, 2026:
+
+- Cloudflare Pages promoted and validated commit `86988b3` at
+  `https://algorand-document-vault.pages.dev/` from `main`.
+- The production origin loaded all core routes and opened Pera Connect without
+  a Pera or WalletConnect secure-relay CSP violation.
+- A disposable document completed Pera approval, TestNet submission, and
+  confirmation in round `66826566`; the resulting Confirmed evidence record
+  matched the unchanged document locally.
+- A password-encrypted one-record backup restored into a fresh Incognito Vault
+  with zero conflicts. The unchanged document matched the transferred Confirmed
+  record, while modified content correctly produced no local evidence match.
+- A production verification link confirmed the unchanged disposable document
+  in a fresh Incognito session without access to the owner's local Vault. The
+  public proof anchored transaction
+  `KFMQTPL3Z6V6NP6AOPGWRCWZULIGMRX3JCEETZQ5PYJ5BPTTSNXQ` in TestNet round
+  `66833022`.
+- The shared-link workflow rejected both a mismatched document/link pair and
+  modified content. Switching to the empty Incognito Vault and back retained
+  the loaded verification link and successful public result without another
+  load action.
+
+Final tag-gate evidence recorded August 30, 2026:
+
+- 40 test files and 162 tests passed; lint and production build passed.
+- The alpha/TestNet boundary passed across 150 production source files, and 289
+  tracked candidate files passed the credential and blocked-name scan.
+- 25 Chromium, Edge, and WebKit core checks passed with two expected skips.
+- The production dependency audit reported zero vulnerabilities.
+- The exact 23-file release package was regenerated with a SHA-256 manifest and
+  passed both packaged-artifact browser checks.
+
 Large-Vault evidence recorded August 28, 2026:
 
 - A generated 10,000-document IndexedDB dataset rendered only 50 document
@@ -290,6 +322,9 @@ Product-owner approval recorded August 30, 2026:
   disclosed pre-release limitation. The application remains unaudited.
 - This approval does not authorize production deployment, a release tag,
   MainNet operation, or an independent-audit claim.
+- After the final production shared-verification smoke passed on August 30,
+  2026, the product owner separately authorized the final release gates and the
+  creation and push of `v0.1.0-alpha` if those gates passed.
 
 Release-identity evidence recorded August 28, 2026:
 
