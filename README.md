@@ -131,6 +131,7 @@ Detailed documentation:
 - [Software architecture](docs/SOFTWARE_ARCHITECTURE.md)
 - [Storage architecture](docs/architecture/STORAGE_ARCHITECTURE.md)
 - [Security architecture](docs/architecture/SECURITY_ARCHITECTURE.md)
+- [Independent security review package](docs/security-review/README.md)
 - [Blockchain architecture](docs/architecture/BLOCKCHAIN_ARCHITECTURE.md)
 - [Roadmap](docs/roadmap/ROADMAP.md)
 
@@ -198,6 +199,7 @@ Important boundaries:
 - TestNet ALGO has no monetary value; never use MainNet funds for development validation.
 - Desktop QR and same-device Pera Mobile handoff have been validated live. Same-device WalletConnect requires a secure HTTPS browser context.
 - The project has not yet completed an independent security audit.
+- A scoped [security review package](docs/security-review/README.md) is ready for an independent reviewer; preparation does not constitute an audit.
 - Encrypted backups cannot be recovered if the password is lost.
 - Blockchain notarization proves timestamped existence and integrity, not legal validity or truthfulness.
 

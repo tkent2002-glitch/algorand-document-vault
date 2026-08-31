@@ -27,7 +27,7 @@ the automated suite passes.
 | Physical Android | Deferred and accepted | No representative Android device is available; responsive emulation remains supporting evidence and is not presented as a physical-device result. |
 | Physical iOS | Passed | iPhone 17 Pro Max on iOS 26.6 passed portrait layout, storage, file selection, backup export, and Pera handoff checks. |
 | Screenshots | Passed | Frozen Dashboard, Verify, Wallet, and confirmed Notarization receipt screenshots were captured on August 30, 2026 without private documents, secrets, or a complete wallet address. |
-| Independent security review | Not started; accepted pre-release limitation | No independent reviewer or report is recorded. The application must remain labeled unaudited and pre-release. |
+| Independent security review | Preparation complete; review not started | A scoped reviewer package is available in `docs/security-review/`. No independent reviewer, completed review, or accepted report is recorded. The application must remain labeled unaudited and pre-release. |
 | Product-owner approval | Approved | On August 30, 2026, the product owner explicitly accepted the RC1 deferrals and unaudited pre-release status. |
 | Production hosting and HTTPS smoke | Passed | Cloudflare Pages production at commit `86988b3` passed route loading, Pera pairing, TestNet notarization, local and shared-link verification, encrypted cross-browser recovery, modified-document rejection, and verification-source state persistence. |
 | Post-validation workflow polish | Passed | Notarize, Verify, and Vault use task-first layouts and progressive disclosure. Automated regression plus focused keyboard and 200%/400% zoom rechecks passed on the frozen routes. |
@@ -203,12 +203,11 @@ For each browser or device:
 
 ## Independent security review
 
-Status: **Not started.** No independent security reviewer, scope, report, or
-acceptance decision is currently recorded. At minimum, the review should cover
-the document-hashing boundary, backup cryptography and import validation,
-IndexedDB trust assumptions, Algorand transaction policy, wallet signing and
-submission integrity, dependency and artifact controls, content security
-policy, and the TestNet-only release boundary.
+Status: **Preparation complete; review not started.** The repository now
+contains a scoped reviewer brief, threat model, reproducible test environment,
+review checklist, and finding template in `docs/security-review/`. No
+independent reviewer, completed review, report, retest, or acceptance decision
+is currently recorded.
 
 The application must continue to describe itself as pre-release and not
 independently audited until this status changes.

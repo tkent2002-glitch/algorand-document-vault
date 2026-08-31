@@ -43,7 +43,7 @@
 
 ## Later review gates
 
-- Independent security review
+- Independent security review (review package prepared; external review not started)
 - Third-party engineering review
 - MainNet readiness decision
 - Production deployment plan
