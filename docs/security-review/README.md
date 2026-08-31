@@ -9,15 +9,17 @@ does not mean that an independent review has started or completed.
 - Product stage: public alpha, pre-release
 - Network boundary: Algorand TestNet only
 - Audit status: unaudited
+- Feature freeze: active as of 2026-08-30
 - Public application: <https://algorand-document-vault.pages.dev/>
 - Source repository: <https://github.com/tkent2002-glitch/algorand-document-vault>
 - Private vulnerability reporting: [SECURITY.md](../../SECURITY.md)
 
 The reviewer must record an exact Git commit before testing. The frozen public
-alpha release is `v0.1.0-alpha` at commit
-`2abcb3456510ab6f5bd17f4e18c5f6f09a7d06c2`. The deployed site may contain
-later changes from `main`; when reviewing the deployment, record the current
-`main` commit and separately assess the delta from the release tag.
+alpha security-review candidate is
+`18def771b8452f95e4c7144c58d503975512368d`, labeled
+`security-review-candidate-2026-08-30`. The deployed site may later contain
+approved fixes from `main`; when reviewing the deployment, record its current
+commit and separately assess the delta from this candidate.
 
 ## Review objectives
 
@@ -72,6 +74,7 @@ application can reduce its impact or is using the dependency unsafely.
 ## Reviewer map
 
 - [Threat model](THREAT_MODEL.md)
+- [Feature-freeze record and change policy](FEATURE_FREEZE.md)
 - [Reproducible test environment](TEST_ENVIRONMENT.md)
 - [Review checklist](REVIEW_CHECKLIST.md)
 - [Pre-review hardening controls](PRE_REVIEW_HARDENING.md)

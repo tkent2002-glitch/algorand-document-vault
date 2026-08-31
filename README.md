@@ -72,9 +72,9 @@ the project is in public alpha.
 - User-approved document/proof folders on supported desktop browsers, with a
   system-share fallback elsewhere
 
-**Current focus:** public-alpha feedback, independent security review,
-cross-browser and manual assistive-technology review, and performance testing.
-MainNet use is not supported.
+**Current focus:** the feature set is frozen for independent security review,
+cross-browser and manual assistive-technology review, and release validation.
+MainNet use is not supported, and the application remains unaudited.
 
 ## Security and privacy boundaries
 
