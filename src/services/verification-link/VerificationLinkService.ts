@@ -3,6 +3,7 @@ import {
   ShareableVerificationProofService,
   type ShareableVerificationProofFile,
 } from "../shareable-proof";
+import { INPUT_SECURITY_LIMITS } from "../security/InputSecurityLimits";
 
 const VERIFICATION_LINK_VERSION = "adv-verification-link-v1";
 const VERIFICATION_HASH_PREFIX = "#verify=";
@@ -59,12 +60,16 @@ function encodeUtf8Base64Url(value: string): string {
 }
 
 function decodeUtf8Base64Url(value: string): string {
+  if (!value || !/^[A-Za-z0-9_-]+$/u.test(value)) {
+    throw new Error("The verification link encoding is invalid.");
+  }
+
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
   const paddingLength = (4 - (normalized.length % 4)) % 4;
   const binary = atob(`${normalized}${"=".repeat(paddingLength)}`);
   const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
 
-  return new TextDecoder().decode(bytes);
+  return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
 }
 
 function normalizeBaseUrl(baseUrl: string): URL {
@@ -116,6 +121,14 @@ export class VerificationLinkService {
         valid: false,
         envelope: null,
         errors: ["No verification link was found."],
+      };
+    }
+
+    if (hash.length > INPUT_SECURITY_LIMITS.verificationLinkCharacters) {
+      return {
+        valid: false,
+        envelope: null,
+        errors: ["The verification link is too large."],
       };
     }
 

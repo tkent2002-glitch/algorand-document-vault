@@ -34,7 +34,8 @@ Primary evidence: `src/services/crypto`, `src/services/notarization`,
 
 Primary evidence: `src/services/verification-link`,
 `src/services/shareable-proof`, `tests/verification`, and
-`docs/BlockchainProofSpecification.md`.
+`docs/BlockchainProofSpecification.md`. Resource limits and residual targets
+are recorded in `PRE_REVIEW_HARDENING.md`.
 
 ## Algorand and wallet boundary
 
@@ -66,6 +67,7 @@ Primary evidence: `src/services/algorand`, `src/services/wallet`,
 
 Primary evidence: `src/storage`, `src/repositories`,
 `src/services/backup`, `src/services/security`, and corresponding tests.
+The enforced import limits are recorded in `PRE_REVIEW_HARDENING.md`.
 
 ## Browser and presentation security
 

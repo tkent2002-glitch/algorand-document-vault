@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { AlgorandExplorerService } from "../../services/algorand/AlgorandExplorerService";
 import { VerificationLinkService } from "../../services/verification-link";
 import {
+  INPUT_SECURITY_LIMITS,
+  formatByteLimit,
+} from "../../services/security/InputSecurityLimits";
+import {
   ShareableVerificationProofService,
   type ShareableVerificationProofFile,
   type ShareableVerificationProofVerificationResult,
 } from "../../services/shareable-proof";
-
-const MAX_SHARED_PROOF_BYTES = 64 * 1024;
 
 type SharedProofVerifierProps = {
   documentHash: string;
@@ -41,6 +43,11 @@ function SharedProofVerifier({
     try {
       setProcessing(true);
       const value = linkText.trim();
+      if (value.length > INPUT_SECURITY_LIMITS.verificationLinkCharacters) {
+        setLinkLoaded(false);
+        setValidationError("The verification link is too large.");
+        return;
+      }
       const hash = value.startsWith("#")
         ? value
         : new URL(value, window.location.href).hash;
@@ -114,8 +121,12 @@ function SharedProofVerifier({
     setValidationError("");
 
     if (!file) return;
-    if (file.size > MAX_SHARED_PROOF_BYTES) {
-      setValidationError("The technical proof file is larger than 64 KB.");
+    if (file.size > INPUT_SECURITY_LIMITS.sharedProofFileBytes) {
+      setValidationError(
+        `The technical proof file is larger than ${formatByteLimit(
+          INPUT_SECURITY_LIMITS.sharedProofFileBytes
+        )}.`
+      );
       return;
     }
 
@@ -186,6 +197,7 @@ function SharedProofVerifier({
             type="url"
             placeholder="https://…/#verify=…"
             value={linkText}
+            maxLength={INPUT_SECURITY_LIMITS.verificationLinkCharacters}
             onChange={(event) => setLinkText(event.target.value)}
           />
           <button

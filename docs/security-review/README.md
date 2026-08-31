@@ -74,6 +74,7 @@ application can reduce its impact or is using the dependency unsafely.
 - [Threat model](THREAT_MODEL.md)
 - [Reproducible test environment](TEST_ENVIRONMENT.md)
 - [Review checklist](REVIEW_CHECKLIST.md)
+- [Pre-review hardening controls](PRE_REVIEW_HARDENING.md)
 - [Finding template](FINDING_TEMPLATE.md)
 - [Security architecture](../architecture/SECURITY_ARCHITECTURE.md)
 - [Blockchain architecture](../architecture/BLOCKCHAIN_ARCHITECTURE.md)

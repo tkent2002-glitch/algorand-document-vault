@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BackupEncryptionService } from "../../src/services/security/BackupEncryptionService";
 import type { EncryptedEvidenceBackupFile } from "../../src/services/security/EncryptionTypes";
+import { INPUT_SECURITY_LIMITS } from "../../src/services/security/InputSecurityLimits";
 
 const password = "boundary-test-password";
 
@@ -72,5 +73,24 @@ describe("BackupEncryptionService security boundaries", () => {
     await expect(
       BackupEncryptionService.encrypt({ test: "data" }, "short")
     ).rejects.toThrow("Backup encryption password must contain at least 12 characters.");
+  });
+
+  it("rejects excessively long passwords before key derivation", async () => {
+    const oversizedPassword = "p".repeat(
+      INPUT_SECURITY_LIMITS.passwordCharacters + 1
+    );
+
+    await expect(
+      BackupEncryptionService.encrypt({ test: "data" }, oversizedPassword)
+    ).rejects.toThrow("Backup encryption password is too long.");
+  });
+
+  it("rejects malformed encrypted envelopes with a controlled error", async () => {
+    await expect(
+      BackupEncryptionService.decrypt(
+        null as unknown as EncryptedEvidenceBackupFile,
+        password
+      )
+    ).rejects.toThrow("Invalid encrypted backup file.");
   });
 });

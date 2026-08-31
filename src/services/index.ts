@@ -29,8 +29,10 @@ export {
 
 export {
   BackupEncryptionService,
+  INPUT_SECURITY_LIMITS,
   KeyDerivationService,
   SecureRandomService,
+  formatByteLimit,
 } from "./security";
 
 export { VerificationService } from "./verification";
