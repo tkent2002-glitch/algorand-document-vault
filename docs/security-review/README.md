@@ -75,6 +75,7 @@ application can reduce its impact or is using the dependency unsafely.
 
 - [Threat model](THREAT_MODEL.md)
 - [Feature-freeze record and change policy](FEATURE_FREEZE.md)
+- [Post-freeze security deltas](POST_FREEZE_SECURITY_DELTAS.md)
 - [Reproducible test environment](TEST_ENVIRONMENT.md)
 - [Review checklist](REVIEW_CHECKLIST.md)
 - [Pre-review hardening controls](PRE_REVIEW_HARDENING.md)

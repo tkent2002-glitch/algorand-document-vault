@@ -5,6 +5,7 @@ import type {
 } from "../../types";
 import { WalletService } from "../wallet/WalletService";
 import { AlgorandProofNoteService } from "./AlgorandProofNoteService";
+import { AlgorandProofTransactionValidationService } from "./AlgorandProofTransactionValidationService";
 import { AlgorandService } from "./AlgorandService";
 import { AlgorandTransactionPolicyService } from "./AlgorandTransactionPolicyService";
 
@@ -112,6 +113,13 @@ export class AlgorandTransactionSigningService {
       WalletService.signSingleTransaction(transaction),
       options
     );
+
+    AlgorandProofTransactionValidationService.decodeAndValidateSignedTransaction({
+      signedTransaction,
+      expectedTransactionId: transaction.txID(),
+      expectedSenderAddress: senderAddress,
+      expectedNote: note,
+    });
 
     return {
       txId: transaction.txID(),

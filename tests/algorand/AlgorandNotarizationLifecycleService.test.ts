@@ -6,6 +6,7 @@ import {
 } from "../../src/services/algorand/AlgorandNotarizationLifecycleService";
 import { AlgorandConfirmationService } from "../../src/services/algorand/AlgorandConfirmationService";
 import { AlgorandSubmissionService } from "../../src/services/algorand/AlgorandSubmissionService";
+import { AlgorandProofTransactionValidationService } from "../../src/services/algorand/AlgorandProofTransactionValidationService";
 import type { EvidenceRecord } from "../../src/services";
 import type { AlgorandSignedProofTransaction } from "../../src/types";
 
@@ -49,6 +50,10 @@ function createSignedTransaction():
 describe("AlgorandNotarizationLifecycleService", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.spyOn(
+      AlgorandProofTransactionValidationService,
+      "decodeAndValidateSignedTransaction"
+    ).mockReturnValue({} as never);
   });
 
   it("submits, confirms, and persists the complete lifecycle", async () => {
@@ -79,6 +84,7 @@ describe("AlgorandNotarizationLifecycleService", () => {
       await AlgorandNotarizationLifecycleService.complete({
         signedTransaction: createSignedTransaction(),
         evidenceRecord: createEvidenceRecord(),
+        expectedSenderAddress: "EXPECTED-SENDER",
         onProgress: progress,
       });
 
@@ -119,11 +125,37 @@ describe("AlgorandNotarizationLifecycleService", () => {
       AlgorandNotarizationLifecycleService.complete({
         signedTransaction: createSignedTransaction(),
         evidenceRecord: createEvidenceRecord(),
+        expectedSenderAddress: "EXPECTED-SENDER",
       })
     ).rejects.toMatchObject({
       name: "AlgorandNotarizationLifecycleError",
       stage: "submitting",
     });
+  });
+
+  it("never submits wallet bytes that fail final proof validation", async () => {
+    vi.mocked(
+      AlgorandProofTransactionValidationService.decodeAndValidateSignedTransaction
+    ).mockImplementation(() => {
+      throw new Error("Wallet transaction does not match the prepared proof.");
+    });
+    const submitSpy = vi.spyOn(
+      AlgorandSubmissionService,
+      "submitSignedTransaction"
+    );
+
+    await expect(
+      AlgorandNotarizationLifecycleService.complete({
+        signedTransaction: createSignedTransaction(),
+        evidenceRecord: createEvidenceRecord(),
+        expectedSenderAddress: "EXPECTED-SENDER",
+      })
+    ).rejects.toMatchObject({
+      stage: "submitting",
+      transactionId: null,
+    });
+
+    expect(submitSpy).not.toHaveBeenCalled();
   });
 
   it("reports the confirming stage when confirmation fails", async () => {
@@ -149,6 +181,7 @@ describe("AlgorandNotarizationLifecycleService", () => {
       await AlgorandNotarizationLifecycleService.complete({
         signedTransaction: createSignedTransaction(),
         evidenceRecord: createEvidenceRecord(),
+        expectedSenderAddress: "EXPECTED-SENDER",
       });
 
       throw new Error("Expected lifecycle failure.");
@@ -194,6 +227,7 @@ describe("AlgorandNotarizationLifecycleService", () => {
           txId: "EXPECTED-TX-ID",
         },
         evidenceRecord: createEvidenceRecord(),
+        expectedSenderAddress: "EXPECTED-SENDER",
       });
 
       throw new Error("Expected transaction ID mismatch.");
