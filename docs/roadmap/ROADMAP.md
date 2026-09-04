@@ -47,3 +47,26 @@
 - Third-party engineering review
 - MainNet readiness decision
 - Production deployment plan
+
+## Post-review feature candidates
+
+### Merkle-tree batch anchoring
+
+Merkle-tree functionality is under consideration for a future release. It is
+not committed, implemented, or included in the current security-review scope.
+
+The candidate workflow would hash multiple documents locally, construct a
+deterministic and versioned Merkle tree, anchor one Merkle root in a single
+Algorand transaction, and produce an independently verifiable proof for each
+document in the batch. Document contents and filenames would remain off-chain.
+
+Before implementation, this feature requires:
+
+- a published Merkle construction and proof-format specification;
+- a dedicated threat model and independent security review;
+- IndexedDB, backup, and migration design for batch evidence;
+- performance testing for large files and large document sets; and
+- usability design that preserves the existing single-document workflow.
+
+The current alpha continues to support one document fingerprint per Algorand
+transaction.
