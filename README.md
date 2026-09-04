@@ -176,6 +176,12 @@ centers on:
 - larger-Vault performance testing; and
 - a separate MainNet readiness decision.
 
+A post-review Merkle-tree batch workflow is under consideration. The proposed
+design would anchor one root for multiple locally hashed documents while
+retaining an individual verification proof for each document. It is not
+implemented or committed to a release; the current alpha supports one document
+fingerprint per Algorand transaction.
+
 See the [roadmap](docs/roadmap/ROADMAP.md) and
 [release validation record](docs/release/RC1_VALIDATION.md) for detailed status.
 

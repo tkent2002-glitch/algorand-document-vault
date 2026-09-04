@@ -15,6 +15,11 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
 - Reuse the proof-transaction validator across signing, submission recovery,
   and shared public verification.
 
+### Documentation
+
+- Record Merkle-tree batch anchoring as a post-review feature candidate while
+  preserving the current single-document capability boundary.
+
 ## [0.1.0-alpha] - 2026-08-30
 
 ### Added
