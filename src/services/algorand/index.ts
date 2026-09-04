@@ -6,6 +6,12 @@ export { AlgorandService } from "./AlgorandService";
 export { AlgorandSubmissionService } from "./AlgorandSubmissionService";
 export { AlgorandTransactionBuilderService } from "./AlgorandTransactionBuilderService";
 export { AlgorandTransactionInspectionService } from "./AlgorandTransactionInspectionService";
+export {
+  AlgorandProofTransactionValidationService,
+  type AlgorandProofTransactionValidationInput,
+  type AlgorandProofTransactionValidationResult,
+  type AlgorandSignedProofTransactionValidationInput,
+} from "./AlgorandProofTransactionValidationService";
 export { AlgorandTransactionSigningService } from "./AlgorandTransactionSigningService";
 
 export {

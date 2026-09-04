@@ -6,6 +6,7 @@ import {
   AlgorandTransactionStatusService,
   type AlgorandTransactionStatusResult,
 } from "./AlgorandTransactionStatusService";
+import type { NotarizationProof } from "../../types";
 
 export type TransactionRecoveryDecision =
   | "confirmed"
@@ -24,6 +25,8 @@ export type TransactionRecoveryResult = {
 export type TransactionRecoveryInput = {
   failure: TransactionFailureClassification;
   transactionId?: string | null;
+  proof?: NotarizationProof | null;
+  expectedSenderAddress?: string | null;
 };
 
 export class TransactionRecoveryDecisionService {
@@ -71,7 +74,14 @@ export class TransactionRecoveryDecisionService {
 
     const statusResult =
       await AlgorandTransactionStatusService.check(
-        transactionId
+        transactionId,
+        input.proof
+          ? {
+              proof: input.proof,
+              expectedSenderAddress:
+                input.expectedSenderAddress,
+            }
+          : undefined
       );
 
     if (statusResult.status === "confirmed") {
@@ -101,6 +111,15 @@ export class TransactionRecoveryDecisionService {
         statusResult,
         userMessage:
           "The Algorand node reports that the transaction was rejected. Review the rejection reason before retrying.",
+      };
+    }
+
+    if (statusResult.status === "mismatch") {
+      return {
+        decision: "manual_review_required",
+        transactionId,
+        statusResult,
+        userMessage: statusResult.message,
       };
     }
 

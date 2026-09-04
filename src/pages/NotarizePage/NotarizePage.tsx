@@ -301,6 +301,7 @@ function NotarizePage({
           await AlgorandNotarizationLifecycleService.complete({
             signedTransaction: transactionToSubmit,
             evidenceRecord,
+            expectedSenderAddress: wallet.address,
             onProgress: ({ stage, message }) => {
               if (
                 stage === "submitting" ||
@@ -414,6 +415,8 @@ function NotarizePage({
         await TransactionRecoveryDecisionService.evaluate({
           failure: recoveryFailure,
           transactionId: recoveryTransactionId,
+          proof,
+          expectedSenderAddress: wallet.address,
         });
 
       setRecoveryMessage(recovery.userMessage);

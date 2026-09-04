@@ -1,12 +1,21 @@
 ﻿import { AlgorandService } from "./AlgorandService";
 import { Logger } from "../../core";
+import type { NotarizationProof } from "../../types";
+import { AlgorandProofNoteService } from "./AlgorandProofNoteService";
+import { AlgorandProofTransactionValidationService } from "./AlgorandProofTransactionValidationService";
 
 export type AlgorandTransactionLookupStatus =
   | "confirmed"
   | "pending"
   | "rejected"
+  | "mismatch"
   | "not_found"
   | "unavailable";
+
+export type AlgorandTransactionProofExpectation = {
+  proof: NotarizationProof;
+  expectedSenderAddress?: string | null;
+};
 
 export type AlgorandTransactionStatusResult = {
   transactionId: string;
@@ -44,7 +53,8 @@ function getHttpStatus(error: unknown): number | null {
 
 export class AlgorandTransactionStatusService {
   static async check(
-    transactionId: string
+    transactionId: string,
+    expectation?: AlgorandTransactionProofExpectation
   ): Promise<AlgorandTransactionStatusResult> {
     const normalizedTransactionId = transactionId.trim();
 
@@ -72,6 +82,44 @@ export class AlgorandTransactionStatusService {
           : "";
 
       if (confirmedRound > 0) {
+        if (expectation) {
+          const transaction = pendingInfo.txn?.txn;
+
+          if (!transaction || typeof transaction.txID !== "function") {
+            return {
+              transactionId: normalizedTransactionId,
+              status: "mismatch",
+              confirmedRound,
+              poolError: null,
+              message:
+                "The confirmed transaction could not be decoded as the expected ADv proof transaction.",
+            };
+          }
+
+          const validation =
+            AlgorandProofTransactionValidationService.validateTransaction({
+              transaction,
+              expectedTransactionId: normalizedTransactionId,
+              expectedSenderAddress:
+                expectation.expectedSenderAddress ??
+                transaction.sender.toString(),
+              expectedNote: AlgorandProofNoteService.createNote(
+                expectation.proof
+              ),
+            });
+
+          if (!validation.valid) {
+            return {
+              transactionId: normalizedTransactionId,
+              status: "mismatch",
+              confirmedRound,
+              poolError: null,
+              message:
+                "The confirmed transaction does not match this document proof. The Vault record was not confirmed.",
+            };
+          }
+        }
+
         return {
           transactionId: normalizedTransactionId,
           status: "confirmed",

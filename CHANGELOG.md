@@ -4,6 +4,17 @@ All notable changes to Algorand Document Vault will be documented in this file.
 
 The project follows [Semantic Versioning](https://semver.org/) when versioned releases begin.
 
+## [Unreleased]
+
+### Security
+
+- Decode and revalidate wallet-returned signed transaction bytes before any
+  TestNet broadcast.
+- Require recovered confirmed transactions to match the document proof and
+  transaction policy before marking Vault evidence confirmed.
+- Reuse the proof-transaction validator across signing, submission recovery,
+  and shared public verification.
+
 ## [0.1.0-alpha] - 2026-08-30
 
 ### Added
