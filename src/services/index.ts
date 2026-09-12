@@ -20,7 +20,7 @@ export {
 
 export { HashService } from "./crypto";
 export { DocumentValidationService } from "./documents";
-export { MerkleTreeService } from "./merkle";
+export { BatchHashingService, MerkleTreeService } from "./merkle";
 
 export {
   EvidenceRecordService,
@@ -56,6 +56,9 @@ export type {
 export type { DocumentValidationResult } from "./documents";
 
 export type {
+  BatchHashedDocument,
+  BatchHashingOptions,
+  BatchHashingProgress,
   MerkleBatch,
   MerkleBatchMember,
   MerkleMembershipProof,
