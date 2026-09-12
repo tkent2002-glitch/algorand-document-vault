@@ -54,8 +54,10 @@
 
 Merkle-tree functionality is merged into `main` and has completed an initial
 three-document live TestNet batch and per-document verification test. It is now
-in broader device and independent-review validation. Automated fail-closed
-reload recovery and performance regression coverage are in place.
+in physical-device, manual assistive-technology, and independent-review
+validation. Automated fail-closed reload recovery, performance regression,
+320-pixel reflow, keyboard, and accessible-control coverage are in place; see
+the [Merkle batch validation record](../release/MERKLE_BATCH_VALIDATION.md).
 It is not yet part of the tagged `v0.1.0-alpha` release or an independently
 reviewed security scope.
 

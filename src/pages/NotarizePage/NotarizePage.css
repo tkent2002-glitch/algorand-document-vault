@@ -660,6 +660,16 @@
   gap: 1rem;
 }
 
+.batch-file-picker-help {
+  max-width: 48rem;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.batch-notarize-panel input[type="file"] {
+  max-width: 100%;
+}
+
 .batch-summary {
   display: grid;
   gap: 0.75rem;
@@ -750,6 +760,11 @@
 @media (max-width: 640px) {
   .notarize-header {
     margin-bottom: 1rem;
+  }
+
+  .notarize-mode-switch {
+    display: grid;
+    width: 100%;
   }
 
   .wallet-readiness-header,

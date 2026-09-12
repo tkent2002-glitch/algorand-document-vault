@@ -92,3 +92,9 @@ Maximum-size and lower-memory-device validation remains pending.
 Reload-recovery tests cover confirmed, pending, mismatched, missing, and
 unavailable transaction states. Only a proof-matching confirmed transaction
 updates the batch and enables its per-document verification links.
+
+Automated mobile-width and accessibility coverage validates 320 CSS-pixel
+reflow, keyboard expansion, mode-selection state, and programmatic multi-file
+guidance. Physical-device and manual assistive-technology review remain pending
+and are tracked in
+[`MERKLE_BATCH_VALIDATION.md`](../release/MERKLE_BATCH_VALIDATION.md).

@@ -185,7 +185,7 @@ export default function BatchNotarizePanel({
         <p className="notarize-eyebrow">Step 1 · Select a batch</p>
         <h3>Choose 2–1,000 documents</h3>
         <p>Each file is fingerprinted locally. Original files are never uploaded.</p>
-        <p className="batch-file-picker-help">
+        <p id="batch-file-picker-help" className="batch-file-picker-help">
           Select all documents in the same window. On Windows, hold Ctrl to choose
           individual files or Shift to choose a range.
         </p>
@@ -194,6 +194,7 @@ export default function BatchNotarizePanel({
           multiple
           disabled={busy}
           aria-label="Documents to notarize as one Merkle batch"
+          aria-describedby="batch-file-picker-help"
           onChange={(event) => void prepare(Array.from(event.target.files ?? []))}
         />
         {progress && busy && (

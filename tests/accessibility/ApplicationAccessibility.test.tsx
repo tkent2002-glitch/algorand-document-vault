@@ -122,6 +122,34 @@ describe("application accessibility boundaries", () => {
     ).toHaveAttribute("type", "file");
   });
 
+  it("exposes batch mode and its multi-file guidance to assistive technology", async () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Notarize" }));
+    const modeGroup = await screen.findByRole("group", {
+      name: "Notarization mode",
+    });
+    const singleMode = screen.getByRole("button", { name: "One document" });
+    const batchMode = screen.getByRole("button", { name: "Document batch" });
+
+    expect(modeGroup).toContainElement(singleMode);
+    expect(modeGroup).toContainElement(batchMode);
+    expect(singleMode).toHaveAttribute("aria-pressed", "true");
+    expect(batchMode).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(batchMode);
+
+    expect(singleMode).toHaveAttribute("aria-pressed", "false");
+    expect(batchMode).toHaveAttribute("aria-pressed", "true");
+    const fileInput = await screen.findByLabelText(
+      "Documents to notarize as one Merkle batch"
+    );
+    expect(fileInput).toHaveAttribute("multiple");
+    expect(fileInput).toHaveAccessibleDescription(
+      /hold Ctrl to choose individual files or Shift to choose a range/i
+    );
+  });
+
   it("keeps a shortened connected-wallet address fully accessible", () => {
     const address =
       "UQWCJ6BW2GY6S2WORUZX7SGKAHDS4PPHSDWCSHZCS7ZNPOZEUX7UV6X4ZI";

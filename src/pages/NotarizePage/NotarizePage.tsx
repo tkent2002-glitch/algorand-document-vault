@@ -516,10 +516,15 @@ function NotarizePage({
         </p>
       </div>
 
-      <div className="notarize-mode-switch" aria-label="Notarization mode">
+      <div
+        className="notarize-mode-switch"
+        role="group"
+        aria-label="Notarization mode"
+      >
         <button
           type="button"
           className={mode === "single" ? "active" : ""}
+          aria-pressed={mode === "single"}
           onClick={() => setMode("single")}
         >
           One document
@@ -528,6 +533,7 @@ function NotarizePage({
           <button
             type="button"
             className={mode === "batch" ? "active" : ""}
+            aria-pressed={mode === "batch"}
             onClick={() => setMode("batch")}
           >
             Document batch
