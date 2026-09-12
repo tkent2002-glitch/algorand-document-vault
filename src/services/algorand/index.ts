@@ -14,6 +14,10 @@ export {
 } from "./AlgorandProofTransactionValidationService";
 export { AlgorandTransactionSigningService } from "./AlgorandTransactionSigningService";
 export { AlgorandBatchNotarizationLifecycleService } from "./AlgorandBatchNotarizationLifecycleService";
+export {
+  AlgorandBatchRecoveryService,
+  type AlgorandBatchRecoveryResult,
+} from "./AlgorandBatchRecoveryService";
 export type {
   AlgorandBatchNotarizationLifecycleInput,
   AlgorandBatchNotarizationLifecycleResult,

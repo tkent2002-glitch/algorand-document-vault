@@ -63,6 +63,9 @@ npm run test:artifact
 - Domain-separated, versioned SHA-256 leaf and internal-node construction.
 - Deterministic sorting and explicit occurrence counters for duplicate files.
 - Exact Version 2 Algorand note validation before broadcast and during recovery.
+- Persisted `submitted` batches can be recovered after reload from the Vault;
+  confirmation is recorded only after the existing on-chain transaction is
+  revalidated against the stored batch proof.
 - Strict file-count, total-size, individual-size, proof-depth, JSON, and link
   limits; local sequential hashing reports progress and supports cancellation.
 - Normalized batch/member IndexedDB stores with a tested v1-to-v2 migration.
@@ -85,3 +88,7 @@ Repeatable workstation measurements and regression ceilings for 1,000-document
 hashing and proof construction plus a representative 25 MiB member are recorded
 in [`MERKLE_BATCH_PERFORMANCE.md`](../performance/MERKLE_BATCH_PERFORMANCE.md).
 Maximum-size and lower-memory-device validation remains pending.
+
+Reload-recovery tests cover confirmed, pending, mismatched, missing, and
+unavailable transaction states. Only a proof-matching confirmed transaction
+updates the batch and enables its per-document verification links.

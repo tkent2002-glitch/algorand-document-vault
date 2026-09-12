@@ -21,6 +21,11 @@
    Send that link with that original file; the recipient does not need the
    other files in the batch.
 
+If confirmation is interrupted after submission, open **Vault**, expand the
+submitted batch, and choose **Check batch confirmation**. The app validates the
+existing transaction against that batch proof before confirming the record.
+Do not create a second transaction while the first transaction is unresolved.
+
 ## Share a verification
 
 1. Open **Vault** and select a document with a confirmed record.

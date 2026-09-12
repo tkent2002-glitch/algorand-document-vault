@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BatchEvidenceRepository } from "../../repositories/evidence/BatchEvidenceRepository";
 import {
+  AlgorandBatchRecoveryService,
   AlgorandExplorerService,
   VerificationLinkService,
   type BatchEvidenceMemberRecord,
@@ -16,6 +17,7 @@ export default function BatchVaultSection() {
   const [batches, setBatches] = useState<BatchWithMembers[]>([]);
   const [shareLink, setShareLink] = useState("");
   const [message, setMessage] = useState("");
+  const [recoveringBatchId, setRecoveringBatchId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -45,6 +47,34 @@ export default function BatchVaultSection() {
     }
   }
 
+  async function recoverBatch(batch: BatchEvidenceRecord) {
+    try {
+      setRecoveringBatchId(batch.id);
+      setMessage("Checking the proof-bound transaction on Algorand TestNet...");
+      const result = await AlgorandBatchRecoveryService.check(batch);
+      if (result.recovered) {
+        setBatches((current) =>
+          current.map((entry) =>
+            entry.batch.id === batch.id
+              ? { ...entry, batch: result.batch }
+              : entry
+          )
+        );
+        setMessage("Batch confirmation recovered. Verification links are now available.");
+      } else {
+        setMessage(result.status.message);
+      }
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Batch confirmation could not be checked."
+      );
+    } finally {
+      setRecoveringBatchId(null);
+    }
+  }
+
   if (batches.length === 0) return null;
 
   return (
@@ -70,6 +100,23 @@ export default function BatchVaultSection() {
             </span>
           </summary>
           <div className="batch-vault-members">
+            {batch.status === "submitted" && batch.algorandTransactionId && (
+              <div className="batch-vault-recovery">
+                <p>
+                  This batch was submitted but confirmation was interrupted. Check
+                  the existing transaction before trying another notarization.
+                </p>
+                <button
+                  type="button"
+                  disabled={recoveringBatchId === batch.id}
+                  onClick={() => void recoverBatch(batch)}
+                >
+                  {recoveringBatchId === batch.id
+                    ? "Checking confirmation..."
+                    : "Check batch confirmation"}
+                </button>
+              </div>
+            )}
             {batch.algorandTransactionId && (
               <a
                 href={AlgorandExplorerService.getTransactionUrl(batch.algorandTransactionId)}

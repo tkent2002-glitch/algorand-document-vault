@@ -1,6 +1,7 @@
 export {
   AlgorandConfirmationService,
   AlgorandBatchNotarizationLifecycleService,
+  AlgorandBatchRecoveryService,
   AlgorandExplorerService,
   AlgorandProofNoteService,
   AlgorandProofTransactionDraftService,

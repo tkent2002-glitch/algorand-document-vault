@@ -54,13 +54,14 @@
 
 Merkle-tree functionality is merged into `main` and has completed an initial
 three-document live TestNet batch and per-document verification test. It is now
-in performance, broader device, recovery, and independent-review validation.
+in broader device and independent-review validation. Automated fail-closed
+reload recovery and performance regression coverage are in place.
 It is not yet part of the tagged `v0.1.0-alpha` release or an independently
 reviewed security scope.
 
 The implemented workflow hashes multiple documents locally, constructs a
-deterministic and versioned Merkle tree, anchor one Merkle root in a single
-Algorand transaction, and produce an independently verifiable proof for each
+deterministic and versioned Merkle tree, anchors one Merkle root in a single
+Algorand transaction, and produces an independently verifiable proof for each
 document in the batch. Document contents and filenames would remain off-chain.
 
 Before release, this feature requires:
