@@ -739,6 +739,22 @@
   padding: 1rem;
 }
 
+.batch-vault-recovery {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-top: 1px solid var(--border-color);
+  background: var(--warning-surface, #fff8e6);
+}
+
+.batch-vault-recovery p {
+  margin: 0;
+}
+
+.batch-vault-recovery button {
+  justify-self: start;
+}
+
 .batch-vault-summary-copy,
 .batch-vault-member span,
 .batch-share-link {
