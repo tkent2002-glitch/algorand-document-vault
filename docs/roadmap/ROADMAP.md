@@ -52,9 +52,11 @@
 
 ### Merkle-tree batch anchoring
 
-Merkle-tree functionality is implemented on the development branch and is now
-in cross-browser, recovery, and independent-review validation. It is not yet
-part of the published alpha release or its completed security-review scope.
+Merkle-tree functionality is merged into `main` and has completed an initial
+three-document live TestNet batch and per-document verification test. It is now
+in performance, broader device, recovery, and independent-review validation.
+It is not yet part of the tagged `v0.1.0-alpha` release or an independently
+reviewed security scope.
 
 The implemented workflow hashes multiple documents locally, constructs a
 deterministic and versioned Merkle tree, anchor one Merkle root in a single
@@ -66,7 +68,9 @@ Before release, this feature requires:
 - a published Merkle construction and proof-format specification;
 - a dedicated threat model and independent security review;
 - IndexedDB, backup, and migration design for batch evidence;
-- performance testing for large files and large document sets; and
+- browser and lower-memory-device performance testing at representative large
+  file sizes (automated 1,000-document and 25 MiB regression coverage is now in
+  place); and
 - usability design that preserves the existing single-document workflow.
 
 The current published alpha continues to support one document fingerprint per

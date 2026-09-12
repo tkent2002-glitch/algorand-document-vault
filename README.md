@@ -176,8 +176,8 @@ centers on:
 - larger-Vault performance testing; and
 - a separate MainNet readiness decision.
 
-A versioned Merkle-tree batch workflow is implemented on the development branch
-and is undergoing release validation. It hashes up to 1,000 documents locally,
+A versioned Merkle-tree batch workflow is merged into `main` and is undergoing
+release validation. It hashes up to 1,000 documents locally,
 anchors one deterministic root in one Algorand transaction, and retains an
 individual membership proof for each document. Existing single-document proofs
 remain supported. Operators can disable the batch UI at build time with

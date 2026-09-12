@@ -54,7 +54,7 @@ npm run test:artifact
 ## INT-2026-09-12-01: Merkle batch anchoring
 
 - Internal severity: architecture expansion requiring independent review
-- Status: implemented on a feature branch; release approval pending
+- Status: merged into `main`; release approval and independent review pending
 - Affected boundary: document hashing, wallet signing, transaction recovery,
   local storage, backup/import, and shared verification
 
@@ -76,6 +76,12 @@ npm run test:artifact
 Unit and security tests cover deterministic vectors, odd trees, duplicate
 fingerprints, malformed paths, migration, backup tampering, signed-byte
 substitution, member-link round trips, and the 1,000-document limit. Chromium
-and WebKit browser runs pass. The local Firefox executable currently fails to
-launch with `spawn UNKNOWN`; this is an environment-level runner failure and
-must be repeated in CI before release approval.
+and WebKit browser runs pass. GitHub CI passed its Chromium, Firefox, and WebKit
+matrix before merge. A three-document batch was anchored with one live TestNet
+transaction, persisted in the Vault, and verified using an individual member
+proof on September 12, 2026.
+
+Repeatable workstation measurements and regression ceilings for 1,000-document
+hashing and proof construction plus a representative 25 MiB member are recorded
+in [`MERKLE_BATCH_PERFORMANCE.md`](../performance/MERKLE_BATCH_PERFORMANCE.md).
+Maximum-size and lower-memory-device validation remains pending.
