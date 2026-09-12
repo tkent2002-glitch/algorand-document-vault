@@ -81,6 +81,9 @@ Trust assumptions:
 | T10 | Compromised dependency or pipeline changes the public build | Lockfile, CI quality/security and browser checks, production audit, artifact smoke test, protected main | Maintainer account compromise, mutable third-party services/actions, deployment provenance |
 | T11 | TestNet evidence is mistaken for MainNet or legal proof | TestNet-only configuration and UI labels; documented proof boundary | Social engineering, screenshots without context, future network configuration drift |
 | T12 | Third-party outage or malicious response creates a false negative/positive | Unavailable is distinct from invalid; receipt fields and policy are independently checked | Endpoint censorship, stale data, availability, error classification |
+| T13 | A malformed or substituted Merkle proof creates false batch membership | Versioned domain-separated construction, deterministic ordering, strict node/path limits, exact root and Algorand-note validation | Implementation disagreement, proof-index ambiguity, future algorithm changes |
+| T14 | Large batches or proof paths exhaust browser memory or block the interface | File-count and proof-depth limits, concurrency-limited hashing, progress and cancellation, strict shared-proof parsing | Very large individual files, browser memory variability, hostile local inputs |
+| T15 | Batch metadata exposes filenames or folder structure | Names and paths are excluded from the Merkle commitment and Algorand note; shared labels remain explicit optional metadata | Locally stored labels, exported proof labels, screenshots, compromised device |
 
 ## Severity guide
 

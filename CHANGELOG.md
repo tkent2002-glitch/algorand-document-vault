@@ -19,6 +19,8 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
 
 - Record Merkle-tree batch anchoring as a post-review feature candidate while
   preserving the current single-document capability boundary.
+- Define the Version 2 Merkle batch architecture, normative tree construction,
+  deterministic vectors, privacy boundary, and security-review requirements.
 
 ## [0.1.0-alpha] - 2026-08-30
 
