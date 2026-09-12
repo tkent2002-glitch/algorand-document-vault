@@ -23,6 +23,7 @@ export { DocumentValidationService } from "./documents";
 export { BatchHashingService, MerkleTreeService } from "./merkle";
 
 export {
+  BatchEvidenceRecordService,
   EvidenceRecordService,
   NotarizationService,
   ProofPayloadSerializer,
@@ -68,6 +69,9 @@ export type {
 } from "./merkle";
 
 export type {
+  BatchEvidenceDraft,
+  BatchEvidenceMemberRecord,
+  BatchEvidenceRecord,
   EvidenceRecord,
   EvidenceRecordStatus,
 } from "./notarization";
