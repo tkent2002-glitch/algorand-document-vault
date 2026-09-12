@@ -50,3 +50,32 @@ npm run verify:release-readiness
 npm run test:browser:core
 npm run test:artifact
 ```
+
+## INT-2026-09-12-01: Merkle batch anchoring
+
+- Internal severity: architecture expansion requiring independent review
+- Status: implemented on a feature branch; release approval pending
+- Affected boundary: document hashing, wallet signing, transaction recovery,
+  local storage, backup/import, and shared verification
+
+### Security controls
+
+- Domain-separated, versioned SHA-256 leaf and internal-node construction.
+- Deterministic sorting and explicit occurrence counters for duplicate files.
+- Exact Version 2 Algorand note validation before broadcast and during recovery.
+- Strict file-count, total-size, individual-size, proof-depth, JSON, and link
+  limits; local sequential hashing reports progress and supports cancellation.
+- Normalized batch/member IndexedDB stores with a tested v1-to-v2 migration.
+- Version 2 backups cryptographically reconstruct every membership proof before
+  import; legacy Version 1 backups remain supported.
+- Per-document sharing discloses only that member's proof path and public
+  receipt metadata.
+
+### Validation evidence
+
+Unit and security tests cover deterministic vectors, odd trees, duplicate
+fingerprints, malformed paths, migration, backup tampering, signed-byte
+substitution, member-link round trips, and the 1,000-document limit. Chromium
+and WebKit browser runs pass. The local Firefox executable currently fails to
+launch with `spawn UNKNOWN`; this is an environment-level runner failure and
+must be repeated in CI before release approval.

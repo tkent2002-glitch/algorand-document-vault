@@ -52,15 +52,16 @@
 
 ### Merkle-tree batch anchoring
 
-Merkle-tree functionality is under consideration for a future release. It is
-not committed, implemented, or included in the current security-review scope.
+Merkle-tree functionality is implemented on the development branch and is now
+in cross-browser, recovery, and independent-review validation. It is not yet
+part of the published alpha release or its completed security-review scope.
 
-The candidate workflow would hash multiple documents locally, construct a
+The implemented workflow hashes multiple documents locally, constructs a
 deterministic and versioned Merkle tree, anchor one Merkle root in a single
 Algorand transaction, and produce an independently verifiable proof for each
 document in the batch. Document contents and filenames would remain off-chain.
 
-Before implementation, this feature requires:
+Before release, this feature requires:
 
 - a published Merkle construction and proof-format specification;
 - a dedicated threat model and independent security review;
@@ -68,5 +69,5 @@ Before implementation, this feature requires:
 - performance testing for large files and large document sets; and
 - usability design that preserves the existing single-document workflow.
 
-The current alpha continues to support one document fingerprint per Algorand
-transaction.
+The current published alpha continues to support one document fingerprint per
+Algorand transaction; the development build supports both formats.

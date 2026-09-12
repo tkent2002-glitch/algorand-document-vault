@@ -1,6 +1,6 @@
 import type {
   AlgorandProofTransactionDraft,
-  NotarizationProof,
+  AnchoringProof,
 } from "../../types";
 import { AlgorandProofNoteService } from "./AlgorandProofNoteService";
 
@@ -8,7 +8,7 @@ const MINIMUM_ALGORAND_FEE_MICROALGOS = 1000;
 
 export class AlgorandProofTransactionDraftService {
   static createDraft(
-    proof: NotarizationProof,
+    proof: AnchoringProof,
     senderAddress: string
   ): AlgorandProofTransactionDraft {
     const note = AlgorandProofNoteService.createNote(proof);

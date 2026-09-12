@@ -1,5 +1,6 @@
 export {
   AlgorandConfirmationService,
+  AlgorandBatchNotarizationLifecycleService,
   AlgorandExplorerService,
   AlgorandProofNoteService,
   AlgorandProofTransactionDraftService,
@@ -13,6 +14,7 @@ export {
 export {
   BackupIntegrityService,
   BackupIntegrityValidationService,
+  EvidenceBackupExportService,
   EvidenceBackupImportPreviewService,
   EvidenceBackupImportService,
   EvidenceBackupValidationService,
@@ -20,8 +22,10 @@ export {
 
 export { HashService } from "./crypto";
 export { DocumentValidationService } from "./documents";
+export { BatchHashingService, MerkleTreeService } from "./merkle";
 
 export {
+  BatchEvidenceRecordService,
   EvidenceRecordService,
   NotarizationService,
   ProofPayloadSerializer,
@@ -38,7 +42,10 @@ export {
 export { VerificationService } from "./verification";
 export { WalletService } from "./wallet";
 
-export { ShareableVerificationProofService } from "./shareable-proof";
+export {
+  MerkleShareableVerificationProofService,
+  ShareableVerificationProofService,
+} from "./shareable-proof";
 export { VerificationLinkService } from "./verification-link";
 export { LocalVaultFolderService } from "./vault-folder";
 
@@ -55,6 +62,21 @@ export type {
 export type { DocumentValidationResult } from "./documents";
 
 export type {
+  BatchHashedDocument,
+  BatchHashingOptions,
+  BatchHashingProgress,
+  MerkleBatch,
+  MerkleBatchMember,
+  MerkleMembershipProof,
+  MerkleProofSibling,
+  MerkleSiblingPosition,
+  MerkleTreeAlgorithm,
+} from "./merkle";
+
+export type {
+  BatchEvidenceDraft,
+  BatchEvidenceMemberRecord,
+  BatchEvidenceRecord,
   EvidenceRecord,
   EvidenceRecordStatus,
 } from "./notarization";
@@ -68,6 +90,7 @@ export type {
 } from "./security";
 
 export type {
+  MerkleShareableVerificationProofFile,
   ShareableVerificationProofEvidence,
   ShareableVerificationProofFile,
   ShareableVerificationProofPayload,

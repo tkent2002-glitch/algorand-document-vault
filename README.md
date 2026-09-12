@@ -176,11 +176,13 @@ centers on:
 - larger-Vault performance testing; and
 - a separate MainNet readiness decision.
 
-A post-review Merkle-tree batch workflow is under consideration. The proposed
-design would anchor one root for multiple locally hashed documents while
-retaining an individual verification proof for each document. It is not
-implemented or committed to a release; the current alpha supports one document
-fingerprint per Algorand transaction.
+A versioned Merkle-tree batch workflow is implemented on the development branch
+and is undergoing release validation. It hashes up to 1,000 documents locally,
+anchors one deterministic root in one Algorand transaction, and retains an
+individual membership proof for each document. Existing single-document proofs
+remain supported. Operators can disable the batch UI at build time with
+`VITE_ENABLE_MERKLE_BATCH_ANCHORING=false` while stored batch evidence remains
+visible and recoverable.
 
 See the [roadmap](docs/roadmap/ROADMAP.md) and
 [release validation record](docs/release/RC1_VALIDATION.md) for detailed status.
