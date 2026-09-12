@@ -13,6 +13,11 @@ export {
   type AlgorandSignedProofTransactionValidationInput,
 } from "./AlgorandProofTransactionValidationService";
 export { AlgorandTransactionSigningService } from "./AlgorandTransactionSigningService";
+export { AlgorandBatchNotarizationLifecycleService } from "./AlgorandBatchNotarizationLifecycleService";
+export type {
+  AlgorandBatchNotarizationLifecycleInput,
+  AlgorandBatchNotarizationLifecycleResult,
+} from "./AlgorandBatchNotarizationLifecycleService";
 
 export {
   AlgorandNotarizationLifecycleError,

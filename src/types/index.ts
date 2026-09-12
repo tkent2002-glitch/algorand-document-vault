@@ -8,6 +8,9 @@ export type {
 export type { VerificationResult, VerificationStatus } from "./Verification";
 
 export type {
+  AnchoringProof,
+  MerkleBatchProof,
+  MerkleBatchProofPayload,
   NotarizationProof,
   NotarizationProofStatus,
   ProofPayload,

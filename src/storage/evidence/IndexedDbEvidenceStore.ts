@@ -1,6 +1,7 @@
 import type { EvidenceRecord } from "../../services";
 import { StorageConfiguration } from "../StorageConfiguration";
 import type { EvidenceStore } from "./EvidenceStore";
+import { upgradeEvidenceDatabase } from "./IndexedDbSchema";
 
 const DATABASE_NAME =
   StorageConfiguration.indexedDb.databaseName;
@@ -135,26 +136,7 @@ export class IndexedDbEvidenceStore implements EvidenceStore {
         );
 
         request.addEventListener("upgradeneeded", () => {
-          const database = request.result;
-
-          const objectStore = database.objectStoreNames.contains(
-            OBJECT_STORE_NAME
-          )
-            ? request.transaction?.objectStore(OBJECT_STORE_NAME)
-            : database.createObjectStore(OBJECT_STORE_NAME, {
-                keyPath: "id",
-              });
-
-          if (
-            objectStore &&
-            !objectStore.indexNames.contains(HASH_INDEX_NAME)
-          ) {
-            objectStore.createIndex(
-              HASH_INDEX_NAME,
-              "hashValue",
-              { unique: false }
-            );
-          }
+          upgradeEvidenceDatabase(request.result, request.transaction);
         });
 
         request.addEventListener("success", () => {

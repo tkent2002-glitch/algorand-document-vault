@@ -1,19 +1,32 @@
 import type { EvidenceRecord } from "../notarization";
 import {
+  MerkleShareableVerificationProofService,
+  type MerkleShareableVerificationProofFile,
   ShareableVerificationProofService,
   type ShareableVerificationProofFile,
 } from "../shareable-proof";
+import type {
+  BatchEvidenceMemberRecord,
+  BatchEvidenceRecord,
+} from "../notarization";
 import { INPUT_SECURITY_LIMITS } from "../security/InputSecurityLimits";
 
 const VERIFICATION_LINK_VERSION = "adv-verification-link-v1";
+const MERKLE_VERIFICATION_LINK_VERSION = "adv-verification-link-v2";
 const VERIFICATION_HASH_PREFIX = "#verify=";
 const MAX_DOCUMENT_LABEL_LENGTH = 180;
 
-export type VerificationLinkEnvelope = {
-  version: typeof VERIFICATION_LINK_VERSION;
-  documentLabel: string;
-  proof: ShareableVerificationProofFile;
-};
+export type VerificationLinkEnvelope =
+  | {
+      version: typeof VERIFICATION_LINK_VERSION;
+      documentLabel: string;
+      proof: ShareableVerificationProofFile;
+    }
+  | {
+      version: typeof MERKLE_VERIFICATION_LINK_VERSION;
+      documentLabel: string;
+      proof: MerkleShareableVerificationProofFile;
+    };
 
 export type VerificationLinkParseResult = {
   valid: boolean;
@@ -105,6 +118,25 @@ export class VerificationLinkService {
     return encodeUtf8Base64Url(JSON.stringify(envelope));
   }
 
+  static async createMerkleUrl(
+    batch: BatchEvidenceRecord,
+    member: BatchEvidenceMemberRecord,
+    baseUrl = window.location.href
+  ): Promise<string> {
+    const documentLabel = member.documentName.trim();
+    if (!isValidDocumentLabel(documentLabel)) {
+      throw new Error("The document name cannot be used as a verification label.");
+    }
+    const envelope: VerificationLinkEnvelope = {
+      version: MERKLE_VERIFICATION_LINK_VERSION,
+      documentLabel,
+      proof: await MerkleShareableVerificationProofService.create(batch, member),
+    };
+    const url = normalizeBaseUrl(baseUrl);
+    url.hash = `verify=${this.serialize(envelope)}`;
+    return url.toString();
+  }
+
   static async createUrl(
     record: EvidenceRecord,
     baseUrl = window.location.href
@@ -144,7 +176,10 @@ export class VerificationLinkService {
         throw new Error("The verification link contains unsupported fields.");
       }
 
-      if (value.version !== VERIFICATION_LINK_VERSION) {
+      if (
+        value.version !== VERIFICATION_LINK_VERSION &&
+        value.version !== MERKLE_VERIFICATION_LINK_VERSION
+      ) {
         throw new Error("The verification link version is not supported.");
       }
 
@@ -152,8 +187,9 @@ export class VerificationLinkService {
         throw new Error("The verification link document label is invalid.");
       }
 
-      const proofValidation =
-        await ShareableVerificationProofService.validate(value.proof);
+      const proofValidation = value.version === MERKLE_VERIFICATION_LINK_VERSION
+        ? await MerkleShareableVerificationProofService.validate(value.proof)
+        : await ShareableVerificationProofService.validate(value.proof);
 
       if (!proofValidation.valid || !proofValidation.proof) {
         return {
@@ -165,11 +201,18 @@ export class VerificationLinkService {
 
       return {
         valid: true,
-        envelope: {
-          version: VERIFICATION_LINK_VERSION,
-          documentLabel: value.documentLabel,
-          proof: proofValidation.proof,
-        },
+        envelope:
+          value.version === MERKLE_VERIFICATION_LINK_VERSION
+            ? {
+                version: MERKLE_VERIFICATION_LINK_VERSION,
+                documentLabel: value.documentLabel,
+                proof: proofValidation.proof as MerkleShareableVerificationProofFile,
+              }
+            : {
+                version: VERIFICATION_LINK_VERSION,
+                documentLabel: value.documentLabel,
+                proof: proofValidation.proof as ShareableVerificationProofFile,
+              },
         errors: [],
       };
     } catch (error) {

@@ -13,6 +13,7 @@ import {
 } from "../../services";
 import VaultBackupActions from "./VaultBackupActions";
 import VaultImportPreview from "./VaultImportPreview";
+import BatchVaultSection from "./BatchVaultSection";
 import {
   buildEvidenceIndex,
   DEFAULT_VAULT_PAGE_SIZE,
@@ -172,6 +173,8 @@ function VaultPage() {
             <strong>{draftCount}</strong> drafts
           </span>
       </div>
+
+      <BatchVaultSection />
 
       <details
         className="vault-tools"

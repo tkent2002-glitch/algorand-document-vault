@@ -1,6 +1,6 @@
 ﻿import { AlgorandService } from "./AlgorandService";
 import { Logger } from "../../core";
-import type { NotarizationProof } from "../../types";
+import type { AnchoringProof } from "../../types";
 import { AlgorandProofNoteService } from "./AlgorandProofNoteService";
 import { AlgorandProofTransactionValidationService } from "./AlgorandProofTransactionValidationService";
 
@@ -13,7 +13,7 @@ export type AlgorandTransactionLookupStatus =
   | "unavailable";
 
 export type AlgorandTransactionProofExpectation = {
-  proof: NotarizationProof;
+  proof: AnchoringProof;
   expectedSenderAddress?: string | null;
 };
 

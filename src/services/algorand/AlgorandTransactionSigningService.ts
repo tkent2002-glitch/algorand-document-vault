@@ -1,7 +1,7 @@
 ﻿import algosdk from "algosdk";
 import type {
   AlgorandSignedProofTransaction,
-  NotarizationProof,
+  AnchoringProof,
 } from "../../types";
 import { WalletService } from "../wallet/WalletService";
 import { AlgorandProofNoteService } from "./AlgorandProofNoteService";
@@ -82,7 +82,7 @@ function waitForWalletApproval(
 
 export class AlgorandTransactionSigningService {
   static async signProofTransaction(
-    proof: NotarizationProof,
+    proof: AnchoringProof,
     senderAddress: string,
     options: WalletApprovalOptions = {}
   ): Promise<AlgorandSignedProofTransaction> {

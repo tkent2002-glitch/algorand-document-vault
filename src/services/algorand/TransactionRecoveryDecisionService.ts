@@ -6,7 +6,7 @@ import {
   AlgorandTransactionStatusService,
   type AlgorandTransactionStatusResult,
 } from "./AlgorandTransactionStatusService";
-import type { NotarizationProof } from "../../types";
+import type { AnchoringProof } from "../../types";
 
 export type TransactionRecoveryDecision =
   | "confirmed"
@@ -25,7 +25,7 @@ export type TransactionRecoveryResult = {
 export type TransactionRecoveryInput = {
   failure: TransactionFailureClassification;
   transactionId?: string | null;
-  proof?: NotarizationProof | null;
+  proof?: AnchoringProof | null;
   expectedSenderAddress?: string | null;
 };
 

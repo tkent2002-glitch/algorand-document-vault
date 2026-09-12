@@ -705,6 +705,59 @@
   grid-template-columns: 110px 1fr 130px;
 }
 
+.batch-vault-section {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  background: var(--surface, #fff);
+}
+
+.batch-vault-group {
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.batch-vault-group summary,
+.batch-vault-member {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.batch-vault-group summary span,
+.batch-vault-member span,
+.batch-share-link {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.batch-vault-member {
+  align-items: center;
+  border-top: 1px solid var(--border-color);
+}
+
+.batch-vault-member code,
+.batch-share-link textarea {
+  overflow-wrap: anywhere;
+}
+
+.batch-share-link textarea {
+  width: 100%;
+}
+
+@media (max-width: 700px) {
+  .batch-vault-group summary,
+  .batch-vault-member {
+    flex-direction: column;
+  }
+}
+
 .evidence-history-item > * {
   min-width: 0;
 }

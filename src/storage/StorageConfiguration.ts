@@ -1,9 +1,13 @@
 ﻿export const StorageConfiguration = {
   indexedDb: {
     databaseName: "algorand-document-vault",
-    databaseVersion: 1,
+    databaseVersion: 2,
     evidenceObjectStoreName: "evidence-records",
     evidenceHashIndexName: "hash-value",
+    batchObjectStoreName: "evidence-batches",
+    batchMemberObjectStoreName: "evidence-batch-members",
+    batchMemberBatchIndexName: "batch-id",
+    batchMemberHashIndexName: "batch-member-hash-value",
   },
 
   migration: {
