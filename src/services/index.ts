@@ -13,6 +13,7 @@ export {
 export {
   BackupIntegrityService,
   BackupIntegrityValidationService,
+  EvidenceBackupExportService,
   EvidenceBackupImportPreviewService,
   EvidenceBackupImportService,
   EvidenceBackupValidationService,

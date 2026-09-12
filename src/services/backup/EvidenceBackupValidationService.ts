@@ -1,12 +1,31 @@
 import type { EvidenceRecord } from "../notarization";
+import type {
+  BatchEvidenceMemberRecord,
+  BatchEvidenceRecord,
+} from "../notarization/BatchEvidenceRecordService";
 import { INPUT_SECURITY_LIMITS } from "../security/InputSecurityLimits";
 
-export type EvidenceBackupFile = {
+export type LegacyEvidenceBackupFile = {
   schema: "adv-evidence-backup-v1";
   exportedAt: string;
   recordCount: number;
   records: EvidenceRecord[];
 };
+
+export type MerkleEvidenceBackupFile = {
+  schema: "adv-evidence-backup-v2";
+  exportedAt: string;
+  recordCount: number;
+  records: EvidenceRecord[];
+  batchCount: number;
+  batches: BatchEvidenceRecord[];
+  batchMemberCount: number;
+  batchMembers: BatchEvidenceMemberRecord[];
+};
+
+export type EvidenceBackupFile =
+  | LegacyEvidenceBackupFile
+  | MerkleEvidenceBackupFile;
 
 export type EvidenceBackupValidationResult = {
   valid: boolean;
@@ -85,7 +104,9 @@ export class EvidenceBackupValidationService {
       }
     };
 
-    if (backup.schema !== "adv-evidence-backup-v1") {
+    const isVersionTwo = backup.schema === "adv-evidence-backup-v2";
+
+    if (backup.schema !== "adv-evidence-backup-v1" && !isVersionTwo) {
       addError("Unsupported backup schema.");
     }
 
@@ -103,6 +124,37 @@ export class EvidenceBackupValidationService {
       backup.recordCount < 0
     ) {
       addError("Backup recordCount must be a non-negative safe integer.");
+    }
+
+    if (isVersionTwo) {
+      if (!Array.isArray(backup.batches)) {
+        addError("Backup batches must be an array.");
+      }
+      if (!Array.isArray(backup.batchMembers)) {
+        addError("Backup batchMembers must be an array.");
+      }
+      if (
+        !Number.isSafeInteger(backup.batchCount) ||
+        Number(backup.batchCount) < 0 ||
+        (Array.isArray(backup.batches) &&
+          backup.batchCount !== backup.batches.length)
+      ) {
+        addError("Backup batchCount is invalid or does not match batches length.");
+      }
+      if (
+        !Number.isSafeInteger(backup.batchMemberCount) ||
+        Number(backup.batchMemberCount) < 0 ||
+        (Array.isArray(backup.batchMembers) &&
+          backup.batchMemberCount !== backup.batchMembers.length)
+      ) {
+        addError(
+          "Backup batchMemberCount is invalid or does not match batchMembers length."
+        );
+      }
+
+      if (Array.isArray(backup.batches) && Array.isArray(backup.batchMembers)) {
+        this.validateBatches(backup.batches, backup.batchMembers, addError);
+      }
     }
 
     if (!isWithinJsonComplexityLimits(data)) {
@@ -244,5 +296,113 @@ export class EvidenceBackupValidationService {
       valid: errors.length === 0,
       errors,
     };
+  }
+
+  private static validateBatches(
+    candidates: unknown[],
+    memberCandidates: unknown[],
+    addError: (message: string) => void
+  ): void {
+    if (candidates.length > INPUT_SECURITY_LIMITS.backupRecords) {
+      addError("Backup contains too many Merkle batches.");
+      return;
+    }
+    if (
+      memberCandidates.length >
+      INPUT_SECURITY_LIMITS.backupRecords * INPUT_SECURITY_LIMITS.merkleBatchFiles
+    ) {
+      addError("Backup contains too many Merkle batch members.");
+      return;
+    }
+
+    const batches = new Map<string, { root: string; leafCount: number }>();
+    for (const [index, candidate] of candidates.entries()) {
+      if (!isRecord(candidate)) {
+        addError(`Batch ${index} must be a JSON object.`);
+        continue;
+      }
+      if (
+        !isBoundedString(candidate.id, INPUT_SECURITY_LIMITS.recordIdentifierCharacters) ||
+        batches.has(String(candidate.id))
+      ) {
+        addError(`Batch ${index} has a missing, invalid, or duplicate id.`);
+        continue;
+      }
+      if (!isSha256(candidate.merkleRoot)) {
+        addError(`Batch ${index} has an invalid Merkle root.`);
+      }
+      if (
+        candidate.treeAlgorithm !== "adv-merkle-sha256-v1" ||
+        !Number.isSafeInteger(candidate.leafCount) ||
+        Number(candidate.leafCount) < 1 ||
+        Number(candidate.leafCount) > INPUT_SECURITY_LIMITS.merkleBatchFiles
+      ) {
+        addError(`Batch ${index} has invalid Merkle tree metadata.`);
+      }
+      const proof = isRecord(candidate.proof) ? candidate.proof : null;
+      const payload = proof && isRecord(proof.payload) ? proof.payload : null;
+      if (
+        !proof ||
+        !payload ||
+        payload.schemaVersion !== "2.0" ||
+        payload.proofType !== "merkle-batch" ||
+        payload.root !== candidate.merkleRoot ||
+        payload.leafCount !== candidate.leafCount
+      ) {
+        addError(`Batch ${index} has an invalid anchoring proof.`);
+      }
+      batches.set(String(candidate.id), {
+        root: String(candidate.merkleRoot),
+        leafCount: Number(candidate.leafCount),
+      });
+    }
+
+    const memberIds = new Set<string>();
+    const counts = new Map<string, number>();
+    for (const [index, candidate] of memberCandidates.entries()) {
+      if (!isRecord(candidate)) {
+        addError(`Batch member ${index} must be a JSON object.`);
+        continue;
+      }
+      const batch = batches.get(String(candidate.batchId));
+      if (!batch) addError(`Batch member ${index} references an unknown batch.`);
+      if (
+        !isBoundedString(candidate.id, INPUT_SECURITY_LIMITS.recordIdentifierCharacters) ||
+        memberIds.has(String(candidate.id))
+      ) {
+        addError(`Batch member ${index} has a missing, invalid, or duplicate id.`);
+      } else {
+        memberIds.add(String(candidate.id));
+      }
+      if (!isBoundedString(candidate.documentName, INPUT_SECURITY_LIMITS.documentNameCharacters)) {
+        addError(`Batch member ${index} has an invalid document name.`);
+      }
+      if (candidate.hashAlgorithm !== "SHA-256" || !isSha256(candidate.hashValue)) {
+        addError(`Batch member ${index} has an invalid fingerprint.`);
+      }
+      const membership = isRecord(candidate.membershipProof)
+        ? candidate.membershipProof
+        : null;
+      if (
+        !batch ||
+        !membership ||
+        membership.algorithm !== "adv-merkle-sha256-v1" ||
+        membership.root !== batch.root ||
+        membership.documentHash !== candidate.hashValue ||
+        membership.leafCount !== batch.leafCount ||
+        membership.leafIndex !== candidate.leafIndex ||
+        !Array.isArray(membership.siblings) ||
+        membership.siblings.length > INPUT_SECURITY_LIMITS.merkleProofDepth
+      ) {
+        addError(`Batch member ${index} has invalid membership proof metadata.`);
+      }
+      counts.set(String(candidate.batchId), (counts.get(String(candidate.batchId)) ?? 0) + 1);
+    }
+
+    for (const [batchId, batch] of batches) {
+      if ((counts.get(batchId) ?? 0) !== batch.leafCount) {
+        addError(`Batch ${batchId} member count does not match its leaf count.`);
+      }
+    }
   }
 }
