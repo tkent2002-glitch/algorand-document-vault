@@ -6,6 +6,8 @@ export const INPUT_SECURITY_LIMITS = Object.freeze({
   encryptedCiphertextCharacters: 20 * 1024 * 1024,
   jsonNestingDepth: 32,
   jsonNodes: 250_000,
+  merkleBatchFiles: 1_000,
+  merkleProofDepth: 10,
   passwordCharacters: 1_024,
   recordIdentifierCharacters: 128,
   sharedProofFileBytes: 64 * 1024,

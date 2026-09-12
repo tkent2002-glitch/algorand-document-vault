@@ -20,6 +20,7 @@ export {
 
 export { HashService } from "./crypto";
 export { DocumentValidationService } from "./documents";
+export { MerkleTreeService } from "./merkle";
 
 export {
   EvidenceRecordService,
@@ -53,6 +54,15 @@ export type {
 } from "./backup";
 
 export type { DocumentValidationResult } from "./documents";
+
+export type {
+  MerkleBatch,
+  MerkleBatchMember,
+  MerkleMembershipProof,
+  MerkleProofSibling,
+  MerkleSiblingPosition,
+  MerkleTreeAlgorithm,
+} from "./merkle";
 
 export type {
   EvidenceRecord,

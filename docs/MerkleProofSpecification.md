@@ -122,11 +122,11 @@ The source documents are the single UTF-8 characters `a`, `b`, `c`, and `d`.
 
 | Input multiset | Expected root |
 | --- | --- |
-| `a` | `e2b985002888895474985c9bcf7b08c73abc1d5698c56fde67b204b953506963` |
-| `a`, `b` | `1f4bfbe98a7d1a58b04f5153917af79c259ad01b0a1fc7e240d6ee9833474366` |
-| `a`, `b`, `c` | `d9f80faab2616e5569ff242d907b9beb27499090702dce397914799c1b2d6378` |
-| `a`, `b`, `c`, `d` | `1a6a978a671cc30fede40325bef7e2d5161aefd93fdc0336b477c509cbee7a39` |
-| `a`, `a` | `71ee67a80151a4ffaa818d35cf3ba7bacdf61c5ce62174914dc2d8a89f2ab5c9` |
+| `a` | `e7eb7d17c2a39c57f85e99178181e8b7ee5edc767839e241b1f67604171b066c` |
+| `a`, `b` | `e835cd1404dab0f4ac5bf193945f981d91e41b8cae9b01a851f51f5a5dc8f677` |
+| `a`, `b`, `c` | `29c6e5cb7cfc5e43c2ff12573695f651034ba0e956d631a3e2d9e2d7f0364353` |
+| `a`, `b`, `c`, `d` | `39e93c0fad3ed0a9a77376e3acabce8dfea503e231bac3c69555f6400897060a` |
+| `a`, `a` | `d832b6502b6214b5dd57d1bf1103b1f2275f0721a4af8b5a266b473544fd0382` |
 
 Inputs are sorted by fingerprint bytes before leaf creation; the table's input
 display order is descriptive rather than the tree order.
@@ -136,4 +136,3 @@ display order is descriptive rather than the tree order.
 Any change to domains, encoding, sorting, occurrence handling, odd-node rules,
 or proof fields MUST use a new tree-algorithm identifier. Implementations MUST
 reject unsupported identifiers rather than guessing.
-
