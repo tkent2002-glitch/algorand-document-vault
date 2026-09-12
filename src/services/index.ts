@@ -1,5 +1,6 @@
 export {
   AlgorandConfirmationService,
+  AlgorandBatchNotarizationLifecycleService,
   AlgorandExplorerService,
   AlgorandProofNoteService,
   AlgorandProofTransactionDraftService,
@@ -41,7 +42,10 @@ export {
 export { VerificationService } from "./verification";
 export { WalletService } from "./wallet";
 
-export { ShareableVerificationProofService } from "./shareable-proof";
+export {
+  MerkleShareableVerificationProofService,
+  ShareableVerificationProofService,
+} from "./shareable-proof";
 export { VerificationLinkService } from "./verification-link";
 export { LocalVaultFolderService } from "./vault-folder";
 
@@ -86,6 +90,7 @@ export type {
 } from "./security";
 
 export type {
+  MerkleShareableVerificationProofFile,
   ShareableVerificationProofEvidence,
   ShareableVerificationProofFile,
   ShareableVerificationProofPayload,

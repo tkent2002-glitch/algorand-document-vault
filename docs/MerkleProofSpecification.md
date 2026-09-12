@@ -136,3 +136,16 @@ display order is descriptive rather than the tree order.
 Any change to domains, encoding, sorting, occurrence handling, odd-node rules,
 or proof fields MUST use a new tree-algorithm identifier. Implementations MUST
 reject unsupported identifiers rather than guessing.
+
+## Portable member proof
+
+Each share link carries one `adv-merkle-shareable-verification-proof-v1`
+payload. It contains the member fingerprint, occurrence, canonical leaf index,
+leaf count, root, ordered sibling path, transaction ID, confirmed round, and an
+integrity digest. It does not contain the document bytes, the other batch
+fingerprints, a wallet address, or a local record ID.
+
+A verifier MUST validate the payload shape and integrity digest, reconstruct
+the root from the selected document fingerprint and sibling path, retrieve the
+claimed Algorand transaction, and require the exact canonical Version 2 note.
+Passing only one of membership or transaction validation is insufficient.

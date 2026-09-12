@@ -6,6 +6,8 @@ import {
   formatByteLimit,
 } from "../../services/security/InputSecurityLimits";
 import {
+  MerkleShareableVerificationProofService,
+  type MerkleShareableVerificationProofFile,
   ShareableVerificationProofService,
   type ShareableVerificationProofFile,
   type ShareableVerificationProofVerificationResult,
@@ -13,7 +15,7 @@ import {
 
 type SharedProofVerifierProps = {
   documentHash: string;
-  initialProof?: ShareableVerificationProofFile;
+  initialProof?: ShareableVerificationProofFile | MerkleShareableVerificationProofFile;
   documentLabel?: string;
 };
 
@@ -30,7 +32,7 @@ function SharedProofVerifier({
   const [linkLoaded, setLinkLoaded] = useState(Boolean(initialProof));
   const [proofValue, setProofValue] = useState<unknown>(initialProof ?? null);
   const [validatedProof, setValidatedProof] =
-    useState<ShareableVerificationProofFile | null>(initialProof ?? null);
+    useState<ShareableVerificationProofFile | MerkleShareableVerificationProofFile | null>(initialProof ?? null);
   const [validationError, setValidationError] = useState("");
   const [verification, setVerification] =
     useState<ShareableVerificationProofVerificationResult | null>(null);
@@ -95,7 +97,9 @@ function SharedProofVerifier({
           setVerification(null);
           setProcessing(true);
         }
-        return ShareableVerificationProofService.verify(documentHash, proofValue);
+        return validatedProof.schema === "adv-merkle-shareable-verification-proof-v1"
+          ? MerkleShareableVerificationProofService.verify(documentHash, proofValue)
+          : ShareableVerificationProofService.verify(documentHash, proofValue);
       })
       .then((result) => {
         if (active) {
@@ -133,8 +137,15 @@ function SharedProofVerifier({
     try {
       setProcessing(true);
       const parsedValue: unknown = JSON.parse(await file.text());
-      const validation =
-        await ShareableVerificationProofService.validate(parsedValue);
+      const isMerkle = Boolean(
+        parsedValue &&
+        typeof parsedValue === "object" &&
+        "schema" in parsedValue &&
+        parsedValue.schema === "adv-merkle-shareable-verification-proof-v1"
+      );
+      const validation = isMerkle
+        ? await MerkleShareableVerificationProofService.validate(parsedValue)
+        : await ShareableVerificationProofService.validate(parsedValue);
 
       if (!validation.valid || !validation.proof) {
         setValidationError(

@@ -225,10 +225,11 @@ Potential future releases may include:
 - Enterprise edition
 - Multiple blockchain support
 
-Merkle-tree batch anchoring is under consideration only. It would require a
-versioned proof specification, threat model, storage and recovery design,
-performance validation, and independent security review. The current alpha
-supports one document fingerprint per Algorand transaction.
+Merkle-tree batch anchoring is implemented on the development branch with a
+versioned proof specification, threat model, normalized storage, backup and
+recovery, and document-specific verification links. Performance validation and
+independent security review remain release gates. The published alpha supports
+one document fingerprint per Algorand transaction.
 
 ---
 

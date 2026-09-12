@@ -22,6 +22,14 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
 - Define the Version 2 Merkle batch architecture, normative tree construction,
   deterministic vectors, privacy boundary, and security-review requirements.
 
+### Added
+
+- Implement deterministic, domain-separated Merkle trees with duplicate-safe
+  membership proofs, bounded local batch hashing, and a versioned Algorand note.
+- Add normalized IndexedDB batch storage, v1-to-v2 migration, integrity-protected
+  backup and restore, individual share links, local/shared verification, and a
+  three-step batch notarization UI with signed-transaction validation.
+
 ## [0.1.0-alpha] - 2026-08-30
 
 ### Added

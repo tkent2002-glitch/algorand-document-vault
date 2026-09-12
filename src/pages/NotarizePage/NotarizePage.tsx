@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from "react";
 import { useRef } from "react";
-import { Logger, NotarizationWorkflow } from "../../core";
+import { FEATURE_FLAGS, Logger, NotarizationWorkflow } from "../../core";
 import { EvidenceRepository } from "../../repositories";
 import {
   AlgorandNotarizationLifecycleError,
@@ -38,6 +38,7 @@ import ProgressTimeline from "./components/ProgressTimeline";
 import SignSubmitStep from "./components/SignSubmitStep";
 import UploadStep from "./components/UploadStep";
 import WalletReadinessPanel from "./components/WalletReadinessPanel";
+import BatchNotarizePanel from "./components/BatchNotarizePanel";
 import "./NotarizePage.css";
 
 type NotarizePageProps = {
@@ -48,6 +49,7 @@ function NotarizePage({
   onCompletionChange,
 }: NotarizePageProps) {
   const [fileName, setFileName] = useState<string>("");
+  const [mode, setMode] = useState<"single" | "batch">("single");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileHash, setFileHash] = useState<string>("");
   const [proof, setProof] = useState<NotarizationProof | null>(null);
@@ -514,7 +516,30 @@ function NotarizePage({
         </p>
       </div>
 
+      <div className="notarize-mode-switch" aria-label="Notarization mode">
+        <button
+          type="button"
+          className={mode === "single" ? "active" : ""}
+          onClick={() => setMode("single")}
+        >
+          One document
+        </button>
+        {FEATURE_FLAGS.merkleBatchAnchoring && (
+          <button
+            type="button"
+            className={mode === "batch" ? "active" : ""}
+            onClick={() => setMode("batch")}
+          >
+            Document batch
+          </button>
+        )}
+      </div>
+
       <div className="notarize-workspace">
+        {mode === "batch" ? (
+          <BatchNotarizePanel onCompletionChange={onCompletionChange} />
+        ) : (
+        <>
         {!confirmationResult && (
           <div className="notarize-primary-grid">
             <div className="notarize-section">
@@ -686,6 +711,8 @@ function NotarizePage({
             />
           </div>
         </details>
+        </>
+        )}
       </div>
     </section>
   );
