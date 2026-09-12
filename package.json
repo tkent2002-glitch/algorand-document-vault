@@ -20,7 +20,7 @@
     "verify:release-readiness": "node tools/release/verify-release-readiness.mjs"
   },
   "dependencies": {
-    "@perawallet/connect": "^1.6.0",
+    "@perawallet/connect": "^1.6.1",
     "algosdk": "^3.6.0",
     "buffer": "^6.0.3",
     "react": "^19.2.7",
