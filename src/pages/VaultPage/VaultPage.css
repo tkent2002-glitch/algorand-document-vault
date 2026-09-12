@@ -721,6 +721,16 @@
   overflow: hidden;
 }
 
+.batch-vault-group summary {
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.batch-vault-group summary::-webkit-details-marker {
+  display: none;
+}
+
 .batch-vault-group summary,
 .batch-vault-member {
   display: flex;
@@ -729,12 +739,34 @@
   padding: 1rem;
 }
 
-.batch-vault-group summary span,
+.batch-vault-summary-copy,
 .batch-vault-member span,
 .batch-share-link {
   display: grid;
   gap: 0.35rem;
   min-width: 0;
+}
+
+.batch-vault-expand-label {
+  color: var(--primary-color, #1769e0);
+  font-weight: 600;
+}
+
+.batch-vault-summary-action {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.batch-vault-chevron {
+  color: var(--primary-color, #1769e0);
+  font-size: 2rem;
+  line-height: 1;
+  transition: transform 160ms ease;
+}
+
+.batch-vault-group[open] .batch-vault-chevron {
+  transform: rotate(90deg);
 }
 
 .batch-vault-member {

@@ -57,11 +57,17 @@ export default function BatchVaultSection() {
       {batches.map(({ batch, members }) => (
         <details key={batch.id} className="batch-vault-group">
           <summary>
-            <span>
+            <span className="batch-vault-summary-copy">
               <strong>{batch.leafCount} documents</strong>
               <small>{batch.status} · {new Date(batch.createdAt).toLocaleString()}</small>
+              <small className="batch-vault-expand-label">
+                View documents and create verification links
+              </small>
             </span>
-            <code>{batch.merkleRoot.slice(0, 12)}…</code>
+            <span className="batch-vault-summary-action">
+              <code>{batch.merkleRoot.slice(0, 12)}…</code>
+              <span className="batch-vault-chevron" aria-hidden="true">›</span>
+            </span>
           </summary>
           <div className="batch-vault-members">
             {batch.algorandTransactionId && (

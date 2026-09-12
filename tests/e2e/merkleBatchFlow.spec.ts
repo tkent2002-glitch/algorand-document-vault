@@ -5,6 +5,10 @@ test("prepares a deterministic Merkle batch and stores its members", async ({ pa
   await page.getByRole("button", { name: "Notarize" }).click();
   await page.getByRole("button", { name: "Document batch" }).click();
 
+  await expect(
+    page.getByText("On Windows, hold Ctrl to choose individual files")
+  ).toBeVisible();
+
   await page
     .getByLabel("Documents to notarize as one Merkle batch")
     .setInputFiles([
@@ -19,6 +23,9 @@ test("prepares a deterministic Merkle batch and stores its members", async ({ pa
 
   await page.getByRole("button", { name: "Vault" }).click();
   await expect(page.getByRole("heading", { name: "Batch anchors" })).toBeVisible();
+  await expect(
+    page.getByText("View documents and create verification links")
+  ).toBeVisible();
   await page.getByText("2 documents", { exact: true }).click();
   await expect(page.getByText("contract-a.txt")).toBeVisible();
   await expect(page.getByText("contract-b.txt")).toBeVisible();
