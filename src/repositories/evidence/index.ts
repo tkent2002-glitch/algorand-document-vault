@@ -1,1 +1,4 @@
-﻿export { EvidenceRepository } from "./EvidenceRepository";
+export {
+  EvidenceRepository,
+  type EvidenceRepositoryEvent,
+} from "./EvidenceRepository";

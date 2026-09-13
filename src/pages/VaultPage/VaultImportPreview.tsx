@@ -20,10 +20,6 @@ import {
   formatByteLimit,
 } from "../../services/security/InputSecurityLimits";
 
-type VaultImportPreviewProps = {
-  onImportComplete: () => void;
-};
-
 function isEncryptedBackup(
   value: unknown
 ): value is EncryptedEvidenceBackupFile {
@@ -35,9 +31,7 @@ function isEncryptedBackup(
   );
 }
 
-function VaultImportPreview({
-  onImportComplete,
-}: VaultImportPreviewProps) {
+function VaultImportPreview() {
   const [fileName, setFileName] = useState<string>("");
   const [backup, setBackup] =
     useState<EvidenceBackupFile | null>(null);
@@ -251,7 +245,6 @@ function VaultImportPreview({
         batchResult.importedBatches === 1 ? "" : "es"
       } imported; ${batchResult.skippedExistingBatches} already present.`
     );
-    onImportComplete();
   }
 
   const canImport =

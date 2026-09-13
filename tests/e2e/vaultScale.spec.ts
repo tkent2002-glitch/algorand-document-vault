@@ -78,6 +78,8 @@ test("keeps a 10,000-document Vault bounded and navigable", async ({
   ).toBeVisible();
 
   await expect(page.getByText("Showing 1–50 of 10,000 documents")).toBeVisible();
+  await expect(page.getByText("Vault capacity notice")).toBeVisible();
+  await expect(page.getByText("No telemetry is sent.")).toBeVisible();
   const largeVaultReadyMs = Date.now() - startupStartedAt;
   const largeVaultHeapBytes = await page.evaluate(() => {
     const measuredPerformance = performance as Performance & {

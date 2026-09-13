@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { EvidenceRepository } from "../../repositories";
+import { useMemo } from "react";
+import { useEvidenceRecords } from "../../hooks/useEvidenceRecords";
 import type { EvidenceRecord } from "../../services";
 import "./DashboardPage.css";
 
@@ -104,28 +104,7 @@ function formatActivityTime(record: EvidenceRecord): string {
 }
 
 function DashboardPage({ onNavigate }: DashboardPageProps) {
-  const [records, setRecords] = useState<EvidenceRecord[]>([]);
-
-  useEffect(() => {
-    let mounted = true;
-
-    void EvidenceRepository.listAsync().then((repositoryRecords) => {
-      if (mounted) {
-        setRecords(repositoryRecords);
-      }
-    });
-
-    const unsubscribe = EvidenceRepository.subscribe((repositoryRecords) => {
-      if (mounted) {
-        setRecords(repositoryRecords);
-      }
-    });
-
-    return () => {
-      mounted = false;
-      unsubscribe();
-    };
-  }, []);
+  const records = useEvidenceRecords();
 
   const recentRecords = useMemo(
     () => [...records].sort((a, b) => recordTimestamp(b) - recordTimestamp(a)).slice(0, 4),
