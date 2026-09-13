@@ -6,6 +6,15 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
 
 ## [Unreleased]
 
+### Performance
+
+- Replace full IndexedDB subscriber reloads with typed evidence-record deltas,
+  remove storage-layer presentation sorting, and cache Vault search/sort keys.
+- Add a local-only capacity notice at 8,000 records while retaining the tested
+  10,000-record public-alpha limit.
+- Document the gated cursor-backed summary-store architecture required before
+  raising that supported limit.
+
 ### Security
 
 - Decode and revalidate wallet-returned signed transaction bytes before any

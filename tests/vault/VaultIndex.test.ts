@@ -84,6 +84,11 @@ describe("Vault document indexing", () => {
     );
 
     expect(index).toHaveLength(2);
+    expect(index[0].normalizedDocumentName).toBe("document-00010.pdf");
+    expect(index[0].normalizedHashValue).toBe(index[0].hashValue.toLowerCase());
+    expect(index[0].latestCreatedAtMs).toBe(
+      new Date(index[0].latestRecord.createdAt).getTime()
+    );
     expect(filtered).toHaveLength(1);
     expect(filtered[0].records.map((record) => record.id)).toEqual([
       "newer-version",

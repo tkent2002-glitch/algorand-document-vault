@@ -43,6 +43,22 @@ every backup record. Backup import also inserted each new record at the front of
 a growing array. Both paths were quadratic. They now use an ID-to-record map and
 a single linear merge while preserving the existing record-order behavior.
 
+Repository subscribers now receive typed `upsert`, `replace`, and `clear`
+events after successful writes. Vault and Dashboard state apply those events
+locally instead of reading the entire IndexedDB object store after every
+single-record lifecycle update. Full replacement remains intentional for a
+completed restore because that operation already owns the complete merged
+record set.
+
+IndexedDB reads no longer apply a presentation-only date sort. The derived
+Vault index owns sorting and caches normalized filenames and numeric timestamps
+once per record-set change. Search, status, and sort controls reuse those
+values instead of repeatedly lowercasing filenames and parsing dates.
+
+At 8,000 records, the Vault displays a local capacity notice ahead of the
+10,000-record validated public-alpha target. This calculation is entirely on
+the device and does not send telemetry.
+
 ## Regression limits
 
 Automated service operations must each complete within 10 seconds. The Chromium
@@ -61,3 +77,7 @@ the supported target materially above 10,000 unique fingerprints, or if
 representative low-tier devices exceed a 2-second Vault-ready target. Backups
 must remain complete exports even if interactive browsing later becomes
 cursor-backed.
+
+The proposed storage architecture, migration invariants, and acceptance gates
+are recorded in [Cursor-backed Vault design](CURSOR_BACKED_VAULT_DESIGN.md).
+That design is not implemented and the supported limit has not been raised.
