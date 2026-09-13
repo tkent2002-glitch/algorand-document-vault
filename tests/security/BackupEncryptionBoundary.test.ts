@@ -2,6 +2,11 @@ import { describe, expect, it } from "vitest";
 import { BackupEncryptionService } from "../../src/services/security/BackupEncryptionService";
 import type { EncryptedEvidenceBackupFile } from "../../src/services/security/EncryptionTypes";
 import { INPUT_SECURITY_LIMITS } from "../../src/services/security/InputSecurityLimits";
+import { KeyDerivationService } from "../../src/services/security/KeyDerivationService";
+import {
+  CURRENT_BACKUP_PBKDF2_ITERATIONS,
+  LEGACY_BACKUP_PBKDF2_ITERATIONS,
+} from "../../src/services/security/BackupEncryptionParameters";
 
 const password = "boundary-test-password";
 
@@ -12,7 +17,68 @@ async function createEncryptedBackup(): Promise<EncryptedEvidenceBackupFile> {
   );
 }
 
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  return bytes.buffer.slice(
+    bytes.byteOffset,
+    bytes.byteOffset + bytes.byteLength
+  ) as ArrayBuffer;
+}
+
+function bytesToBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
+async function createLegacyEncryptedBackup(
+  payload: unknown
+): Promise<EncryptedEvidenceBackupFile> {
+  const salt = new Uint8Array(16).fill(7);
+  const iv = new Uint8Array(12).fill(3);
+  const key = await KeyDerivationService.deriveAesKeyFromPassword(
+    password,
+    salt,
+    LEGACY_BACKUP_PBKDF2_ITERATIONS
+  );
+  const plaintext = new TextEncoder().encode(JSON.stringify(payload));
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: toArrayBuffer(iv) },
+    key,
+    toArrayBuffer(plaintext)
+  );
+
+  return {
+    schema: "adv-encrypted-evidence-backup-v1",
+    exportedAt: "2026-09-12T00:00:00.000Z",
+    encryption: {
+      algorithm: "AES-GCM",
+      keyDerivation: "PBKDF2-SHA-256",
+      iterations: LEGACY_BACKUP_PBKDF2_ITERATIONS,
+      salt: bytesToBase64(salt),
+      iv: bytesToBase64(iv),
+    },
+    ciphertext: bytesToBase64(new Uint8Array(ciphertext)),
+  };
+}
+
 describe("BackupEncryptionService security boundaries", () => {
+  it("writes the current work factor into new encrypted backups", async () => {
+    const backup = await createEncryptedBackup();
+
+    expect(backup.encryption.iterations).toBe(
+      CURRENT_BACKUP_PBKDF2_ITERATIONS
+    );
+  });
+
+  it("decrypts known legacy 250,000-iteration backups", async () => {
+    const payload = { schema: "legacy-test", value: "preserved" };
+    const backup = await createLegacyEncryptedBackup(payload);
+
+    await expect(
+      BackupEncryptionService.decrypt(backup, password)
+    ).resolves.toEqual(payload);
+  });
+
   it("rejects altered PBKDF2 iteration metadata", async () => {
     const backup = await createEncryptedBackup();
 

@@ -119,4 +119,17 @@ describe("MerkleTreeService", () => {
     ).rejects.toThrow();
     await expect(MerkleTreeService.build(["ABC"])).rejects.toThrow();
   });
+
+  it("builds and verifies the 999-document near-limit boundary", async () => {
+    const hashes = Array.from({ length: 999 }, (_, index) =>
+      index.toString(16).padStart(64, "0")
+    );
+    const batch = await MerkleTreeService.build(hashes);
+
+    expect(batch.leafCount).toBe(999);
+    expect(batch.members[0].proof.siblings).toHaveLength(10);
+    await expect(MerkleTreeService.verify(batch.members[0].proof)).resolves.toBe(true);
+    await expect(MerkleTreeService.verify(batch.members[499].proof)).resolves.toBe(true);
+    await expect(MerkleTreeService.verify(batch.members[998].proof)).resolves.toBe(true);
+  });
 });

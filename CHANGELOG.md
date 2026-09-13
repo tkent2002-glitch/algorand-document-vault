@@ -78,5 +78,13 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
 
 ### Post-approval work
 
+- Raised the PBKDF2-SHA-256 work factor for new encrypted backups from 250,000
+  to 600,000 iterations while retaining narrowly allowlisted legacy restore.
+- Cleared mutable password and decrypted-plaintext byte buffers after use;
+  immutable JavaScript strings remain governed by browser garbage collection.
+- Added the formal proof-payload specification, network recovery guidance, an
+  accurately labeled internal security assessment, stronger artifact-header
+  assertions, and an explicit 999-document Merkle boundary test.
+
 - Public-alpha hosting selection and deployed HTTPS validation
 - Independent security review before any production-readiness claim

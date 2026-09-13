@@ -61,7 +61,7 @@ Primary evidence: `src/services/algorand`, `src/services/wallet`,
 - [ ] Integrity covers every security-relevant plain-backup field canonically
 - [ ] Import preview matches the eventual atomic write set
 - [ ] Duplicate/conflicting IDs are blocked without partial import
-- [ ] Encrypted backup uses random salt/IV, PBKDF2-SHA-256 (250,000), and AES-256-GCM
+- [ ] Encrypted backup uses random salt/IV, PBKDF2-SHA-256 (600,000 for new exports with controlled 250,000 legacy restore), and AES-256-GCM
 - [ ] Wrong password, modified metadata/ciphertext, truncation, and resource exhaustion fail safely
 - [ ] Password material and plaintext are not retained longer than necessary or logged
 

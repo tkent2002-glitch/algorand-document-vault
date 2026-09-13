@@ -20,10 +20,20 @@ test("boots the packaged artifact through a direct-load fallback with security h
     response?.headers()["content-security-policy"];
 
   expect(contentSecurityPolicy).toContain("default-src 'self'");
+  expect(contentSecurityPolicy).toContain("frame-ancestors 'none'");
   expect(contentSecurityPolicy).toContain("wss://*.perawallet.app");
   expect(contentSecurityPolicy).toContain("wss://*.bridge.walletconnect.org");
+  const scriptPolicy = contentSecurityPolicy
+    ?.split(";")
+    .map((directive) => directive.trim())
+    .find((directive) => directive.startsWith("script-src "));
+  expect(scriptPolicy).toBe("script-src 'self'");
+  expect(contentSecurityPolicy).not.toContain("'unsafe-eval'");
   expect(response?.headers()["x-content-type-options"]).toBe("nosniff");
   expect(response?.headers()["x-frame-options"]).toBe("DENY");
+  expect(response?.headers()["referrer-policy"]).toBe(
+    "strict-origin-when-cross-origin"
+  );
 
   await expect(page).toHaveTitle("Dashboard | Algorand Document Vault");
   await expect(
