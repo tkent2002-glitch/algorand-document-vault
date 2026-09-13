@@ -21,14 +21,19 @@ assistive-technology review.
   proof construction, and a representative 25 MiB member.
 - Reload recovery fails closed unless the existing Algorand transaction is
   confirmed and matches the stored batch proof.
+- A physical Samsung Galaxy S25 running Android 16 completed the deployed
+  Chrome workflow on September 12, 2026. The pass covered route reflow,
+  three-file selection, Merkle-root generation, Pera TestNet approval,
+  persistence after refresh, member sharing, original/modified-document
+  verification, wallet rejection, TalkBack, and enlarged font/display sizes.
+  The exact Chrome version was not captured.
 
 ## Remaining manual gates
 
-- Complete VoiceOver/Safari and TalkBack/Chrome walkthroughs on physical
-  supported devices.
-- Confirm multi-file selection behavior on each supported mobile platform;
-  mobile operating systems may expose file providers differently from desktop
-  Ctrl/Shift selection.
+- Complete the VoiceOver/Safari walkthrough and multi-file selection check on
+  a physical supported iOS device. The corresponding TalkBack/Chrome and
+  multi-file checks passed on Android; mobile file providers can still behave
+  differently across platforms.
 - Repeat visual validation at 200% and 400% page zoom and with large text.
 - Exercise a representative large batch on a lower-memory device and record
   responsiveness, cancellation, and recovery behavior.

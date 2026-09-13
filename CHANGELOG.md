@@ -69,8 +69,8 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
 
 ### Accepted release-candidate limitations
 
-- Physical Android validation is deferred because no representative device is
-  available.
+- Physical Android validation subsequently passed on a Samsung Galaxy S25
+  running Android 16; the exact Chrome version was not captured.
 - Exact Safari 200%/400% page-zoom coverage and the supported-mobile visual-mode
   retest are deferred until a controlled HTTPS deployment is available.
 - Independent security review has not begun; this version remains an unaudited

@@ -107,8 +107,7 @@ Manual accessibility evidence recorded August 28, 2026:
 - [x] Test the current stable Edge release on Windows.
 - [x] Test the current stable Firefox release.
 - [x] Test the current stable Safari release on macOS or iOS.
-- [ ] Test a representative physical Android layout. Deferred because no
-  representative Android device is currently available.
+- [x] Test a representative physical Android layout.
 - [x] Test a representative physical iOS layout.
 - [x] Verify IndexedDB persistence after reload in clean Chromium, Edge, and WebKit contexts.
 - [x] Verify IndexedDB persistence after a full browser restart.
@@ -169,6 +168,12 @@ Manual responsive evidence recorded August 28, 2026:
   and zero conflicts. A Pera same-device handoff returned to a connected TestNet
   session, and the wallet session and Draft record both survived a subsequent
   Safari refresh.
+- A Samsung Galaxy S25 running Android 16 completed the deployed physical
+  Chrome pass on September 12, 2026. All routes reflowed without horizontal
+  obstruction; three-file Merkle selection, one-transaction anchoring,
+  persistence, member verification, modified-document rejection, wallet
+  cancellation, TalkBack, and enlarged font/display settings passed. The exact
+  Chrome version was not captured.
 
 ## Algorand TestNet and wallet validation
 
