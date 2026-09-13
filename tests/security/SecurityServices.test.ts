@@ -2,6 +2,10 @@
 import { BackupEncryptionService } from "../../src/services/security/BackupEncryptionService";
 import { KeyDerivationService } from "../../src/services/security/KeyDerivationService";
 import { SecureRandomService } from "../../src/services/security/SecureRandomService";
+import {
+  CURRENT_BACKUP_PBKDF2_ITERATIONS,
+  LEGACY_BACKUP_PBKDF2_ITERATIONS,
+} from "../../src/services/security/BackupEncryptionParameters";
 
 describe("SecureRandomService", () => {
   it("creates the requested number of random bytes", () => {
@@ -98,13 +102,40 @@ describe("KeyDerivationService", () => {
       )
     ).rejects.toThrow("Salt is required.");
   });
+
+  it("accepts only the current and known legacy backup work factors", async () => {
+    const salt = SecureRandomService.randomBytes(16);
+
+    await expect(
+      KeyDerivationService.deriveAesKeyFromPassword(
+        "test-password",
+        salt,
+        LEGACY_BACKUP_PBKDF2_ITERATIONS
+      )
+    ).resolves.toBeInstanceOf(CryptoKey);
+    await expect(
+      KeyDerivationService.deriveAesKeyFromPassword(
+        "test-password",
+        salt,
+        CURRENT_BACKUP_PBKDF2_ITERATIONS
+      )
+    ).resolves.toBeInstanceOf(CryptoKey);
+    await expect(
+      KeyDerivationService.deriveAesKeyFromPassword(
+        "test-password",
+        salt,
+        400_000
+      )
+    ).rejects.toThrow("Unsupported PBKDF2 iteration count.");
+  });
 });
 
 describe("BackupEncryptionService foundation", () => {
   it("declares the selected encryption architecture", () => {
     expect(BackupEncryptionService.algorithm).toBe("AES-GCM");
     expect(BackupEncryptionService.keyDerivation).toBe("PBKDF2-SHA-256");
-    expect(BackupEncryptionService.iterations).toBe(250000);
+    expect(BackupEncryptionService.iterations).toBe(600_000);
+    expect(BackupEncryptionService.legacyIterations).toBe(250_000);
   });
 });
 

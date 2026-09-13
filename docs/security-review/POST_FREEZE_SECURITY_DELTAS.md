@@ -98,3 +98,20 @@ reflow, keyboard expansion, mode-selection state, and programmatic multi-file
 guidance. Physical-device and manual assistive-technology review remain pending
 and are tracked in
 [`MERKLE_BATCH_VALIDATION.md`](../release/MERKLE_BATCH_VALIDATION.md).
+
+## INT-2026-09-12-02: Backup work factor and review documentation
+
+- Internal severity: Medium
+- Status: remediated in the working tree; independent review pending
+- Affected boundary: encrypted backup creation and recovery
+
+New encrypted backups use 600,000 PBKDF2-SHA-256 iterations. Restore accepts
+only that current value or the historical 250,000 value so existing alpha
+backups remain recoverable without permitting arbitrary attacker-controlled
+work factors. Mutable UTF-8 password bytes are cleared after Web Crypto key
+import, and mutable decrypted plaintext bytes are cleared after parsing;
+immutable JavaScript strings cannot be reliably erased.
+
+The proof payload formats and actual wallet/network recovery policy are now
+documented. The accompanying internal assessment corrects stale proposed
+findings and does not change the project's unaudited status.
