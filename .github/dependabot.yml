@@ -11,6 +11,13 @@ updates:
       - dependency-name: typescript
         versions: [">=6.1.0"]
     groups:
+      # Keep the runtime pair and their types together before the dev group.
+      react:
+        patterns:
+          - react
+          - react-dom
+          - "@types/react"
+          - "@types/react-dom"
       development-dependencies:
         dependency-type: development
 
