@@ -59,11 +59,7 @@ export class IndexedDbEvidenceStore implements EvidenceStore {
 
     await transactionToPromise(transaction);
 
-    return records.sort(
-      (first, second) =>
-        new Date(second.createdAt).getTime() -
-        new Date(first.createdAt).getTime()
-    );
+    return records;
   }
 
   async findByHash(hashValue: string): Promise<EvidenceRecord | null> {

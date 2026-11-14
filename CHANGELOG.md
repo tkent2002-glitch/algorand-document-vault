@@ -6,6 +6,15 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
 
 ## [Unreleased]
 
+### Performance
+
+- Replace full IndexedDB subscriber reloads with typed evidence-record deltas,
+  remove storage-layer presentation sorting, and cache Vault search/sort keys.
+- Add a local-only capacity notice at 8,000 records while retaining the tested
+  10,000-record public-alpha limit.
+- Document the gated cursor-backed summary-store architecture required before
+  raising that supported limit.
+
 ### Security
 
 - Decode and revalidate wallet-returned signed transaction bytes before any
@@ -77,6 +86,14 @@ The project follows [Semantic Versioning](https://semver.org/) when versioned re
   pre-release public alpha.
 
 ### Post-approval work
+
+- Raised the PBKDF2-SHA-256 work factor for new encrypted backups from 250,000
+  to 600,000 iterations while retaining narrowly allowlisted legacy restore.
+- Cleared mutable password and decrypted-plaintext byte buffers after use;
+  immutable JavaScript strings remain governed by browser garbage collection.
+- Added the formal proof-payload specification, network recovery guidance, an
+  accurately labeled internal security assessment, stronger artifact-header
+  assertions, and an explicit 999-document Merkle boundary test.
 
 - Public-alpha hosting selection and deployed HTTPS validation
 - Independent security review before any production-readiness claim

@@ -1,4 +1,9 @@
-﻿export type DerivedKeyResult = {
+import {
+  CURRENT_BACKUP_PBKDF2_ITERATIONS,
+  isSupportedBackupPbkdf2Iterations,
+} from "./BackupEncryptionParameters";
+
+export type DerivedKeyResult = {
   key: CryptoKey;
   salt: Uint8Array;
 };
@@ -13,7 +18,8 @@ function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
 export class KeyDerivationService {
   static async deriveAesKeyFromPassword(
     password: string,
-    salt: Uint8Array
+    salt: Uint8Array,
+    iterations = CURRENT_BACKUP_PBKDF2_ITERATIONS
   ): Promise<CryptoKey> {
     if (!password) {
       throw new Error("Password is required.");
@@ -23,21 +29,32 @@ export class KeyDerivationService {
       throw new Error("Salt is required.");
     }
 
-    const encodedPassword = new TextEncoder().encode(password);
+    if (!isSupportedBackupPbkdf2Iterations(iterations)) {
+      throw new Error("Unsupported PBKDF2 iteration count.");
+    }
 
-    const baseKey = await crypto.subtle.importKey(
-      "raw",
-      toArrayBuffer(encodedPassword),
-      "PBKDF2",
-      false,
-      ["deriveKey"]
-    );
+    const encodedPassword = new TextEncoder().encode(password);
+    let baseKey: CryptoKey;
+
+    try {
+      baseKey = await crypto.subtle.importKey(
+        "raw",
+        toArrayBuffer(encodedPassword),
+        "PBKDF2",
+        false,
+        ["deriveKey"]
+      );
+    } finally {
+      // JavaScript strings are immutable and cannot be reliably erased. This
+      // clears the mutable UTF-8 copy as soon as Web Crypto has imported it.
+      encodedPassword.fill(0);
+    }
 
     return crypto.subtle.deriveKey(
       {
         name: "PBKDF2",
         salt: toArrayBuffer(salt),
-        iterations: 250000,
+        iterations,
         hash: "SHA-256",
       },
       baseKey,
