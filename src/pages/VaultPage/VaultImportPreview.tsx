@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { EvidenceRepository } from "../../repositories";
+import { BatchEvidenceRepository } from "../../repositories/evidence/BatchEvidenceRepository";
 import {
   BackupEncryptionService,
   BackupIntegrityValidationService,
@@ -14,10 +15,10 @@ import {
   type IntegrityProtectedEvidenceBackupFile,
 } from "../../services";
 import "./VaultImportPreview.css";
-
-type VaultImportPreviewProps = {
-  onImportComplete: () => void;
-};
+import {
+  INPUT_SECURITY_LIMITS,
+  formatByteLimit,
+} from "../../services/security/InputSecurityLimits";
 
 function isEncryptedBackup(
   value: unknown
@@ -30,9 +31,7 @@ function isEncryptedBackup(
   );
 }
 
-function VaultImportPreview({
-  onImportComplete,
-}: VaultImportPreviewProps) {
+function VaultImportPreview() {
   const [fileName, setFileName] = useState<string>("");
   const [backup, setBackup] =
     useState<EvidenceBackupFile | null>(null);
@@ -50,6 +49,7 @@ function VaultImportPreview({
     useState<EvidenceBackupImportPreview | null>(null);
   const [importResult, setImportResult] =
     useState<EvidenceBackupImportResult | null>(null);
+  const [batchImportMessage, setBatchImportMessage] = useState<string>("");
 
   async function prepareBackupPreview(
     candidate: unknown
@@ -82,13 +82,25 @@ function VaultImportPreview({
       return;
     }
 
-    const currentRecords = await EvidenceRepository.listAsync();
+    const [currentRecords, currentBatches] = await Promise.all([
+      EvidenceRepository.listAsync(),
+      BatchEvidenceRepository.listBatchesAsync(),
+    ]);
+    const currentBatchMembers = (
+      await Promise.all(
+        currentBatches.map((batch) =>
+          BatchEvidenceRepository.listMembersAsync(batch.id)
+        )
+      )
+    ).flat();
     const validBackup =
       candidate as IntegrityProtectedEvidenceBackupFile;
     const changePreview =
       EvidenceBackupImportPreviewService.preview(
         validBackup,
-        currentRecords
+        currentRecords,
+        currentBatches,
+        currentBatchMembers
       );
 
     setBackup(validBackup);
@@ -108,8 +120,21 @@ function VaultImportPreview({
     setValidation(null);
     setPreview(null);
     setImportResult(null);
+    setBatchImportMessage("");
 
     if (!file) {
+      return;
+    }
+
+    if (file.size > INPUT_SECURITY_LIMITS.backupFileBytes) {
+      setValidation({
+        valid: false,
+        errors: [
+          `Backup file must be ${formatByteLimit(
+            INPUT_SECURITY_LIMITS.backupFileBytes
+          )} or smaller.`,
+        ],
+      });
       return;
     }
 
@@ -168,7 +193,7 @@ function VaultImportPreview({
       return;
     }
 
-    if (preview.conflictingRecordIds > 0) {
+    if (preview.conflictingRecordIds > 0 || preview.conflictingBatchIds > 0) {
       setImportResult({
         importedRecords: 0,
         skippedExistingRecords: 0,
@@ -180,6 +205,25 @@ function VaultImportPreview({
 
     const currentRecords =
       await EvidenceRepository.listAsync();
+    const currentBatches = await BatchEvidenceRepository.listBatchesAsync();
+    const currentBatchMembers = (
+      await Promise.all(
+        currentBatches.map((batch) =>
+          BatchEvidenceRepository.listMembersAsync(batch.id)
+        )
+      )
+    ).flat();
+
+    const batchResult = await EvidenceBackupImportService.selectNewBatches(
+      backup,
+      currentBatches,
+      currentBatchMembers
+    );
+
+    if (batchResult.blockedConflictingBatches > 0) {
+      setBatchImportMessage("Batch import blocked because conflicting IDs were detected.");
+      return;
+    }
 
     const result =
       await EvidenceBackupImportService.importNewRecords(
@@ -188,51 +232,67 @@ function VaultImportPreview({
       );
 
     await EvidenceRepository.saveAllAsync(result.records);
+    for (const candidate of batchResult.batches) {
+      await BatchEvidenceRepository.saveBatchAsync(
+        candidate.batch,
+        candidate.members
+      );
+    }
 
     setImportResult(result);
-    onImportComplete();
+    setBatchImportMessage(
+      `${batchResult.importedBatches} Merkle batch${
+        batchResult.importedBatches === 1 ? "" : "es"
+      } imported; ${batchResult.skippedExistingBatches} already present.`
+    );
   }
 
   const canImport =
     Boolean(backup && validation?.valid && preview) &&
-    preview?.conflictingRecordIds === 0;
+    preview?.conflictingRecordIds === 0 &&
+    preview?.conflictingBatchIds === 0;
 
   return (
     <section className="vault-import-preview">
       <div className="vault-import-header">
         <div>
-          <strong>Restore from Backup</strong>
+          <h3>Restore evidence records</h3>
           <p>
-            Select an Evidence Vault backup to validate and preview
-            before any records are imported.
+            Choose a backup to validate and preview before importing.
           </p>
         </div>
-
-        <span>Validation Required</span>
       </div>
 
       <div className="vault-import-safety">
         <p>
-          Backup files are inspected before they can modify the Vault.
-        </p>
-        <p>
-          Conflicting record IDs block import automatically.
+          Nothing is imported until validation passes and you approve
+          the preview. Conflicting record IDs are blocked automatically.
         </p>
       </div>
 
-      <label htmlFor="vault-backup-file">Evidence Vault backup file</label>
-      <input
-        id="vault-backup-file"
-        type="file"
-        accept="application/json"
-        onChange={handleFileChange}
-      />
-
-      {fileName && (
-        <p>
-          <strong>Selected Backup:</strong> {fileName}
-        </p>
-      )}
+      <div className="vault-import-file-picker">
+        <strong>Evidence Vault backup file</strong>
+        <div className="vault-import-file-control">
+          <label
+            className="vault-import-file-button"
+            htmlFor="vault-backup-file"
+          >
+            Select backup file
+          </label>
+          <span role="status">
+            {fileName || "No file selected"}
+          </span>
+        </div>
+        <input
+          id="vault-backup-file"
+          className="visually-hidden"
+          type="file"
+          accept="application/json"
+          data-max-bytes={INPUT_SECURITY_LIMITS.backupFileBytes}
+          aria-label="Evidence Vault backup file"
+          onChange={handleFileChange}
+        />
+      </div>
 
       {encryptedBackup && !backup && (
         <div className="vault-import-decryption">
@@ -313,6 +373,15 @@ function VaultImportPreview({
                 <span>Records</span>
                 <strong>{backup.recordCount}</strong>
               </div>
+
+              <div>
+                <span>Merkle batches</span>
+                <strong>
+                  {backup.schema === "adv-evidence-backup-v2"
+                    ? backup.batchCount
+                    : 0}
+                </strong>
+              </div>
             </div>
           )}
 
@@ -350,9 +419,25 @@ function VaultImportPreview({
                   <span>Conflicting Record IDs</span>
                   <strong>{preview.conflictingRecordIds}</strong>
                 </div>
+
+                <div>
+                  <span>New Merkle Batches</span>
+                  <strong>{preview.newBatches}</strong>
+                </div>
+
+                <div>
+                  <span>Existing Merkle Batches</span>
+                  <strong>{preview.existingBatches}</strong>
+                </div>
+
+                <div>
+                  <span>Conflicting Batch IDs</span>
+                  <strong>{preview.conflictingBatchIds}</strong>
+                </div>
               </div>
 
-              {preview.conflictingRecordIds > 0 && (
+              {(preview.conflictingRecordIds > 0 ||
+                preview.conflictingBatchIds > 0) && (
                 <p className="vault-import-conflict-warning">
                   Import is blocked because conflicting record IDs
                   were detected.
@@ -398,6 +483,12 @@ function VaultImportPreview({
             </div>
           )}
 
+          {batchImportMessage && (
+            <p className="vault-import-status valid" role="status">
+              {batchImportMessage}
+            </p>
+          )}
+
           {validation.errors.length > 0 && (
             <div className="vault-import-errors">
               <strong>Validation Details</strong>
@@ -413,8 +504,7 @@ function VaultImportPreview({
       )}
 
       <p className="vault-import-boundary">
-        Only import backup files you trust. Validation and conflict
-        checks run before records are written to the Vault.
+        Only import backup files you trust.
       </p>
     </section>
   );

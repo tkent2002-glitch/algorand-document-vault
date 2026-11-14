@@ -1,10 +1,10 @@
-import type { NotarizationProof } from "../../types";
+import type { AnchoringProof } from "../../types";
 import { ProofPayloadSerializer } from "../notarization";
 
 const MAX_ALGORAND_NOTE_BYTES = 1024;
 
 export class AlgorandProofNoteService {
-  static createNote(proof: NotarizationProof): Uint8Array {
+  static createNote(proof: AnchoringProof): Uint8Array {
     const serializedPayload = ProofPayloadSerializer.serialize(proof);
     const note = new TextEncoder().encode(serializedPayload);
 
@@ -15,7 +15,7 @@ export class AlgorandProofNoteService {
     return note;
   }
 
-  static createPreview(proof: NotarizationProof): string {
+  static createPreview(proof: AnchoringProof): string {
     return ProofPayloadSerializer.serialize(proof);
   }
 }

@@ -1,25 +1,72 @@
-﻿import { useState } from "react";
+import { useEffect, useState } from "react";
 import EvidenceCard from "../../components/cards/EvidenceCard";
 import EvidenceDetailsPanel from "../../components/evidence/EvidenceDetailsPanel";
 import { EvidenceRepository } from "../../repositories";
-import { HashService } from "../../services";
-import type { EvidenceRecord } from "../../services";
+import { BatchEvidenceRepository } from "../../repositories/evidence/BatchEvidenceRepository";
+import { HashService, VerificationLinkService } from "../../services";
+import type {
+  EvidenceRecord,
+  BatchEvidenceMemberRecord,
+  BatchEvidenceRecord,
+  VerificationLinkEnvelope,
+} from "../../services";
+import SharedProofVerifier from "./SharedProofVerifier";
 import "./VerifyPage.css";
 
-type VerificationStage = {
-  label: string;
-  description: string;
-  complete: boolean;
-};
+type EvidenceSource = "local" | "shared";
 
 function VerifyPage() {
-  const [fileName, setFileName] = useState<string>("");
-  const [hashValue, setHashValue] = useState<string>("");
+  const hasVerificationLink = VerificationLinkService.hasVerificationHash(
+    window.location.hash
+  );
+  const [source, setSource] = useState<EvidenceSource>(
+    hasVerificationLink ? "shared" : "local"
+  );
+  const [verificationLink, setVerificationLink] =
+    useState<VerificationLinkEnvelope | null>(null);
+  const [linkLoading, setLinkLoading] = useState(hasVerificationLink);
+  const [linkError, setLinkError] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [hashValue, setHashValue] = useState("");
   const [match, setMatch] = useState<EvidenceRecord | null>(null);
-  const [checked, setChecked] = useState<boolean>(false);
-  const [processing, setProcessing] = useState<boolean>(false);
+  const [batchMatch, setBatchMatch] = useState<{
+    member: BatchEvidenceMemberRecord;
+    batch: BatchEvidenceRecord;
+  } | null>(null);
+  const [checked, setChecked] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const [selectedRecord, setSelectedRecord] =
     useState<EvidenceRecord | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    if (!hasVerificationLink) {
+      return () => {
+        active = false;
+      };
+    }
+
+    void VerificationLinkService.parseHash(window.location.hash).then(
+      (result) => {
+        if (!active) return;
+
+        setLinkLoading(false);
+        if (!result.valid || !result.envelope) {
+          setLinkError(
+            result.errors[0] ?? "This verification link is invalid or incomplete."
+          );
+          return;
+        }
+
+        setVerificationLink(result.envelope);
+      }
+    );
+
+    return () => {
+      active = false;
+    };
+  }, [hasVerificationLink]);
 
   async function handleFileChange(
     event: React.ChangeEvent<HTMLInputElement>
@@ -28,233 +75,204 @@ function VerifyPage() {
 
     setChecked(false);
     setMatch(null);
+    setBatchMatch(null);
     setSelectedRecord(null);
     setHashValue("");
     setFileName(file?.name ?? "");
 
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
     try {
       setProcessing(true);
-
       const hash = await HashService.sha256FromFile(file);
-      const records = await EvidenceRepository.listAsync();
-
+      const [records, members] = await Promise.all([
+        EvidenceRepository.listAsync(),
+        BatchEvidenceRepository.findMembersByHashAsync(hash),
+      ]);
       const matchingRecord =
         records.find((record) => record.hashValue === hash) ?? null;
 
       setHashValue(hash);
       setMatch(matchingRecord);
+      if (members[0]) {
+        const batches = await BatchEvidenceRepository.listBatchesAsync();
+        const batch = batches.find((candidate) => candidate.id === members[0].batchId);
+        setBatchMatch(batch ? { member: members[0], batch } : null);
+      }
       setChecked(true);
     } finally {
       setProcessing(false);
     }
   }
 
-  const stages: VerificationStage[] = [
-    {
-      label: "Document",
-      description: "Document selected for local verification.",
-      complete: Boolean(fileName),
-    },
-    {
-      label: "Fingerprint",
-      description: "SHA-256 fingerprint generated locally.",
-      complete: Boolean(hashValue),
-    },
-    {
-      label: "Vault Search",
-      description: "Evidence Vault searched for a matching fingerprint.",
-      complete: checked,
-    },
-    {
-      label: "Result",
-      description: "Verification result available.",
-      complete: checked,
-    },
-  ];
-
-  const completedStages = stages.filter(
-    (stage) => stage.complete
-  ).length;
-
   return (
     <section className="page verify-page">
       <div className="verify-header">
         <p className="verify-eyebrow">Document Verification</p>
-
-        <h2>
-          Verify document integrity against your Evidence Vault.
-        </h2>
-
+        <h2>Verify Document</h2>
         <p>
-          Select a document to calculate its SHA-256 fingerprint
-          locally and compare it against evidence stored on this
-          device. The document itself is never uploaded.
+          Follow three steps to compare a document with evidence on this
+          device or a shared Algorand verification link. The document stays on
+          your device.
         </p>
       </div>
 
-      <div className="verify-workspace">
-        <div className="verify-card">
-          <strong>Step 1 - Select Document</strong>
-
+      <div className="verify-guided-flow">
+        <section className="verify-flow-step" aria-labelledby="verify-step-one">
+          <span className="verify-step-label">Step 1</span>
+          <h3 id="verify-step-one">
+            {verificationLink
+              ? `Select ${verificationLink.documentLabel}`
+              : "Select the document"}
+          </h3>
           <p>
-            Choose the exact document you want to compare against
-            your local Evidence Vault.
+            {verificationLink
+              ? "Choose the document the sender gave you. The displayed name is guidance; the fingerprint is what proves a match."
+              : "Choose the exact document you want to verify."}
           </p>
-
-          <label htmlFor="verification-document">
-            Document to verify
-          </label>
-
+          <label htmlFor="verification-document">Document to verify</label>
           <input
             id="verification-document"
             type="file"
             onChange={handleFileChange}
             disabled={processing}
           />
+          {processing && <p role="status">Calculating its fingerprint...</p>}
 
-          {processing && (
-            <p role="status">
-              Calculating fingerprint and searching the Vault...
-            </p>
+          {fileName && (
+            <div className="verify-selected-document" role="status">
+              <div>
+                <span>Selected document</span>
+                <strong>{fileName}</strong>
+              </div>
+              <div>
+                <span>SHA-256 fingerprint</span>
+                {hashValue ? <code>{hashValue}</code> : <strong>Calculating...</strong>}
+              </div>
+            </div>
           )}
-        </div>
+        </section>
 
-        <div className="verify-card">
-          <strong>Step 2 - SHA-256 Fingerprint</strong>
+        <section className="verify-flow-step" aria-labelledby="verify-step-two">
+          <span className="verify-step-label">Step 2</span>
+          <h3 id="verify-step-two">Choose where to verify</h3>
+          <p>Use your own Vault, or use a verification link from the owner.</p>
 
-          {fileName ? (
-            <>
-              <p>
-                <strong>Selected File:</strong> {fileName}
-              </p>
-
-              {hashValue ? (
-                <>
-                  <p>
-                    This fingerprint was generated from the selected
-                    file in your browser.
-                  </p>
-                  <code>{hashValue}</code>
-                </>
-              ) : (
-                <p>Fingerprint calculation is in progress.</p>
-              )}
-            </>
-          ) : (
-            <p>No document selected yet.</p>
-          )}
-        </div>
-
-        <div className="verify-card verify-progress">
-          <div className="verify-progress-header">
-            <strong>Verification Progress</strong>
-            <span>
-              {completedStages} of {stages.length} stages complete
-            </span>
+          <div className="verify-source-options">
+            <button
+              type="button"
+              aria-label="Local verification"
+              className={source === "local" ? "active" : ""}
+              onClick={() => setSource("local")}
+            >
+              <strong>This device&apos;s Vault</strong>
+              <span>Check records saved in this browser.</span>
+            </button>
+            <button
+              type="button"
+              aria-label="Shared verification"
+              className={source === "shared" ? "active" : ""}
+              onClick={() => setSource("shared")}
+            >
+              <strong>Shared verification</strong>
+              <span>Use a link or technical proof from the owner.</span>
+            </button>
           </div>
 
-          <ol className="verify-progress-list">
-            {stages.map((stage, index) => (
-              <li
-                key={stage.label}
-                className={
-                  stage.complete
-                    ? "verify-progress-stage complete"
-                    : "verify-progress-stage pending"
-                }
-              >
-                <div className="verify-progress-marker">
-                  {stage.complete ? "OK" : index + 1}
-                </div>
+          {source === "local" && (
+            <div className="verify-source-summary">
+              {checked
+                ? "This device's Evidence Vault has been searched."
+                : "Select a document in Step 1 to search this device's Vault."}
+            </div>
+          )}
 
-                <div className="verify-progress-content">
-                  <div className="verify-progress-stage-header">
-                    <strong>{stage.label}</strong>
-                    <span>
-                  {stage.complete ? "OK" : index + 1}
-                    </span>
-                  </div>
-
-                  <p>{stage.description}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        <div className="verify-card">
-          <strong>Verification Result</strong>
-
-          {!checked && (
-            <p>
-              Select a document to run verification.
+          {source === "shared" && linkLoading && (
+            <p className="verify-source-summary" role="status">
+              Loading verification link...
             </p>
           )}
-
-          {checked && match && (
-            <div className="verify-success" role="status">
-              <strong>Fingerprint Match Found</strong>
-
-              <p>
-                The selected document produces the same SHA-256
-                fingerprint as a record in your Evidence Vault.
-              </p>
-
-              <p>
-                This supports document integrity: the file matches the
-                content fingerprint previously recorded in the Vault.
-              </p>
+          {source === "shared" && linkError && (
+            <p className="verify-source-error" role="alert">{linkError}</p>
+          )}
+          {!linkLoading && !linkError && (
+            <div hidden={source !== "shared"}>
+              <SharedProofVerifier
+                documentHash={hashValue}
+                initialProof={verificationLink?.proof}
+                documentLabel={verificationLink?.documentLabel}
+              />
             </div>
           )}
+        </section>
 
-          {checked && !match && (
-            <div className="verify-warning" role="status">
-              <strong>No Local Evidence Match Found</strong>
+        {source === "local" && (
+          <section className="verify-flow-step" aria-labelledby="verify-step-three">
+            <span className="verify-step-label">Step 3</span>
+            <h3 id="verify-step-three">Review result</h3>
 
-              <p>
-                No record on this device contains the same SHA-256
-                fingerprint.
-              </p>
+            {!checked && (
+              <div className="verify-final-result ready">
+                <strong>Waiting for a document</strong>
+                <p>Complete Step 1 to see the local verification result.</p>
+              </div>
+            )}
+            {checked && (match || batchMatch) && (
+              <div className="verify-final-result verified" role="status">
+                <strong>Local fingerprint match found</strong>
+                <p>
+                  This document matches {batchMatch
+                    ? `member ${batchMatch.member.leafIndex + 1} of a ${batchMatch.batch.leafCount}-document Merkle batch saved in this device's Vault.`
+                    : "evidence saved in this device's Vault."}
+                </p>
+              </div>
+            )}
+            {checked && !match && !batchMatch && (
+              <div className="verify-final-result failed" role="status">
+                <strong>No local evidence match found</strong>
+                <p>
+                  No record on this device contains the same fingerprint. This
+                  does not prove the document is invalid or altered.
+                </p>
+                <p>
+                  If the owner sent a verification link, choose Shared
+                  verification in Step 2.
+                </p>
+              </div>
+            )}
+          </section>
+        )}
 
-              <p>
-                This does not prove that the document is invalid,
-                altered, or fraudulent. It only means that no matching
-                local evidence record was found.
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className="verify-card verify-boundary">
-          <strong>What Verification Proves</strong>
-
-          <p>
-            A matching SHA-256 fingerprint supports the conclusion
-            that the selected file has the same content as the file
-            represented by the stored evidence record.
-          </p>
-
-          <p>
-            It does not establish authorship, ownership, legal
-            validity, truthfulness, or enforceability of the document.
-          </p>
-        </div>
+        <details className="verify-boundary">
+          <summary>What verification does—and does not—prove</summary>
+          <div>
+            <p>
+              A matching SHA-256 fingerprint supports the conclusion that the
+              selected file has the same content as the file represented by the
+              evidence.
+            </p>
+            <p>
+              It does not establish authorship, ownership, legal validity,
+              truthfulness, or enforceability of the document.
+            </p>
+          </div>
+        </details>
       </div>
 
-      {match && (
+      {source === "local" && match && (
         <div className="verify-match">
           <h2>Matching Evidence Record</h2>
           <EvidenceCard
             record={match}
-            onViewDetails={setSelectedRecord}
+            detailsOpen={selectedRecord?.id === match.id}
+            onViewDetails={(record) =>
+              setSelectedRecord((currentRecord) =>
+                currentRecord?.id === record.id ? null : record
+              )
+            }
           />
-
           {selectedRecord && (
-            <div className="verify-details">
+            <div className="verify-details" id={`evidence-details-${selectedRecord.id}`}>
               <EvidenceDetailsPanel record={selectedRecord} />
             </div>
           )}
@@ -265,4 +283,3 @@ function VerifyPage() {
 }
 
 export default VerifyPage;
-

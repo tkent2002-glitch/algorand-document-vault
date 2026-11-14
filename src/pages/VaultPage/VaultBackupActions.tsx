@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Logger } from "../../core";
-import { EvidenceRepository } from "../../repositories";
 import {
   BackupEncryptionService,
-  BackupIntegrityService,
+  EvidenceBackupExportService,
 } from "../../services";
 import "./VaultBackupActions.css";
 
@@ -24,23 +23,12 @@ function downloadJsonFile(fileName: string, data: unknown): void {
   URL.revokeObjectURL(url);
 }
 
-async function createIntegrityProtectedBackupPayload() {
-  const records = await EvidenceRepository.listAsync();
-
-  const payload = {
-    schema: "adv-evidence-backup-v1" as const,
-    exportedAt: new Date().toISOString(),
-    recordCount: records.length,
-    records,
-  };
-
-  return {
-    ...payload,
-    integrity: await BackupIntegrityService.createIntegrity(payload),
-  };
+interface VaultBackupActionsProps {
+  recordCount: number;
 }
 
-function VaultBackupActions() {
+function VaultBackupActions({ recordCount }: VaultBackupActionsProps) {
+  const [panelOpen, setPanelOpen] = useState<boolean>(true);
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [message, setMessage] = useState<string>("");
@@ -51,7 +39,7 @@ function VaultBackupActions() {
       setMessage("");
       setExporting(true);
 
-      const backup = await createIntegrityProtectedBackupPayload();
+      const backup = await EvidenceBackupExportService.createIntegrityProtectedBackup();
 
       downloadJsonFile(
         `algorand-document-vault-backup-${Date.now()}.json`,
@@ -85,7 +73,8 @@ function VaultBackupActions() {
     try {
       setExporting(true);
 
-      const integrityProtectedBackup = await createIntegrityProtectedBackupPayload();
+      const integrityProtectedBackup =
+        await EvidenceBackupExportService.createIntegrityProtectedBackup();
 
       const encryptedBackup = await BackupEncryptionService.encrypt(
         integrityProtectedBackup,
@@ -116,83 +105,61 @@ function VaultBackupActions() {
   const passwordLongEnough =
     password.length >= MINIMUM_PASSWORD_LENGTH;
 
+  function closePanel(): void {
+    setPanelOpen(false);
+    setPassword("");
+    setConfirmPassword("");
+    setMessage("");
+  }
+
+  if (!panelOpen) {
+    return (
+      <button
+        className="vault-backup-reopen"
+        type="button"
+        aria-expanded="false"
+        onClick={() => setPanelOpen(true)}
+      >
+        <span aria-hidden="true">+</span>
+        <strong>Back up records</strong>
+      </button>
+    );
+  }
+
   return (
     <section className="vault-backup-actions">
       <div className="vault-backup-header">
         <div>
-          <strong>Vault Backup</strong>
+          <h3>Back up evidence records</h3>
           <p>
-            Export local evidence records without including the original
-            documents.
+            Protect these {recordCount.toLocaleString()} locally stored record
+            {recordCount === 1 ? "" : "s"} before changing browsers or devices.
           </p>
         </div>
 
-        <span className="vault-backup-security-label">
-          Integrity Protected
-        </span>
+        <button
+          className="vault-backup-close"
+          type="button"
+          aria-label="Close backup controls"
+          onClick={closePanel}
+        >
+          Close
+        </button>
       </div>
 
-      <div className="vault-backup-options-grid">
-        <div className="vault-backup-option">
-          <div className="vault-backup-option-header">
-            <div>
-              <h3>Plain JSON Backup</h3>
-              <p>
-                Human-readable backup with cryptographic integrity
-                protection.
-              </p>
-            </div>
+      <div className="vault-backup-choices">
+        <details className="vault-backup-encrypted">
+          <summary>
+            <span>
+              <strong>Encrypted backup</strong>
+              <small>Recommended</small>
+            </span>
+          </summary>
 
-            <span>Readable</span>
-          </div>
-
-          <div className="vault-backup-properties">
-            <p>
-              <strong>Integrity:</strong> Protected
-            </p>
-            <p>
-              <strong>Confidentiality:</strong> Not protected
-            </p>
-            <p>
-              <strong>Original documents:</strong> Not included
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={handlePlainExport}
-            disabled={exporting}
-          >
-            {exporting
-              ? "Export in Progress..."
-              : "Export Plain Backup"}
-          </button>
-        </div>
-
-        <div className="vault-backup-option">
-          <div className="vault-backup-option-header">
-            <div>
-              <h3>Encrypted Backup</h3>
-              <p>
-                Encrypt the integrity-protected backup using AES-GCM
-                with a password-derived key.
-              </p>
-            </div>
-
-            <span>Confidential</span>
-          </div>
-
-          <div className="vault-backup-properties">
-            <p>
-              <strong>Integrity:</strong> Protected
-            </p>
-            <p>
-              <strong>Confidentiality:</strong> AES-GCM encrypted
-            </p>
-            <p>
-              <strong>Original documents:</strong> Not included
-            </p>
-          </div>
+          <div className="vault-backup-encrypted-fields">
+          <p className="vault-backup-option-security">
+            Integrity protected · AES-GCM encrypted
+          </p>
 
           <label>
             Backup Password
@@ -207,7 +174,7 @@ function VaultBackupActions() {
 
           <p className="vault-backup-password-status">
             Password length: {password.length} / {MINIMUM_PASSWORD_LENGTH}
-            minimum
+            {" "}minimum
           </p>
 
           <label>
@@ -248,22 +215,34 @@ function VaultBackupActions() {
             The backup password is never stored or recoverable. If it
             is lost, the encrypted backup cannot be opened.
           </p>
-        </div>
+          </div>
+        </details>
+
+        <button
+          className="vault-backup-plain"
+          type="button"
+          aria-label="Export Plain Backup"
+          onClick={handlePlainExport}
+          disabled={exporting}
+        >
+          <span>
+            <strong>Plain JSON backup</strong>
+            <small>Readable, not encrypted</small>
+          </span>
+        </button>
       </div>
 
       <p
         className="vault-backup-message"
         role="status"
+        aria-label="Backup export status"
         aria-live="polite"
         aria-atomic="true"
       >
         {message}
       </p>
 
-      <p className="vault-backup-boundary">
-        Backup files contain evidence records and metadata only. They
-        never contain your original documents.
-      </p>
+      <p className="vault-backup-boundary">Original documents are never included.</p>
     </section>
   );
 }

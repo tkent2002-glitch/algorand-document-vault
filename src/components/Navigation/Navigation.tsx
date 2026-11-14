@@ -4,7 +4,10 @@ type Page = "dashboard" | "notarize" | "verify" | "vault" | "wallet";
 
 type NavigationProps = {
   activePage: Page;
-  onNavigate: (page: Page) => void;
+  onNavigate: (
+    page: Page,
+    options?: { preventScroll?: boolean }
+  ) => void;
 };
 
 const navigationItems: { label: string; page: Page }[] = [
@@ -76,7 +79,11 @@ function Navigation({ activePage, onNavigate }: NavigationProps) {
           className={activePage === item.page ? "active" : ""}
           aria-current={activePage === item.page ? "page" : undefined}
           key={item.page}
-          onClick={() => onNavigate(item.page)}
+          onClick={(event) =>
+            onNavigate(item.page, {
+              preventScroll: event.detail > 0,
+            })
+          }
           type="button"
         >
           <NavigationIcon page={item.page} />

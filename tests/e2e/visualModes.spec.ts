@@ -9,15 +9,17 @@ const PAGE_NAMES = [
 ] as const;
 
 async function expectNoHorizontalOverflow(page: Page) {
+  // Chromium on Linux can round fractional layout boundaries by one CSS pixel.
+  // Larger values still represent user-visible horizontal overflow.
   await expect
     .poll(() =>
       page.evaluate(
         () =>
-          document.documentElement.scrollWidth <=
+          document.documentElement.scrollWidth -
           document.documentElement.clientWidth
       )
     )
-    .toBe(true);
+    .toBeLessThanOrEqual(1);
 }
 
 test("renders every page in dark mode without overflow", async ({ page }) => {
@@ -132,6 +134,34 @@ test("retains visible keyboard focus in forced-colors mode", async ({
   expect(focusStyle.outlineStyle).not.toBe("none");
   expect(focusStyle.outlineWidth).toBeGreaterThanOrEqual(1);
   await expectNoHorizontalOverflow(page);
+});
+
+test("keeps the Vault tools focus indicator inside its clipped container", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Vault", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Evidence Vault", exact: true })
+  ).toBeVisible();
+  await expect(page.locator("#main-content")).toBeFocused();
+
+  const toolsSummary = page.locator("details.vault-tools > summary");
+  await page.keyboard.press("Tab");
+  await expect(toolsSummary).toBeFocused();
+
+  const focusStyle = await toolsSummary.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      outlineOffset: Number.parseFloat(style.outlineOffset),
+      outlineStyle: style.outlineStyle,
+      outlineWidth: Number.parseFloat(style.outlineWidth),
+    };
+  });
+
+  expect(focusStyle.outlineStyle).not.toBe("none");
+  expect(focusStyle.outlineWidth).toBeGreaterThanOrEqual(1);
+  expect(focusStyle.outlineOffset).toBeLessThanOrEqual(0);
 });
 
 test("reflows every page at a 320 CSS-pixel viewport", async ({ page }) => {

@@ -30,6 +30,14 @@ const RETRY_POLICIES: Record<
       "The wallet signature was not completed. No transaction was submitted, so signing may be attempted again.",
   },
 
+  wallet_unresponsive: {
+    decision: "retry_allowed",
+    canRetryImmediately: true,
+    transactionMayHaveBeenSubmitted: false,
+    userMessage:
+      "The wallet request ended before signing. Reopen Pera Wallet and try again. If no request appears, disconnect and reconnect Pera on this page.",
+  },
+
   network_unavailable: {
     decision: "retry_after_connectivity_restored",
     canRetryImmediately: false,

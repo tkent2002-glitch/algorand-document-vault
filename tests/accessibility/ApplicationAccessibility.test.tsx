@@ -12,6 +12,7 @@ import {
 import { afterEach, describe, expect, it, vi } from "vitest";
 import App from "../../src/App";
 import UploadStep from "../../src/pages/NotarizePage/components/UploadStep";
+import WalletReadinessPanel from "../../src/pages/NotarizePage/components/WalletReadinessPanel";
 
 vi.mock("@perawallet/connect", () => ({
   PeraWalletConnect: class {
@@ -69,6 +70,27 @@ describe("application accessibility boundaries", () => {
     ).toHaveAttribute("type", "file");
   });
 
+  it("keeps the viewport stable after pointer navigation", async () => {
+    render(<App />);
+
+    const main = screen.getByRole("main");
+    const focus = vi.spyOn(main, "focus");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Verify" }),
+      { detail: 1 }
+    );
+
+    await waitFor(() => {
+      expect(document.title).toBe(
+        "Verify | Algorand Document Vault"
+      );
+      expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+    });
+
+    expect(main).toHaveFocus();
+  });
+
   it("provides a keyboard skip link to the main landmark", () => {
     render(<App />);
 
@@ -76,6 +98,20 @@ describe("application accessibility boundaries", () => {
       screen.getByRole("link", { name: "Skip to main content" })
     ).toHaveAttribute("href", "#main-content");
     expect(screen.getAllByRole("main")).toHaveLength(1);
+  });
+
+  it("offers a privacy-conscious public alpha feedback channel", () => {
+    render(<App />);
+
+    expect(
+      screen.getByRole("link", { name: "Report a problem" })
+    ).toHaveAttribute(
+      "href",
+      "https://github.com/tkent2002-glitch/algorand-document-vault/issues/new/choose"
+    );
+    expect(
+      screen.getByRole("link", { name: "Report a problem" })
+    ).toHaveAttribute("target", "_blank");
   });
 
   it("labels the notarization file input", () => {
@@ -86,34 +122,114 @@ describe("application accessibility boundaries", () => {
     ).toHaveAttribute("type", "file");
   });
 
+  it("exposes batch mode and its multi-file guidance to assistive technology", async () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Notarize" }));
+    const modeGroup = await screen.findByRole("group", {
+      name: "Notarization mode",
+    });
+    const singleMode = screen.getByRole("button", { name: "One document" });
+    const batchMode = screen.getByRole("button", { name: "Document batch" });
+
+    expect(modeGroup).toContainElement(singleMode);
+    expect(modeGroup).toContainElement(batchMode);
+    expect(singleMode).toHaveAttribute("aria-pressed", "true");
+    expect(batchMode).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(batchMode);
+
+    expect(singleMode).toHaveAttribute("aria-pressed", "false");
+    expect(batchMode).toHaveAttribute("aria-pressed", "true");
+    const fileInput = await screen.findByLabelText(
+      "Documents to notarize as one Merkle batch"
+    );
+    expect(fileInput).toHaveAttribute("multiple");
+    expect(fileInput).toHaveAccessibleDescription(
+      /hold Ctrl to choose individual files or Shift to choose a range/i
+    );
+  });
+
+  it("keeps a shortened connected-wallet address fully accessible", () => {
+    const address =
+      "UQWCJ6BW2GY6S2WORUZX7SGKAHDS4PPHSDWCSHZCS7ZNPOZEUX7UV6X4ZI";
+
+    render(
+      <WalletReadinessPanel
+        wallet={{ status: "connected", address }}
+        connecting={false}
+        onConnect={vi.fn()}
+        onDisconnect={vi.fn()}
+      />
+    );
+
+    const displayedAddress = screen.getByLabelText(
+      `Wallet address ${address}`
+    );
+
+    expect(displayedAddress).toHaveTextContent("UQWCJ6BW2G…7UV6X4ZI");
+    expect(displayedAddress).toHaveAttribute("title", address);
+  });
+
   it("labels Vault controls without nesting main landmarks", async () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: "Vault" }));
 
+    const toolsSummary = (await screen.findByText("Restore records", {
+      exact: true,
+    })).closest("summary");
+
+    expect(toolsSummary).not.toBeNull();
+    expect(toolsSummary?.closest("details")).not.toHaveAttribute("open");
+    fireEvent.click(toolsSummary!);
+    expect(toolsSummary?.closest("details")).toHaveAttribute("open");
+
+    expect(
+      screen.getByLabelText("Search evidence by filename or fingerprint")
+    ).toHaveAttribute("type", "search");
+    expect(screen.getByLabelText("Filter evidence by status")).toBeVisible();
+    expect(
+      screen.getByLabelText("Evidence Vault backup file")
+    ).toHaveAttribute("type", "file");
+
+    fireEvent.click(toolsSummary!);
     expect(
       await screen.findByLabelText(
         "Search evidence by filename or fingerprint"
       )
     ).toHaveAttribute("type", "search");
-    expect(
-      screen.getByLabelText("Filter evidence by status")
-    ).toHaveValue("all");
-    expect(
-      screen.getByLabelText("Evidence Vault backup file")
-    ).toHaveAttribute("type", "file");
     expect(screen.getAllByRole("main")).toHaveLength(1);
   });
 
   it("keeps the backup status region mounted when validation updates", async () => {
     render(<App />);
 
+    fireEvent.click(screen.getByRole("button", { name: "Notarize" }));
+    fireEvent.change(await screen.findByLabelText("Document to notarize"), {
+      target: {
+        files: [
+          new File(["backup test"], "backup-test.txt", {
+            type: "text/plain",
+          }),
+        ],
+      },
+    });
+
+    await screen.findByText("backup-test.txt", { exact: true });
     fireEvent.click(screen.getByRole("button", { name: "Vault" }));
+
+    const encryptedSummary = (await screen.findByText("Encrypted backup", {
+      exact: true,
+    })).closest("summary");
+    fireEvent.click(encryptedSummary!);
 
     const exportButton = await screen.findByRole("button", {
       name: "Export Encrypted Backup",
     });
-    const statusRegion = screen.getByRole("status");
+    const statusRegion = screen.getByRole("status", {
+      name: "Backup export status",
+    });
 
     expect(statusRegion).toBeEmptyDOMElement();
     expect(statusRegion).toHaveAttribute("aria-live", "polite");
@@ -124,6 +240,25 @@ describe("application accessibility boundaries", () => {
     expect(statusRegion).toHaveTextContent(
       "Password must contain at least 12 characters."
     );
-    expect(screen.getByRole("status")).toBe(statusRegion);
+    expect(
+      screen.getByRole("status", { name: "Backup export status" })
+    ).toBe(statusRegion);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Close backup controls" })
+    );
+    expect(
+      screen.getByRole("button", { name: "Back up records" })
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.queryByText("Encrypted backup", { exact: true })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Back up records" })
+    );
+    expect(
+      screen.getByText("Encrypted backup", { exact: true })
+    ).toBeVisible();
   });
 });

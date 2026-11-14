@@ -2,6 +2,8 @@ import type { EvidenceRecord } from "../../services";
 
 export const DEFAULT_VAULT_PAGE_SIZE = 50;
 export const VAULT_HISTORY_PAGE_SIZE = 25;
+export const SUPPORTED_VAULT_RECORD_LIMIT = 10_000;
+export const VAULT_RECORD_WARNING_THRESHOLD = 8_000;
 
 export type VaultStatusFilter =
   | "all"
@@ -20,7 +22,10 @@ export type VaultSortOrder =
 
 export type EvidenceIndexItem = {
   hashValue: string;
+  normalizedHashValue: string;
   documentName: string;
+  normalizedDocumentName: string;
+  latestCreatedAtMs: number;
   latestRecord: EvidenceRecord;
   records: EvidenceRecord[];
 };
@@ -41,8 +46,10 @@ export function buildEvidenceIndex(
   records: EvidenceRecord[]
 ): EvidenceIndexItem[] {
   const grouped = new Map<string, EvidenceRecord[]>();
+  const timestamps = new Map<string, number>();
 
   for (const record of records) {
+    timestamps.set(record.id, createdAt(record));
     const existing = grouped.get(record.hashValue) ?? [];
     existing.push(record);
     grouped.set(record.hashValue, existing);
@@ -50,12 +57,17 @@ export function buildEvidenceIndex(
 
   return Array.from(grouped.entries()).map(([hashValue, group]) => {
     const sorted = [...group].sort(
-      (first, second) => createdAt(second) - createdAt(first)
+      (first, second) =>
+        (timestamps.get(second.id) ?? 0) - (timestamps.get(first.id) ?? 0)
     );
+    const documentName = sorted[0].documentName;
 
     return {
       hashValue,
-      documentName: sorted[0].documentName,
+      normalizedHashValue: hashValue.toLowerCase(),
+      documentName,
+      normalizedDocumentName: documentName.toLowerCase(),
+      latestCreatedAtMs: timestamps.get(sorted[0].id) ?? 0,
       latestRecord: sorted[0],
       records: sorted,
     };
@@ -73,8 +85,8 @@ export function filterAndSortEvidenceIndex(
   const filtered = index.filter((item) => {
     const matchesSearch =
       normalizedSearch.length === 0 ||
-      item.documentName.toLowerCase().includes(normalizedSearch) ||
-      item.hashValue.toLowerCase().includes(normalizedSearch);
+      item.normalizedDocumentName.includes(normalizedSearch) ||
+      item.normalizedHashValue.includes(normalizedSearch);
 
     const matchesStatus =
       statusFilter === "all" || item.latestRecord.status === statusFilter;
@@ -85,7 +97,7 @@ export function filterAndSortEvidenceIndex(
   return filtered.sort((first, second) => {
     const comparison = (() => {
       if (sortOrder === "oldest") {
-        return createdAt(first.latestRecord) - createdAt(second.latestRecord);
+        return first.latestCreatedAtMs - second.latestCreatedAtMs;
       }
 
       if (sortOrder === "filename") {
@@ -105,7 +117,7 @@ export function filterAndSortEvidenceIndex(
         );
       }
 
-      return createdAt(second.latestRecord) - createdAt(first.latestRecord);
+      return second.latestCreatedAtMs - first.latestCreatedAtMs;
     })();
 
     return comparison || first.documentName.localeCompare(second.documentName);

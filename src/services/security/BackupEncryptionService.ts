@@ -1,10 +1,15 @@
 import { KeyDerivationService } from "./KeyDerivationService";
 import { SecureRandomService } from "./SecureRandomService";
+import {
+  CURRENT_BACKUP_PBKDF2_ITERATIONS,
+  LEGACY_BACKUP_PBKDF2_ITERATIONS,
+  isSupportedBackupPbkdf2Iterations,
+} from "./BackupEncryptionParameters";
 import type {
   EncryptedEvidenceBackupFile,
 } from "./EncryptionTypes";
+import { INPUT_SECURITY_LIMITS } from "./InputSecurityLimits";
 
-const PBKDF2_ITERATIONS = 250000;
 const SALT_LENGTH_BYTES = 16;
 const IV_LENGTH_BYTES = 12;
 
@@ -47,7 +52,8 @@ function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
 export class BackupEncryptionService {
   static readonly algorithm = "AES-GCM";
   static readonly keyDerivation = "PBKDF2-SHA-256";
-  static readonly iterations = PBKDF2_ITERATIONS;
+  static readonly iterations = CURRENT_BACKUP_PBKDF2_ITERATIONS;
+  static readonly legacyIterations = LEGACY_BACKUP_PBKDF2_ITERATIONS;
 
   static async encrypt(
     payload: unknown,
@@ -61,37 +67,46 @@ export class BackupEncryptionService {
       throw new Error("Backup encryption password must contain at least 12 characters.");
     }
 
+    if (password.length > INPUT_SECURITY_LIMITS.passwordCharacters) {
+      throw new Error("Backup encryption password is too long.");
+    }
+
     const salt = SecureRandomService.randomBytes(SALT_LENGTH_BYTES);
     const iv = SecureRandomService.randomBytes(IV_LENGTH_BYTES);
 
     const key = await KeyDerivationService.deriveAesKeyFromPassword(
       password,
-      salt
+      salt,
+      CURRENT_BACKUP_PBKDF2_ITERATIONS
     );
 
     const plaintext = new TextEncoder().encode(JSON.stringify(payload));
 
-    const ciphertextBuffer = await crypto.subtle.encrypt(
-      {
-        name: "AES-GCM",
-        iv: toArrayBuffer(iv),
-      },
-      key,
-      toArrayBuffer(plaintext)
-    );
+    try {
+      const ciphertextBuffer = await crypto.subtle.encrypt(
+        {
+          name: "AES-GCM",
+          iv: toArrayBuffer(iv),
+        },
+        key,
+        toArrayBuffer(plaintext)
+      );
 
-    return {
-      schema: "adv-encrypted-evidence-backup-v1",
-      exportedAt: new Date().toISOString(),
-      encryption: {
-        algorithm: "AES-GCM",
-        keyDerivation: "PBKDF2-SHA-256",
-        iterations: PBKDF2_ITERATIONS,
-        salt: bytesToBase64(salt),
-        iv: bytesToBase64(iv),
-      },
-      ciphertext: bytesToBase64(new Uint8Array(ciphertextBuffer)),
-    };
+      return {
+        schema: "adv-encrypted-evidence-backup-v1",
+        exportedAt: new Date().toISOString(),
+        encryption: {
+          algorithm: "AES-GCM",
+          keyDerivation: "PBKDF2-SHA-256",
+          iterations: CURRENT_BACKUP_PBKDF2_ITERATIONS,
+          salt: bytesToBase64(salt),
+          iv: bytesToBase64(iv),
+        },
+        ciphertext: bytesToBase64(new Uint8Array(ciphertextBuffer)),
+      };
+    } finally {
+      plaintext.fill(0);
+    }
   }
 
   static async decrypt<T>(
@@ -102,16 +117,42 @@ export class BackupEncryptionService {
       throw new Error("Backup decryption password is required.");
     }
 
+    if (password.length > INPUT_SECURITY_LIMITS.passwordCharacters) {
+      throw new Error("Backup decryption password is too long.");
+    }
+
+    if (!backup || typeof backup !== "object") {
+      throw new Error("Invalid encrypted backup file.");
+    }
+
     if (backup.schema !== "adv-encrypted-evidence-backup-v1") {
       throw new Error("Unsupported encrypted backup schema.");
     }
 
     if (
+      !backup.encryption ||
+      typeof backup.encryption !== "object" ||
       backup.encryption.algorithm !== "AES-GCM" ||
       backup.encryption.keyDerivation !== "PBKDF2-SHA-256" ||
-      backup.encryption.iterations !== PBKDF2_ITERATIONS
+      !isSupportedBackupPbkdf2Iterations(backup.encryption.iterations)
     ) {
       throw new Error("Unsupported backup encryption configuration.");
+    }
+
+    if (
+      typeof backup.ciphertext !== "string" ||
+      backup.ciphertext.length > INPUT_SECURITY_LIMITS.encryptedCiphertextCharacters
+    ) {
+      throw new Error("Encrypted backup payload is invalid or too large.");
+    }
+
+    if (
+      typeof backup.encryption.salt !== "string" ||
+      backup.encryption.salt.length > 64 ||
+      typeof backup.encryption.iv !== "string" ||
+      backup.encryption.iv.length > 64
+    ) {
+      throw new Error("Invalid backup encryption metadata.");
     }
 
     const salt = decodeBackupBase64(backup.encryption.salt);
@@ -127,7 +168,8 @@ export class BackupEncryptionService {
 
     const key = await KeyDerivationService.deriveAesKeyFromPassword(
       password,
-      salt
+      salt,
+      backup.encryption.iterations
     );
 
     try {
@@ -140,7 +182,13 @@ export class BackupEncryptionService {
         toArrayBuffer(ciphertext)
       );
 
-      return JSON.parse(new TextDecoder().decode(plaintextBuffer)) as T;
+      const plaintext = new Uint8Array(plaintextBuffer);
+
+      try {
+        return JSON.parse(new TextDecoder().decode(plaintext)) as T;
+      } finally {
+        plaintext.fill(0);
+      }
     } catch {
       throw new Error(
         "Backup decryption failed. The password may be incorrect or the file may be corrupted."

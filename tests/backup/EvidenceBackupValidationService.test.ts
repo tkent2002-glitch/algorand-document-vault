@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { EvidenceBackupValidationService } from "../../src/services/backup/EvidenceBackupValidationService";
+import { INPUT_SECURITY_LIMITS } from "../../src/services/security/InputSecurityLimits";
 
 const validRecord = {
   id: "record-1",
@@ -265,5 +266,83 @@ describe("EvidenceBackupValidationService", () => {
 
     expect(result.valid).toBe(false);
     expect(result.errors).toContain("Record 0 has invalid proof createdAt timestamp.");
+  });
+
+  it("rejects non-object records without throwing", () => {
+    const result = EvidenceBackupValidationService.validate({
+      schema: "adv-evidence-backup-v1",
+      exportedAt: new Date().toISOString(),
+      recordCount: 2,
+      records: [null, "record"],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain("Record 0 must be a JSON object.");
+    expect(result.errors).toContain("Record 1 must be a JSON object.");
+  });
+
+  it("rejects unsafe record counts", () => {
+    const result = EvidenceBackupValidationService.validate({
+      schema: "adv-evidence-backup-v1",
+      exportedAt: new Date().toISOString(),
+      recordCount: Number.MAX_VALUE,
+      records: [],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain(
+      "Backup recordCount must be a non-negative safe integer."
+    );
+  });
+
+  it("rejects backups above the record resource limit", () => {
+    const records = Array.from(
+      { length: INPUT_SECURITY_LIMITS.backupRecords + 1 },
+      () => validRecord
+    );
+    const result = EvidenceBackupValidationService.validate({
+      schema: "adv-evidence-backup-v1",
+      exportedAt: new Date().toISOString(),
+      recordCount: records.length,
+      records,
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain(
+      `Backup contains more than ${INPUT_SECURITY_LIMITS.backupRecords.toLocaleString()} records.`
+    );
+  });
+
+  it("rejects malformed integrity metadata", () => {
+    const result = EvidenceBackupValidationService.validate({
+      schema: "adv-evidence-backup-v1",
+      exportedAt: new Date().toISOString(),
+      recordCount: 1,
+      records: [validRecord],
+      integrity: { algorithm: "SHA-256", digest: "not-a-digest" },
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain("Backup integrity metadata is invalid.");
+  });
+
+  it("rejects deeply nested backup JSON before integrity processing", () => {
+    let nested: unknown = "leaf";
+    for (let index = 0; index <= INPUT_SECURITY_LIMITS.jsonNestingDepth; index += 1) {
+      nested = { nested };
+    }
+
+    const result = EvidenceBackupValidationService.validate({
+      schema: "adv-evidence-backup-v1",
+      exportedAt: new Date().toISOString(),
+      recordCount: 0,
+      records: [],
+      unexpected: nested,
+    });
+
+    expect(result).toEqual({
+      valid: false,
+      errors: ["Backup JSON exceeds structural complexity limits."],
+    });
   });
 });

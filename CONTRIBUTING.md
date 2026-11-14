@@ -11,6 +11,18 @@ This is a security-first project. Changes should be small, purposeful, reviewabl
 - Use a private security report instead of a public issue for vulnerabilities.
 - Keep proposals within the project's privacy-first and evidence-focused scope.
 
+## Public alpha feedback
+
+Use the repository's guided issue forms to report a reproducible bug or describe
+where an alpha workflow was difficult to understand. Search existing issues
+before submitting a new report.
+
+Never include original documents, document fingerprints, verification links,
+wallet addresses, signed transactions, private keys, seed phrases, encrypted
+backups, or backup passwords in a public issue. Use a disposable test document
+when a reproduction requires a file. Suspected vulnerabilities belong in a
+private security report, not the public feedback channel.
+
 ## Development setup
 
 ```powershell

@@ -28,6 +28,19 @@ describe("TransactionFailureClassificationService", () => {
     expect(result.type).toBe("wallet_rejected");
   });
 
+  it("classifies an unresponsive wallet before generic cancellation text", () => {
+    const result =
+      TransactionFailureClassificationService.classify(
+        new Error(
+          "Wallet approval wait was cancelled by the application."
+        ),
+        { stage: "signing" }
+      );
+
+    expect(result.type).toBe("wallet_unresponsive");
+    expect(result.userMessage).toContain("No transaction was submitted");
+  });
+
   it("classifies a network failure", () => {
     const result =
       TransactionFailureClassificationService.classify(
