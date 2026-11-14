@@ -45,7 +45,7 @@ test("loads deferred features without browser errors", async ({ page }) => {
   ).toBeVisible();
   expect(
     requestedAssets.some((url) =>
-      /\/(algorand|pera-wallet)-[^/]+\.js$/.test(url)
+      /\/(algorand-sdk|pera-wallet)-[^/]+\.js$/.test(url)
     )
   ).toBe(false);
 
@@ -90,6 +90,14 @@ test("loads deferred features without browser errors", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Pera Wallet" })
   ).toBeVisible();
+
+  for (const chunk of ["algorand-sdk", "pera-wallet"]) {
+    expect(
+      requestedAssets.some((url) =>
+        new URL(url).pathname.startsWith(`/assets/${chunk}-`)
+      )
+    ).toBe(true);
+  }
 
   expect(browserProblems).toEqual([]);
 });
