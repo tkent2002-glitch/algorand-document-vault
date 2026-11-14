@@ -1,4 +1,135 @@
-.page {
-  padding: 40px;
+.wallet-page {
+  text-align: left;
+}
+
+.wallet-header {
+  max-width: 760px;
+  margin: 0 auto 1.5rem;
   text-align: center;
+}
+
+.wallet-eyebrow {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.wallet-readiness-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.wallet-readiness-summary div,
+.wallet-panel,
+.wallet-security-boundary {
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--social-bg);
+  box-shadow: var(--shadow);
+}
+
+.wallet-readiness-summary div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.wallet-readiness-summary span,
+.wallet-address-panel span {
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.wallet-readiness-summary strong {
+  color: var(--text-h);
+  font-size: 1.1rem;
+}
+
+.wallet-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.wallet-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.wallet-panel-header p {
+  margin: 0.35rem 0 0;
+}
+
+.wallet-status {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.wallet-address-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.wallet-address-panel code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.wallet-purpose {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.wallet-purpose p {
+  margin: 0.5rem 0 0;
+}
+
+.wallet-panel button {
+  width: fit-content;
+  cursor: pointer;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.wallet-panel button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.wallet-security-boundary {
+  margin-top: 1.5rem;
+}
+
+.wallet-security-boundary p {
+  margin-bottom: 0;
+}
+
+@media (max-width: 760px) {
+  .wallet-readiness-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .wallet-panel-header {
+    flex-direction: column;
+  }
 }

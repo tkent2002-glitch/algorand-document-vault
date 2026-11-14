@@ -1,0 +1,230 @@
+import type { EvidenceRecord } from "../notarization";
+import {
+  MerkleShareableVerificationProofService,
+  type MerkleShareableVerificationProofFile,
+  ShareableVerificationProofService,
+  type ShareableVerificationProofFile,
+} from "../shareable-proof";
+import type {
+  BatchEvidenceMemberRecord,
+  BatchEvidenceRecord,
+} from "../notarization";
+import { INPUT_SECURITY_LIMITS } from "../security/InputSecurityLimits";
+
+const VERIFICATION_LINK_VERSION = "adv-verification-link-v1";
+const MERKLE_VERIFICATION_LINK_VERSION = "adv-verification-link-v2";
+const VERIFICATION_HASH_PREFIX = "#verify=";
+const MAX_DOCUMENT_LABEL_LENGTH = 180;
+
+export type VerificationLinkEnvelope =
+  | {
+      version: typeof VERIFICATION_LINK_VERSION;
+      documentLabel: string;
+      proof: ShareableVerificationProofFile;
+    }
+  | {
+      version: typeof MERKLE_VERIFICATION_LINK_VERSION;
+      documentLabel: string;
+      proof: MerkleShareableVerificationProofFile;
+    };
+
+export type VerificationLinkParseResult = {
+  valid: boolean;
+  envelope: VerificationLinkEnvelope | null;
+  errors: string[];
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function hasOnlyKeys(
+  value: Record<string, unknown>,
+  allowedKeys: string[]
+): boolean {
+  const allowed = new Set(allowedKeys);
+  return Object.keys(value).every((key) => allowed.has(key));
+}
+
+function isValidDocumentLabel(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length > 0 &&
+    value.length <= MAX_DOCUMENT_LABEL_LENGTH &&
+    !Array.from(value).some((character) => {
+      const codePoint = character.codePointAt(0) ?? 0;
+      return codePoint <= 31 || codePoint === 127;
+    })
+  );
+}
+
+function encodeUtf8Base64Url(value: string): string {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  return btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/u, "");
+}
+
+function decodeUtf8Base64Url(value: string): string {
+  if (!value || !/^[A-Za-z0-9_-]+$/u.test(value)) {
+    throw new Error("The verification link encoding is invalid.");
+  }
+
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const paddingLength = (4 - (normalized.length % 4)) % 4;
+  const binary = atob(`${normalized}${"=".repeat(paddingLength)}`);
+  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+
+  return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+}
+
+function normalizeBaseUrl(baseUrl: string): URL {
+  const url = new URL(baseUrl);
+  url.hash = "";
+  url.search = "";
+  url.pathname = "/";
+  return url;
+}
+
+export class VerificationLinkService {
+  static hasVerificationHash(hash: string): boolean {
+    return hash.startsWith(VERIFICATION_HASH_PREFIX);
+  }
+
+  static async createEnvelope(
+    record: EvidenceRecord
+  ): Promise<VerificationLinkEnvelope> {
+    const documentLabel = record.documentName.trim();
+
+    if (!isValidDocumentLabel(documentLabel)) {
+      throw new Error("The document name cannot be used as a verification label.");
+    }
+
+    return {
+      version: VERIFICATION_LINK_VERSION,
+      documentLabel,
+      proof: await ShareableVerificationProofService.create(record),
+    };
+  }
+
+  static serialize(envelope: VerificationLinkEnvelope): string {
+    return encodeUtf8Base64Url(JSON.stringify(envelope));
+  }
+
+  static async createMerkleUrl(
+    batch: BatchEvidenceRecord,
+    member: BatchEvidenceMemberRecord,
+    baseUrl = window.location.href
+  ): Promise<string> {
+    const documentLabel = member.documentName.trim();
+    if (!isValidDocumentLabel(documentLabel)) {
+      throw new Error("The document name cannot be used as a verification label.");
+    }
+    const envelope: VerificationLinkEnvelope = {
+      version: MERKLE_VERIFICATION_LINK_VERSION,
+      documentLabel,
+      proof: await MerkleShareableVerificationProofService.create(batch, member),
+    };
+    const url = normalizeBaseUrl(baseUrl);
+    url.hash = `verify=${this.serialize(envelope)}`;
+    return url.toString();
+  }
+
+  static async createUrl(
+    record: EvidenceRecord,
+    baseUrl = window.location.href
+  ): Promise<string> {
+    const envelope = await this.createEnvelope(record);
+    const url = normalizeBaseUrl(baseUrl);
+    url.hash = `verify=${this.serialize(envelope)}`;
+    return url.toString();
+  }
+
+  static async parseHash(hash: string): Promise<VerificationLinkParseResult> {
+    if (!this.hasVerificationHash(hash)) {
+      return {
+        valid: false,
+        envelope: null,
+        errors: ["No verification link was found."],
+      };
+    }
+
+    if (hash.length > INPUT_SECURITY_LIMITS.verificationLinkCharacters) {
+      return {
+        valid: false,
+        envelope: null,
+        errors: ["The verification link is too large."],
+      };
+    }
+
+    try {
+      const encoded = hash.slice(VERIFICATION_HASH_PREFIX.length);
+      const value: unknown = JSON.parse(decodeUtf8Base64Url(encoded));
+
+      if (!isRecord(value)) {
+        throw new Error("The verification link payload is not an object.");
+      }
+
+      if (!hasOnlyKeys(value, ["version", "documentLabel", "proof"])) {
+        throw new Error("The verification link contains unsupported fields.");
+      }
+
+      if (
+        value.version !== VERIFICATION_LINK_VERSION &&
+        value.version !== MERKLE_VERIFICATION_LINK_VERSION
+      ) {
+        throw new Error("The verification link version is not supported.");
+      }
+
+      if (!isValidDocumentLabel(value.documentLabel)) {
+        throw new Error("The verification link document label is invalid.");
+      }
+
+      const proofValidation = value.version === MERKLE_VERIFICATION_LINK_VERSION
+        ? await MerkleShareableVerificationProofService.validate(value.proof)
+        : await ShareableVerificationProofService.validate(value.proof);
+
+      if (!proofValidation.valid || !proofValidation.proof) {
+        return {
+          valid: false,
+          envelope: null,
+          errors: proofValidation.errors,
+        };
+      }
+
+      return {
+        valid: true,
+        envelope:
+          value.version === MERKLE_VERIFICATION_LINK_VERSION
+            ? {
+                version: MERKLE_VERIFICATION_LINK_VERSION,
+                documentLabel: value.documentLabel,
+                proof: proofValidation.proof as MerkleShareableVerificationProofFile,
+              }
+            : {
+                version: VERIFICATION_LINK_VERSION,
+                documentLabel: value.documentLabel,
+                proof: proofValidation.proof as ShareableVerificationProofFile,
+              },
+        errors: [],
+      };
+    } catch (error) {
+      return {
+        valid: false,
+        envelope: null,
+        errors: [
+          error instanceof Error
+            ? error.message
+            : "The verification link could not be read.",
+        ],
+      };
+    }
+  }
+}

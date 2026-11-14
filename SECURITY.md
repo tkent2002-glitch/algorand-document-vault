@@ -34,6 +34,10 @@ If private vulnerability reporting is unavailable, contact the repository owner 
 - Encrypted backups are unrecoverable without the correct password.
 - Blockchain proof demonstrates existence and integrity at a point in time; it does not establish the truth or legal enforceability of document contents.
 
+## Independent review preparation
+
+The repository includes a reviewer-ready [independent security review package](docs/security-review/README.md) with a threat model, reproducible environment, review checklist, and private finding template. This package prepares a review; it is not an audit report. The project remains unaudited until an independent review is completed and formally accepted.
+
 ## Scope examples
 
 Reports involving these areas are especially valuable:

@@ -1,6 +1,8 @@
-﻿import type {
+import type {
+  AlgorandConfirmationResult,
   AlgorandProofTransactionDraft,
   AlgorandSignedProofTransaction,
+  AlgorandSubmissionResult,
   NotarizationProof,
 } from "../../../types";
 import type { EvidenceRecord } from "../../../services";
@@ -14,6 +16,14 @@ type ProgressTimelineProps = {
   walletReady: boolean;
   transactionDraft: AlgorandProofTransactionDraft | null;
   signedTransaction: AlgorandSignedProofTransaction | null;
+  submissionResult: AlgorandSubmissionResult | null;
+  confirmationResult: AlgorandConfirmationResult | null;
+};
+
+type ProgressStage = {
+  label: string;
+  description: string;
+  complete: boolean;
 };
 
 function ProgressTimeline({
@@ -25,20 +35,90 @@ function ProgressTimeline({
   walletReady,
   transactionDraft,
   signedTransaction,
+  submissionResult,
+  confirmationResult,
 }: ProgressTimelineProps) {
+  const documentPrepared = Boolean(
+    fileName &&
+      fileHash &&
+      proof &&
+      evidenceRecord &&
+      serializedProofPayload
+  );
+
+  const stages: ProgressStage[] = [
+    {
+      label: "Document",
+      description: "Document selected and cryptographic proof prepared.",
+      complete: documentPrepared,
+    },
+    {
+      label: "Wallet",
+      description: "Pera Wallet connected.",
+      complete: walletReady,
+    },
+    {
+      label: "Transaction",
+      description: "Algorand transaction prepared for review.",
+      complete: Boolean(transactionDraft),
+    },
+    {
+      label: "Signature",
+      description: "Transaction approved and signed with Pera Wallet.",
+      complete: Boolean(signedTransaction),
+    },
+    {
+      label: "Submission",
+      description: "Signed transaction submitted to Algorand TestNet.",
+      complete: Boolean(submissionResult),
+    },
+    {
+      label: "Confirmation",
+      description: "Blockchain confirmation received.",
+      complete: Boolean(confirmationResult),
+    },
+  ];
+
+  const completedStages = stages.filter(
+    (stage) => stage.complete
+  ).length;
+
   return (
-    <div className="notarize-result">
-      <strong>Notarization Progress</strong>
-      <p>{fileName ? "Complete: Document selected" : "Pending: Document selected"}</p>
-      <p>{fileHash ? "Complete: SHA-256 hash generated" : "Pending: SHA-256 hash generated"}</p>
-      <p>{proof ? "Complete: Proof created" : "Pending: Proof created"}</p>
-      <p>{evidenceRecord ? "Complete: Evidence record created" : "Pending: Evidence record created"}</p>
-      <p>{serializedProofPayload ? "Complete: Payload prepared" : "Pending: Payload prepared"}</p>
-      <p>{walletReady ? "Complete: Wallet connected" : "Pending: Wallet connected"}</p>
-      <p>{transactionDraft ? "Complete: Transaction draft prepared" : "Pending: Transaction draft prepared"}</p>
-      <p>{signedTransaction ? "Complete: Transaction signed" : "Pending: Transaction signed"}</p>
-      <p>Pending: Transaction submitted</p>
-      <p>Pending: Confirmation received</p>
+    <div className="notarize-result notarize-progress">
+      <div className="notarize-progress-header">
+        <strong>Notarization Progress</strong>
+        <span>
+          {completedStages} of {stages.length} stages complete
+        </span>
+      </div>
+
+      <ol className="notarize-progress-list">
+        {stages.map((stage, index) => (
+          <li
+            key={stage.label}
+            className={
+              stage.complete
+                ? "notarize-progress-stage complete"
+                : "notarize-progress-stage pending"
+            }
+          >
+            <div className="notarize-progress-marker">
+              {stage.complete ? "✓" : index + 1}
+            </div>
+
+            <div className="notarize-progress-content">
+              <div className="notarize-progress-stage-header">
+                <strong>{stage.label}</strong>
+                <span>
+                  {stage.complete ? "Complete" : "Pending"}
+                </span>
+              </div>
+
+              <p>{stage.description}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }

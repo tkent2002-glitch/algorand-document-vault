@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { EvidenceRepository } from "../../repositories";
+import { BatchEvidenceRepository } from "../../repositories/evidence/BatchEvidenceRepository";
 import {
+  BackupEncryptionService,
+  BackupIntegrityValidationService,
   EvidenceBackupImportPreviewService,
   EvidenceBackupImportService,
   EvidenceBackupValidationService,
@@ -8,54 +11,143 @@ import {
   type EvidenceBackupImportPreview,
   type EvidenceBackupImportResult,
   type EvidenceBackupValidationResult,
+  type EncryptedEvidenceBackupFile,
+  type IntegrityProtectedEvidenceBackupFile,
 } from "../../services";
 import "./VaultImportPreview.css";
+import {
+  INPUT_SECURITY_LIMITS,
+  formatByteLimit,
+} from "../../services/security/InputSecurityLimits";
 
-type VaultImportPreviewProps = {
-  onImportComplete: () => void;
-};
+function isEncryptedBackup(
+  value: unknown
+): value is EncryptedEvidenceBackupFile {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      "schema" in value &&
+      value.schema === "adv-encrypted-evidence-backup-v1"
+  );
+}
 
-function VaultImportPreview({ onImportComplete }: VaultImportPreviewProps) {
+function VaultImportPreview() {
   const [fileName, setFileName] = useState<string>("");
-  const [backup, setBackup] = useState<EvidenceBackupFile | null>(null);
+  const [backup, setBackup] =
+    useState<EvidenceBackupFile | null>(null);
+  const [encryptedBackup, setEncryptedBackup] =
+    useState<EncryptedEvidenceBackupFile | null>(null);
+  const [decryptionPassword, setDecryptionPassword] =
+    useState<string>("");
+  const [decrypting, setDecrypting] =
+    useState<boolean>(false);
+  const [decryptionError, setDecryptionError] =
+    useState<string>("");
   const [validation, setValidation] =
     useState<EvidenceBackupValidationResult | null>(null);
   const [preview, setPreview] =
     useState<EvidenceBackupImportPreview | null>(null);
   const [importResult, setImportResult] =
     useState<EvidenceBackupImportResult | null>(null);
+  const [batchImportMessage, setBatchImportMessage] = useState<string>("");
 
-  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+  async function prepareBackupPreview(
+    candidate: unknown
+  ) {
+    const structureValidation =
+      EvidenceBackupValidationService.validate(candidate);
+
+    if (!structureValidation.valid) {
+      setValidation(structureValidation);
+      setBackup(null);
+      setPreview(null);
+      return;
+    }
+
+    const integrityValidation =
+      await BackupIntegrityValidationService.evaluate(
+        candidate as IntegrityProtectedEvidenceBackupFile
+      );
+
+    const result: EvidenceBackupValidationResult = {
+      valid: integrityValidation.valid,
+      errors: integrityValidation.errors,
+    };
+
+    setValidation(result);
+
+    if (!result.valid) {
+      setBackup(null);
+      setPreview(null);
+      return;
+    }
+
+    const [currentRecords, currentBatches] = await Promise.all([
+      EvidenceRepository.listAsync(),
+      BatchEvidenceRepository.listBatchesAsync(),
+    ]);
+    const currentBatchMembers = (
+      await Promise.all(
+        currentBatches.map((batch) =>
+          BatchEvidenceRepository.listMembersAsync(batch.id)
+        )
+      )
+    ).flat();
+    const validBackup =
+      candidate as IntegrityProtectedEvidenceBackupFile;
+    const changePreview =
+      EvidenceBackupImportPreviewService.preview(
+        validBackup,
+        currentRecords,
+        currentBatches,
+        currentBatchMembers
+      );
+
+    setBackup(validBackup);
+    setPreview(changePreview);
+  }
+
+  async function handleFileChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
     const file = event.target.files?.[0] ?? null;
 
     setFileName(file?.name ?? "");
     setBackup(null);
+    setEncryptedBackup(null);
+    setDecryptionPassword("");
+    setDecryptionError("");
     setValidation(null);
     setPreview(null);
     setImportResult(null);
+    setBatchImportMessage("");
 
     if (!file) {
+      return;
+    }
+
+    if (file.size > INPUT_SECURITY_LIMITS.backupFileBytes) {
+      setValidation({
+        valid: false,
+        errors: [
+          `Backup file must be ${formatByteLimit(
+            INPUT_SECURITY_LIMITS.backupFileBytes
+          )} or smaller.`,
+        ],
+      });
       return;
     }
 
     try {
       const text = await file.text();
       const parsed = JSON.parse(text) as unknown;
-      const result = EvidenceBackupValidationService.validate(parsed);
 
-      setValidation(result);
-
-      if (result.valid) {
-        const validBackup = parsed as EvidenceBackupFile;
-        const currentRecords = await EvidenceRepository.listAsync();
-        const changePreview = EvidenceBackupImportPreviewService.preview(
-          validBackup,
-          currentRecords
-        );
-
-        setBackup(validBackup);
-        setPreview(changePreview);
+      if (isEncryptedBackup(parsed)) {
+        setEncryptedBackup(parsed);
+        return;
       }
+
+      await prepareBackupPreview(parsed);
     } catch {
       setValidation({
         valid: false,
@@ -64,67 +156,302 @@ function VaultImportPreview({ onImportComplete }: VaultImportPreviewProps) {
     }
   }
 
- async function handleImport() {
+  async function handleDecrypt() {
+    if (!encryptedBackup || !decryptionPassword) {
+      return;
+    }
+
+    setDecrypting(true);
+    setDecryptionError("");
+    setValidation(null);
+    setBackup(null);
+    setPreview(null);
+    setImportResult(null);
+
+    try {
+      const decrypted =
+        await BackupEncryptionService.decrypt<unknown>(
+          encryptedBackup,
+          decryptionPassword
+        );
+
+      await prepareBackupPreview(decrypted);
+    } catch (error) {
+      setDecryptionError(
+        error instanceof Error
+          ? error.message
+          : "Encrypted backup recovery failed."
+      );
+    } finally {
+      setDecryptionPassword("");
+      setDecrypting(false);
+    }
+  }
+
+  async function handleImport() {
     if (!backup || !validation?.valid || !preview) {
       return;
     }
 
-    if (preview.conflictingRecordIds > 0) {
+    if (preview.conflictingRecordIds > 0 || preview.conflictingBatchIds > 0) {
       setImportResult({
         importedRecords: 0,
         skippedExistingRecords: 0,
-        blockedConflictingRecords: preview.conflictingRecordIds,
+        blockedConflictingRecords:
+          preview.conflictingRecordIds,
       });
       return;
     }
 
-   const currentRecords = await EvidenceRepository.listAsync();
-const result = await EvidenceBackupImportService.importNewRecords(
+    const currentRecords =
+      await EvidenceRepository.listAsync();
+    const currentBatches = await BatchEvidenceRepository.listBatchesAsync();
+    const currentBatchMembers = (
+      await Promise.all(
+        currentBatches.map((batch) =>
+          BatchEvidenceRepository.listMembersAsync(batch.id)
+        )
+      )
+    ).flat();
+
+    const batchResult = await EvidenceBackupImportService.selectNewBatches(
       backup,
-      currentRecords
+      currentBatches,
+      currentBatchMembers
     );
 
+    if (batchResult.blockedConflictingBatches > 0) {
+      setBatchImportMessage("Batch import blocked because conflicting IDs were detected.");
+      return;
+    }
+
+    const result =
+      await EvidenceBackupImportService.importNewRecords(
+        backup,
+        currentRecords
+      );
+
     await EvidenceRepository.saveAllAsync(result.records);
+    for (const candidate of batchResult.batches) {
+      await BatchEvidenceRepository.saveBatchAsync(
+        candidate.batch,
+        candidate.members
+      );
+    }
+
     setImportResult(result);
-    onImportComplete();
+    setBatchImportMessage(
+      `${batchResult.importedBatches} Merkle batch${
+        batchResult.importedBatches === 1 ? "" : "es"
+      } imported; ${batchResult.skippedExistingBatches} already present.`
+    );
   }
 
   const canImport =
     Boolean(backup && validation?.valid && preview) &&
-    preview?.conflictingRecordIds === 0;
+    preview?.conflictingRecordIds === 0 &&
+    preview?.conflictingBatchIds === 0;
 
   return (
-    <div className="vault-import-preview">
-      <strong>Backup Import Preview</strong>
-      <p>Select an Evidence Vault backup file to validate before importing.</p>
+    <section className="vault-import-preview">
+      <div className="vault-import-header">
+        <div>
+          <h3>Restore evidence records</h3>
+          <p>
+            Choose a backup to validate and preview before importing.
+          </p>
+        </div>
+      </div>
 
-      <input type="file" accept="application/json" onChange={handleFileChange} />
+      <div className="vault-import-safety">
+        <p>
+          Nothing is imported until validation passes and you approve
+          the preview. Conflicting record IDs are blocked automatically.
+        </p>
+      </div>
 
-      {fileName && <p>Selected Backup: {fileName}</p>}
+      <div className="vault-import-file-picker">
+        <strong>Evidence Vault backup file</strong>
+        <div className="vault-import-file-control">
+          <label
+            className="vault-import-file-button"
+            htmlFor="vault-backup-file"
+          >
+            Select backup file
+          </label>
+          <span role="status">
+            {fileName || "No file selected"}
+          </span>
+        </div>
+        <input
+          id="vault-backup-file"
+          className="visually-hidden"
+          type="file"
+          accept="application/json"
+          data-max-bytes={INPUT_SECURITY_LIMITS.backupFileBytes}
+          aria-label="Evidence Vault backup file"
+          onChange={handleFileChange}
+        />
+      </div>
+
+      {encryptedBackup && !backup && (
+        <div className="vault-import-decryption">
+          <div role="status" className="vault-import-status valid">
+            <strong>Encrypted Backup Selected</strong>
+            <span>
+              Enter the backup password to decrypt, validate, and preview
+              the records before import.
+            </span>
+          </div>
+
+          <label htmlFor="vault-backup-password">
+            Backup Password
+          </label>
+          <input
+            id="vault-backup-password"
+            type="password"
+            value={decryptionPassword}
+            autoComplete="current-password"
+            onChange={(event) =>
+              setDecryptionPassword(event.target.value)
+            }
+          />
+          <button
+            type="button"
+            onClick={handleDecrypt}
+            disabled={!decryptionPassword || decrypting}
+          >
+            {decrypting
+              ? "Decrypting Backup..."
+              : "Decrypt and Preview"}
+          </button>
+
+          {decryptionError && (
+            <p className="vault-import-errors" role="alert">
+              {decryptionError}
+            </p>
+          )}
+        </div>
+      )}
 
       {validation && (
         <div className="vault-import-result">
-          <strong>{validation.valid ? "Backup Valid" : "Backup Invalid"}</strong>
+          <div
+            role="status"
+            className={
+              validation.valid
+                ? "vault-import-status valid"
+                : "vault-import-status invalid"
+            }
+          >
+            <strong>
+              {validation.valid
+                ? "Backup Validation Passed"
+                : "Backup Validation Failed"}
+            </strong>
+
+            <span>
+              {validation.valid
+                ? "Structure, required metadata, and integrity accepted."
+                : "Import is blocked."}
+            </span>
+          </div>
 
           {backup && (
-            <>
-              <p>Schema: {backup.schema}</p>
-              <p>Exported At: {backup.exportedAt}</p>
-              <p>Records: {backup.recordCount}</p>
-            </>
+            <div className="vault-import-metadata">
+              <div>
+                <span>Schema</span>
+                <strong>{backup.schema}</strong>
+              </div>
+
+              <div>
+                <span>Exported At</span>
+                <strong>{backup.exportedAt}</strong>
+              </div>
+
+              <div>
+                <span>Records</span>
+                <strong>{backup.recordCount}</strong>
+              </div>
+
+              <div>
+                <span>Merkle batches</span>
+                <strong>
+                  {backup.schema === "adv-evidence-backup-v2"
+                    ? backup.batchCount
+                    : 0}
+                </strong>
+              </div>
+            </div>
           )}
 
           {preview && (
             <div className="vault-import-change-preview">
               <strong>Import Change Preview</strong>
-              <p>Total Records: {preview.totalRecords}</p>
-              <p>New Records: {preview.newRecords}</p>
-              <p>Existing Records: {preview.existingRecords}</p>
-              <p>Duplicate Fingerprints: {preview.duplicateFingerprints}</p>
-              <p>Conflicting Record IDs: {preview.conflictingRecordIds}</p>
 
-              <button type="button" onClick={handleImport} disabled={!canImport}>
-                Import New Records
+              <p>
+                Review these changes before allowing the backup to
+                modify the Vault.
+              </p>
+
+              <div className="vault-import-change-grid">
+                <div>
+                  <span>Total Records</span>
+                  <strong>{preview.totalRecords}</strong>
+                </div>
+
+                <div>
+                  <span>New Records</span>
+                  <strong>{preview.newRecords}</strong>
+                </div>
+
+                <div>
+                  <span>Existing Records</span>
+                  <strong>{preview.existingRecords}</strong>
+                </div>
+
+                <div>
+                  <span>Duplicate Fingerprints</span>
+                  <strong>{preview.duplicateFingerprints}</strong>
+                </div>
+
+                <div>
+                  <span>Conflicting Record IDs</span>
+                  <strong>{preview.conflictingRecordIds}</strong>
+                </div>
+
+                <div>
+                  <span>New Merkle Batches</span>
+                  <strong>{preview.newBatches}</strong>
+                </div>
+
+                <div>
+                  <span>Existing Merkle Batches</span>
+                  <strong>{preview.existingBatches}</strong>
+                </div>
+
+                <div>
+                  <span>Conflicting Batch IDs</span>
+                  <strong>{preview.conflictingBatchIds}</strong>
+                </div>
+              </div>
+
+              {(preview.conflictingRecordIds > 0 ||
+                preview.conflictingBatchIds > 0) && (
+                <p className="vault-import-conflict-warning">
+                  Import is blocked because conflicting record IDs
+                  were detected.
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={handleImport}
+                disabled={!canImport}
+              >
+                {canImport
+                  ? "Import New Records"
+                  : "Import Blocked"}
               </button>
             </div>
           )}
@@ -132,22 +459,54 @@ const result = await EvidenceBackupImportService.importNewRecords(
           {importResult && (
             <div className="vault-import-change-preview">
               <strong>Import Result</strong>
-              <p>Imported Records: {importResult.importedRecords}</p>
-              <p>Skipped Existing Records: {importResult.skippedExistingRecords}</p>
-              <p>Blocked Conflicting Records: {importResult.blockedConflictingRecords}</p>
+
+              <div className="vault-import-change-grid">
+                <div>
+                  <span>Imported</span>
+                  <strong>{importResult.importedRecords}</strong>
+                </div>
+
+                <div>
+                  <span>Skipped Existing</span>
+                  <strong>
+                    {importResult.skippedExistingRecords}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Blocked Conflicts</span>
+                  <strong>
+                    {importResult.blockedConflictingRecords}
+                  </strong>
+                </div>
+              </div>
             </div>
           )}
 
+          {batchImportMessage && (
+            <p className="vault-import-status valid" role="status">
+              {batchImportMessage}
+            </p>
+          )}
+
           {validation.errors.length > 0 && (
-            <ul>
-              {validation.errors.map((error) => (
-                <li key={error}>{error}</li>
-              ))}
-            </ul>
+            <div className="vault-import-errors">
+              <strong>Validation Details</strong>
+
+              <ul>
+                {validation.errors.map((error) => (
+                  <li key={error}>{error}</li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
       )}
-    </div>
+
+      <p className="vault-import-boundary">
+        Only import backup files you trust.
+      </p>
+    </section>
   );
 }
 

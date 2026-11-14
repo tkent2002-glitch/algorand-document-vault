@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { EvidenceRepository } from "../../repositories";
+import { Logger } from "../../core";
 import {
   BackupEncryptionService,
-  BackupIntegrityService,
+  EvidenceBackupExportService,
 } from "../../services";
 import "./VaultBackupActions.css";
 
@@ -23,23 +23,12 @@ function downloadJsonFile(fileName: string, data: unknown): void {
   URL.revokeObjectURL(url);
 }
 
-async function createTrustedBackupPayload() {
-  const records = await EvidenceRepository.listAsync();
-
-  const payload = {
-    schema: "adv-evidence-backup-v1" as const,
-    exportedAt: new Date().toISOString(),
-    recordCount: records.length,
-    records,
-  };
-
-  return {
-    ...payload,
-    integrity: await BackupIntegrityService.createIntegrity(payload),
-  };
+interface VaultBackupActionsProps {
+  recordCount: number;
 }
 
-function VaultBackupActions() {
+function VaultBackupActions({ recordCount }: VaultBackupActionsProps) {
+  const [panelOpen, setPanelOpen] = useState<boolean>(true);
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [message, setMessage] = useState<string>("");
@@ -50,7 +39,7 @@ function VaultBackupActions() {
       setMessage("");
       setExporting(true);
 
-      const backup = await createTrustedBackupPayload();
+      const backup = await EvidenceBackupExportService.createIntegrityProtectedBackup();
 
       downloadJsonFile(
         `algorand-document-vault-backup-${Date.now()}.json`,
@@ -58,8 +47,8 @@ function VaultBackupActions() {
       );
 
       setMessage("Plain Evidence Vault backup exported successfully.");
-    } catch (error) {
-      console.error("Plain backup export failed:", error);
+    } catch {
+      Logger.error("Plain backup export failed.");
       setMessage("Plain backup export failed.");
     } finally {
       setExporting(false);
@@ -84,10 +73,11 @@ function VaultBackupActions() {
     try {
       setExporting(true);
 
-      const trustedBackup = await createTrustedBackupPayload();
+      const integrityProtectedBackup =
+        await EvidenceBackupExportService.createIntegrityProtectedBackup();
 
       const encryptedBackup = await BackupEncryptionService.encrypt(
-        trustedBackup,
+        integrityProtectedBackup,
         password
       );
 
@@ -99,86 +89,160 @@ function VaultBackupActions() {
       setPassword("");
       setConfirmPassword("");
       setMessage("Encrypted Evidence Vault backup exported successfully.");
-    } catch (error) {
-      console.error("Encrypted backup export failed:", error);
+    } catch {
+      Logger.error("Encrypted backup export failed.");
       setMessage("Encrypted backup export failed.");
     } finally {
       setExporting(false);
     }
   }
 
+  const passwordsMatch =
+    password.length > 0 &&
+    confirmPassword.length > 0 &&
+    password === confirmPassword;
+
+  const passwordLongEnough =
+    password.length >= MINIMUM_PASSWORD_LENGTH;
+
+  function closePanel(): void {
+    setPanelOpen(false);
+    setPassword("");
+    setConfirmPassword("");
+    setMessage("");
+  }
+
+  if (!panelOpen) {
+    return (
+      <button
+        className="vault-backup-reopen"
+        type="button"
+        aria-expanded="false"
+        onClick={() => setPanelOpen(true)}
+      >
+        <span aria-hidden="true">+</span>
+        <strong>Back up records</strong>
+      </button>
+    );
+  }
+
   return (
     <section className="vault-backup-actions">
-      <div>
-        <strong>Vault Backup</strong>
-        <p>
-          Export Evidence Vault records without storing the original documents.
-        </p>
-      </div>
-
-      <div className="vault-backup-option">
-        <h3>Plain JSON Backup</h3>
-        <p>
-          Human-readable and integrity protected, but not confidential.
-        </p>
+      <div className="vault-backup-header">
+        <div>
+          <h3>Back up evidence records</h3>
+          <p>
+            Protect these {recordCount.toLocaleString()} locally stored record
+            {recordCount === 1 ? "" : "s"} before changing browsers or devices.
+          </p>
+        </div>
 
         <button
+          className="vault-backup-close"
           type="button"
+          aria-label="Close backup controls"
+          onClick={closePanel}
+        >
+          Close
+        </button>
+      </div>
+
+      <div className="vault-backup-choices">
+        <details className="vault-backup-encrypted">
+          <summary>
+            <span>
+              <strong>Encrypted backup</strong>
+              <small>Recommended</small>
+            </span>
+          </summary>
+
+          <div className="vault-backup-encrypted-fields">
+          <p className="vault-backup-option-security">
+            Integrity protected · AES-GCM encrypted
+          </p>
+
+          <label>
+            Backup Password
+            <input
+              type="password"
+              value={password}
+              minLength={MINIMUM_PASSWORD_LENGTH}
+              autoComplete="new-password"
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </label>
+
+          <p className="vault-backup-password-status">
+            Password length: {password.length} / {MINIMUM_PASSWORD_LENGTH}
+            {" "}minimum
+          </p>
+
+          <label>
+            Confirm Password
+            <input
+              type="password"
+              value={confirmPassword}
+              minLength={MINIMUM_PASSWORD_LENGTH}
+              autoComplete="new-password"
+              onChange={(event) => setConfirmPassword(event.target.value)}
+            />
+          </label>
+
+          {confirmPassword.length > 0 && (
+            <p className="vault-backup-password-status">
+              Passwords: {passwordsMatch ? "Match" : "Do not match"}
+            </p>
+          )}
+
+          <button
+            type="button"
+            onClick={handleEncryptedExport}
+            disabled={exporting}
+          >
+            {exporting
+              ? "Export in Progress..."
+              : "Export Encrypted Backup"}
+          </button>
+
+          {!passwordLongEnough && password.length > 0 && (
+            <p className="vault-backup-warning">
+              Use at least {MINIMUM_PASSWORD_LENGTH} characters before
+              exporting an encrypted backup.
+            </p>
+          )}
+
+          <p className="vault-backup-warning">
+            The backup password is never stored or recoverable. If it
+            is lost, the encrypted backup cannot be opened.
+          </p>
+          </div>
+        </details>
+
+        <button
+          className="vault-backup-plain"
+          type="button"
+          aria-label="Export Plain Backup"
           onClick={handlePlainExport}
           disabled={exporting}
         >
-          Export Plain Backup
+          <span>
+            <strong>Plain JSON backup</strong>
+            <small>Readable, not encrypted</small>
+          </span>
         </button>
       </div>
 
-      <div className="vault-backup-option">
-        <h3>Encrypted Backup</h3>
-        <p>
-          Encrypt the integrity-protected backup using AES-GCM and a password
-          derived key.
-        </p>
+      <p
+        className="vault-backup-message"
+        role="status"
+        aria-label="Backup export status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {message}
+      </p>
 
-        <label>
-          Backup Password
-          <input
-            type="password"
-            value={password}
-            minLength={MINIMUM_PASSWORD_LENGTH}
-            autoComplete="new-password"
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </label>
-
-        <label>
-          Confirm Password
-          <input
-            type="password"
-            value={confirmPassword}
-            minLength={MINIMUM_PASSWORD_LENGTH}
-            autoComplete="new-password"
-            onChange={(event) => setConfirmPassword(event.target.value)}
-          />
-        </label>
-
-        <button
-          type="button"
-          onClick={handleEncryptedExport}
-          disabled={exporting}
-        >
-          Export Encrypted Backup
-        </button>
-
-        <p className="vault-backup-warning">
-          The password is not stored or recoverable. Losing it means the
-          encrypted backup cannot be opened.
-        </p>
-      </div>
-
-      {message && (
-        <p className="vault-backup-message" role="status">
-          {message}
-        </p>
-      )}
+      <p className="vault-backup-boundary">Original documents are never included.</p>
     </section>
   );
 }

@@ -18,10 +18,11 @@ cd C:\Projects\algorand-document-vault
 1. Define the purpose and affected trust boundaries.
 2. Apply one controlled implementation step.
 3. Run `npm test`.
-4. Run `npm run build`.
-5. Perform runtime verification when behavior changes.
-6. Review `git diff`.
-7. Commit and push only after verification passes.
+4. Run `npm run lint`.
+5. Run `npm run build`.
+6. Perform runtime verification when behavior changes.
+7. Run `git diff --check` and review the complete diff.
+8. Commit and push only after verification passes.
 
 ## Architecture rule
 

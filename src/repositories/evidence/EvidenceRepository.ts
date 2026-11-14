@@ -1,4 +1,5 @@
-import type { EvidenceRecord } from "../../services";
+﻿import type { EvidenceRecord } from "../../services";
+import { Logger } from "../../core/Logger";
 import {
   EvidenceStoreMigrationService,
   IndexedDbEvidenceStore,
@@ -13,7 +14,12 @@ import { StorageConfiguration } from "../../storage/StorageConfiguration";
 const MIGRATION_MARKER_KEY =
   StorageConfiguration.migration.evidenceStorageMarkerKey;
 
-type EvidenceRepositoryListener = (records: EvidenceRecord[]) => void;
+export type EvidenceRepositoryEvent =
+  | { type: "upsert"; record: EvidenceRecord }
+  | { type: "replace"; records: EvidenceRecord[] }
+  | { type: "clear" };
+
+type EvidenceRepositoryListener = (event: EvidenceRepositoryEvent) => void;
 
 export class EvidenceRepository {
   private static listeners: EvidenceRepositoryListener[] = [];
@@ -45,19 +51,19 @@ export class EvidenceRepository {
 
   static async saveAsync(record: EvidenceRecord): Promise<void> {
     await EvidenceRepository.store.save(record);
-    await EvidenceRepository.notifyAsync();
+    EvidenceRepository.notify({ type: "upsert", record });
   }
 
   static async saveAllAsync(
     records: EvidenceRecord[]
   ): Promise<void> {
     await EvidenceRepository.store.saveAll(records);
-    await EvidenceRepository.notifyAsync();
+    EvidenceRepository.notify({ type: "replace", records });
   }
 
   static async clearAsync(): Promise<void> {
     await EvidenceRepository.store.clear();
-    await EvidenceRepository.notifyAsync();
+    EvidenceRepository.notify({ type: "clear" });
   }
 
   static subscribe(listener: EvidenceRepositoryListener): () => void {
@@ -100,9 +106,7 @@ export class EvidenceRepository {
         };
       }
 
-      console.warn(
-        "IndexedDB was empty after a completed migration. Recovery migration will run."
-      );
+      Logger.warn("IndexedDB was empty after a completed migration. Recovery migration will run.");
     }
 
     const migration =
@@ -123,11 +127,11 @@ export class EvidenceRepository {
     return migration;
   }
 
-  private static async notifyAsync(): Promise<void> {
-    const records = await EvidenceRepository.listAsync();
-
+  private static notify(event: EvidenceRepositoryEvent): void {
     for (const listener of EvidenceRepository.listeners) {
-      listener(records);
+      listener(event);
     }
   }
 }
+
+

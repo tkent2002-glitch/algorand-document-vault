@@ -1,9 +1,9 @@
-﻿import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { BackupIntegrityService } from "../../src/services/backup/BackupIntegrityService";
-import { BackupTrustService } from "../../src/services/backup/BackupTrustService";
+import { BackupIntegrityValidationService } from "../../src/services/backup/BackupIntegrityValidationService";
 import { EvidenceBackupImportService } from "../../src/services/backup/EvidenceBackupImportService";
 import { BackupEncryptionService } from "../../src/services/security/BackupEncryptionService";
-import type { TrustedEvidenceBackupFile } from "../../src/services/backup/BackupTrustService";
+import type { IntegrityProtectedEvidenceBackupFile } from "../../src/services/backup/BackupIntegrityValidationService";
 import type { EvidenceRecord } from "../../src/services";
 
 const documentHash =
@@ -18,9 +18,10 @@ function createEvidenceRecord(): EvidenceRecord {
     hashValue: documentHash,
     proof: {
       id: "encrypted-recovery-proof-1",
-      status: "created",
+      status: "confirmed",
       payload: {
-        schemaVersion: "1.0",
+        appId: "algorand-document-vault",
+      schemaVersion: "1.0",
         hash: {
           algorithm: "SHA-256",
           value: documentHash,
@@ -37,7 +38,7 @@ function createEvidenceRecord(): EvidenceRecord {
   };
 }
 
-async function createTrustedBackup(): Promise<TrustedEvidenceBackupFile> {
+async function createIntegrityProtectedBackup(): Promise<IntegrityProtectedEvidenceBackupFile> {
   const payload = {
     schema: "adv-evidence-backup-v1" as const,
     exportedAt: "2026-07-10T01:00:00.000Z",
@@ -52,8 +53,8 @@ async function createTrustedBackup(): Promise<TrustedEvidenceBackupFile> {
 }
 
 describe("Encrypted backup recovery pipeline", () => {
-  it("decrypts, verifies, and imports a trusted backup", async () => {
-    const originalBackup = await createTrustedBackup();
+  it("decrypts, validates integrity, and imports a protected backup", async () => {
+    const originalBackup = await createIntegrityProtectedBackup();
 
     const encryptedBackup = await BackupEncryptionService.encrypt(
       originalBackup,
@@ -61,16 +62,16 @@ describe("Encrypted backup recovery pipeline", () => {
     );
 
     const decryptedBackup =
-      await BackupEncryptionService.decrypt<TrustedEvidenceBackupFile>(
+      await BackupEncryptionService.decrypt<IntegrityProtectedEvidenceBackupFile>(
         encryptedBackup,
         "integration-test-password"
       );
 
-    const trustResult = await BackupTrustService.evaluate(decryptedBackup);
+    const integrityResult = await BackupIntegrityValidationService.evaluate(decryptedBackup);
 
-    expect(trustResult.trusted).toBe(true);
-    expect(trustResult.structureValid).toBe(true);
-    expect(trustResult.integrityVerified).toBe(true);
+    expect(integrityResult.valid).toBe(true);
+    expect(integrityResult.structureValid).toBe(true);
+    expect(integrityResult.integrityVerified).toBe(true);
 
     const importResult =
       await EvidenceBackupImportService.importNewRecords(
@@ -85,7 +86,7 @@ describe("Encrypted backup recovery pipeline", () => {
   });
 
   it("blocks recovery when the encrypted backup password is incorrect", async () => {
-    const originalBackup = await createTrustedBackup();
+    const originalBackup = await createIntegrityProtectedBackup();
 
     const encryptedBackup = await BackupEncryptionService.encrypt(
       originalBackup,
@@ -103,9 +104,9 @@ describe("Encrypted backup recovery pipeline", () => {
   });
 
   it("blocks import when decrypted backup integrity is invalid", async () => {
-    const originalBackup = await createTrustedBackup();
+    const originalBackup = await createIntegrityProtectedBackup();
 
-    const modifiedBackup: TrustedEvidenceBackupFile = {
+    const modifiedBackup: IntegrityProtectedEvidenceBackupFile = {
       ...originalBackup,
       records: [
         {
@@ -121,15 +122,15 @@ describe("Encrypted backup recovery pipeline", () => {
     );
 
     const decryptedBackup =
-      await BackupEncryptionService.decrypt<TrustedEvidenceBackupFile>(
+      await BackupEncryptionService.decrypt<IntegrityProtectedEvidenceBackupFile>(
         encryptedBackup,
         "integrity-test-password"
       );
 
-    const trustResult = await BackupTrustService.evaluate(decryptedBackup);
+    const integrityResult = await BackupIntegrityValidationService.evaluate(decryptedBackup);
 
-    expect(trustResult.trusted).toBe(false);
-    expect(trustResult.integrityVerified).toBe(false);
+    expect(integrityResult.valid).toBe(false);
+    expect(integrityResult.integrityVerified).toBe(false);
 
     await expect(
       EvidenceBackupImportService.importNewRecords(

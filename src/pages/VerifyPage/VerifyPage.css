@@ -1,65 +1,157 @@
-.verify-page {
-  text-align: left;
-}
+.verify-page { text-align: left; }
 
-.verify-header {
-  max-width: 760px;
-  margin: 0 auto 1.5rem;
-  text-align: center;
-}
-
-.verify-eyebrow {
+.verify-header { max-width: 760px; margin: 0 0 1.5rem; }
+.verify-header h2 { margin: 0.25rem 0 0.55rem; }
+.verify-header > p:last-child { margin-bottom: 0; }
+.verify-eyebrow,
+.verify-step-label {
+  margin: 0;
   color: var(--accent);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
-.verify-workspace {
-  display: grid;
-  gap: 1rem;
-}
-
-.verify-card,
-.verify-match {
-  padding: 1.25rem;
+.verify-guided-flow { display: grid; gap: 1rem; }
+.verify-flow-step,
+.verify-match,
+.verify-boundary {
+  padding: 1rem 1.1rem;
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 14px;
   background: var(--social-bg);
-  box-shadow: var(--shadow);
+}
+.verify-flow-step { display: grid; gap: 0.7rem; }
+.verify-flow-step h3 { margin: 0; color: var(--text-h); }
+.verify-flow-step > p { margin: 0; }
+.verify-flow-step > label { color: var(--text-h); font-weight: 750; }
+.verify-flow-step > input,
+.shared-proof-json-fallback input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.42rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
 }
 
-.verify-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.verify-selected-document {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.35fr) minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--social-bg) 72%, transparent);
 }
+.verify-selected-document > div { display: grid; min-width: 0; gap: 0.2rem; }
+.verify-selected-document span {
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.verify-selected-document strong { color: var(--text-h); }
+.verify-selected-document code { color: var(--text-h); white-space: normal; overflow-wrap: anywhere; }
 
-.verify-card strong,
-.verify-match h2 {
+.verify-source-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+.verify-source-options button {
+  display: grid;
+  min-height: 92px;
+  gap: 0.3rem;
+  align-content: center;
+  text-align: left;
+  border-color: var(--border);
+  background: var(--surface);
+}
+.verify-source-options button.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-bg) 48%, var(--surface));
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+.verify-source-options button strong { color: var(--text-h); }
+.verify-source-options button span { color: var(--text); font-weight: 500; }
+
+.verify-source-summary,
+.verify-source-error,
+.shared-proof-link-loaded,
+.shared-proof-link-entry {
+  padding: 0.8rem;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent-bg) 36%, var(--surface));
+}
+.verify-source-summary p,
+.shared-proof-link-loaded p,
+.shared-proof-link-entry p { margin: 0.25rem 0 0; }
+.verify-source-error { border-color: #ca8a04; }
+
+.shared-proof-link-entry {
+  display: grid;
+  gap: 0.55rem;
+}
+.shared-proof-link-entry label { color: var(--text-h); font-weight: 750; }
+.shared-proof-link-entry input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
   color: var(--text-h);
 }
+.shared-proof-link-entry button { width: fit-content; max-width: 100%; }
 
-.verify-card input {
-  width: 100%;
+.shared-proof-verifier,
+.shared-proof-result-step { display: grid; gap: 0.7rem; }
+.shared-proof-json-fallback,
+.shared-proof-boundary { border-top: 1px solid var(--border); padding-top: 0.7rem; }
+.shared-proof-json-fallback summary,
+.shared-proof-boundary summary { cursor: pointer; color: var(--text-h); font-weight: 750; }
+.shared-proof-json-fallback p,
+.shared-proof-boundary p { margin: 0.6rem 0; }
+.shared-proof-json-fallback label { display: block; margin-bottom: 0.35rem; color: var(--text-h); font-weight: 700; }
+.shared-proof-json-fallback small { display: block; margin-top: 0.35rem; }
+.shared-proof-result-step { margin-top: 0.15rem; }
+.shared-proof-result-step h3 { margin: 0; }
+
+.verify-final-result {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface);
 }
+.verify-final-result strong { color: var(--text-h); }
+.verify-final-result p { margin: 0; }
+.verify-final-result.ready { border-color: var(--accent-border); }
+.verify-final-result.verified { border-color: color-mix(in srgb, #16a34a 62%, var(--border)); }
+.verify-final-result.failed { border-color: color-mix(in srgb, #ca8a04 62%, var(--border)); }
+.verify-final-result dl { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 0.5rem; margin: 0.25rem 0 0; }
+.verify-final-result dt { color: var(--text); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+.verify-final-result dd { margin: 0.1rem 0 0; color: var(--text-h); font-weight: 700; }
+.verify-final-result code { white-space: normal; overflow-wrap: anywhere; }
 
-.verify-card code {
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
+.verify-boundary { overflow: hidden; padding: 0; background: color-mix(in srgb, var(--social-bg) 68%, transparent); }
+.verify-boundary summary { cursor: pointer; padding: 0.85rem 1rem; color: var(--text-h); font-weight: 750; }
+.verify-boundary > div { padding: 0 1rem 0.9rem; border-top: 1px solid var(--border); }
+.verify-boundary p { margin: 0.75rem 0 0; }
+.verify-match { margin-top: 1rem; }
+.verify-match > h2 { margin-top: 0; }
+.verify-details { margin-top: 1rem; }
 
-.verify-success {
-  color: #16a34a;
-  font-weight: 700;
-}
-
-.verify-warning {
-  color: #ca8a04;
-  font-weight: 700;
-}
-
-.verify-match {
-  margin-top: 1.5rem;
+@media (max-width: 700px) {
+  .verify-header { margin-bottom: 1rem; }
+  .verify-source-options,
+  .verify-selected-document,
+  .verify-final-result dl { grid-template-columns: 1fr; }
+  .verify-flow-step,
+  .verify-match { padding: 0.9rem; }
 }

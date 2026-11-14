@@ -1,0 +1,79 @@
+.share-verification-actions {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.share-verification-primary,
+.share-verification-folder,
+.share-verification-link,
+.share-verification-advanced {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.share-verification-primary {
+  padding: 0.8rem;
+  border: 1px solid var(--accent-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent-bg) 36%, var(--surface));
+}
+
+.share-verification-primary > strong {
+  color: var(--text-h);
+}
+
+.share-verification-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.share-verification-actions button {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.share-verification-primary p,
+.share-verification-folder p,
+.share-verification-advanced p,
+.share-verification-message {
+  margin: 0;
+}
+
+.share-verification-link {
+  padding: 0.8rem;
+  border: 1px solid var(--accent-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent-bg) 36%, var(--surface));
+}
+
+.share-verification-link label {
+  color: var(--text-h);
+  font-weight: 750;
+}
+
+.share-verification-link input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.share-verification-folder {
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border);
+}
+
+.share-verification-advanced {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.share-verification-advanced summary {
+  cursor: pointer;
+  color: var(--text-h);
+  font-weight: 750;
+}
+
+.share-verification-message {
+  color: var(--text-h);
+  font-weight: 650;
+}

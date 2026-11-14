@@ -1,14 +1,18 @@
-﻿export {
+export {
   BackupIntegrityService,
 } from "./BackupIntegrityService";
 
 export {
-  BackupTrustService,
-} from "./BackupTrustService";
+  BackupIntegrityValidationService,
+} from "./BackupIntegrityValidationService";
 
 export {
   EvidenceBackupImportService,
 } from "./EvidenceBackupImportService";
+
+export {
+  EvidenceBackupExportService,
+} from "./EvidenceBackupExportService";
 
 export {
   EvidenceBackupImportPreviewService,
@@ -23,9 +27,9 @@ export type {
 } from "./BackupIntegrityService";
 
 export type {
-  BackupTrustResult,
-  TrustedEvidenceBackupFile,
-} from "./BackupTrustService";
+  BackupIntegrityValidationResult,
+  IntegrityProtectedEvidenceBackupFile,
+} from "./BackupIntegrityValidationService";
 
 export type {
   EvidenceBackupImportResult,
@@ -38,4 +42,6 @@ export type {
 export type {
   EvidenceBackupFile,
   EvidenceBackupValidationResult,
+  LegacyEvidenceBackupFile,
+  MerkleEvidenceBackupFile,
 } from "./EvidenceBackupValidationService";

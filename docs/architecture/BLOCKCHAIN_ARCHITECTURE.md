@@ -18,12 +18,12 @@ The application prepares a zero-amount self-payment transaction:
 
 ```text
 Create local proof
-â†’ build transaction
-â†’ user signs through Pera Wallet
-â†’ submit signed bytes to Algod
-â†’ wait for confirmation
-â†’ persist transaction ID and confirmed round
-â†’ expose explorer link
+→ build transaction
+→ user signs through Pera Wallet
+→ submit signed bytes to Algod
+→ wait for confirmation
+→ persist transaction ID and confirmed round
+→ expose explorer link
 ```
 
 ## Service boundaries
