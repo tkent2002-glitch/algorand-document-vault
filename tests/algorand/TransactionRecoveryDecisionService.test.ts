@@ -167,6 +167,34 @@ describe("TransactionRecoveryDecisionService", () => {
     );
   });
 
+  it("never confirms recovery when the on-chain transaction mismatches the proof", async () => {
+    vi.spyOn(
+      AlgorandTransactionStatusService,
+      "check"
+    ).mockResolvedValue({
+      transactionId: "TX-ID",
+      status: "mismatch",
+      confirmedRound: 123,
+      poolError: null,
+      message:
+        "The confirmed transaction does not match this document proof. The Vault record was not confirmed.",
+    });
+
+    const result =
+      await TransactionRecoveryDecisionService.evaluate({
+        failure: createFailure(
+          "confirmation_timeout",
+          "confirming"
+        ),
+        transactionId: "TX-ID",
+      });
+
+    expect(result.decision).toBe("manual_review_required");
+    expect(result.userMessage).toContain(
+      "Vault record was not confirmed"
+    );
+  });
+
   it("blocks retry when status lookup is unavailable", async () => {
     vi.spyOn(
       AlgorandTransactionStatusService,

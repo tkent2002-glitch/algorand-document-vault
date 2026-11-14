@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Logger } from "../../core";
-import { EvidenceRepository } from "../../repositories";
 import {
   BackupEncryptionService,
-  BackupIntegrityService,
+  EvidenceBackupExportService,
 } from "../../services";
 import "./VaultBackupActions.css";
 
@@ -24,22 +23,6 @@ function downloadJsonFile(fileName: string, data: unknown): void {
   URL.revokeObjectURL(url);
 }
 
-async function createIntegrityProtectedBackupPayload() {
-  const records = await EvidenceRepository.listAsync();
-
-  const payload = {
-    schema: "adv-evidence-backup-v1" as const,
-    exportedAt: new Date().toISOString(),
-    recordCount: records.length,
-    records,
-  };
-
-  return {
-    ...payload,
-    integrity: await BackupIntegrityService.createIntegrity(payload),
-  };
-}
-
 interface VaultBackupActionsProps {
   recordCount: number;
 }
@@ -56,7 +39,7 @@ function VaultBackupActions({ recordCount }: VaultBackupActionsProps) {
       setMessage("");
       setExporting(true);
 
-      const backup = await createIntegrityProtectedBackupPayload();
+      const backup = await EvidenceBackupExportService.createIntegrityProtectedBackup();
 
       downloadJsonFile(
         `algorand-document-vault-backup-${Date.now()}.json`,
@@ -90,7 +73,8 @@ function VaultBackupActions({ recordCount }: VaultBackupActionsProps) {
     try {
       setExporting(true);
 
-      const integrityProtectedBackup = await createIntegrityProtectedBackupPayload();
+      const integrityProtectedBackup =
+        await EvidenceBackupExportService.createIntegrityProtectedBackup();
 
       const encryptedBackup = await BackupEncryptionService.encrypt(
         integrityProtectedBackup,

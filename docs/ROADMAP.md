@@ -218,11 +218,20 @@ Potential future releases may include:
 - Mobile applications
 - Public verification portal
 - QR verification certificates
+- Merkle-tree batch anchoring with individual document proofs
 - Team workspaces
 - Cloud synchronization
 - AI-assisted organization
 - Enterprise edition
 - Multiple blockchain support
+
+Merkle-tree batch anchoring is merged into `main` with a
+versioned proof specification, threat model, normalized storage, backup and
+recovery, and document-specific verification links. An initial live TestNet
+batch and individual-member verification have passed. Broader device
+performance validation and independent security review remain release gates.
+The tagged public alpha supports one document fingerprint per Algorand
+transaction.
 
 ---
 

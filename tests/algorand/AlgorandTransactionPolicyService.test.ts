@@ -15,12 +15,18 @@ function createTransaction(options?: {
   fee?: number;
   genesisID?: string;
   note?: Uint8Array;
+  closeRemainderTo?: string;
+  rekeyTo?: string;
+  lease?: Uint8Array;
 }) {
   return algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     sender: TEST_ACCOUNT.addr,
     receiver: options?.receiver ?? TEST_ACCOUNT.addr,
     amount: options?.amount ?? 0,
     note: options?.note ?? EXPECTED_NOTE,
+    closeRemainderTo: options?.closeRemainderTo,
+    rekeyTo: options?.rekeyTo,
+    lease: options?.lease,
     suggestedParams: {
       fee: BigInt(options?.fee ?? 1000),
       minFee: 1000n,
@@ -115,6 +121,38 @@ describe("AlgorandTransactionPolicyService", () => {
     expect(result.valid).toBe(false);
     expect(result.errors).toContain(
       "Transaction fee does not match the approved ADv proof transaction fee."
+    );
+  });
+
+  it("rejects close, rekey, group, and lease side effects", () => {
+    const closeResult = validate(
+      createTransaction({
+        closeRemainderTo: OTHER_ACCOUNT.addr.toString(),
+      })
+    );
+    const rekeyResult = validate(
+      createTransaction({
+        rekeyTo: OTHER_ACCOUNT.addr.toString(),
+      })
+    );
+    const groupedTransaction = createTransaction();
+    algosdk.assignGroupID([groupedTransaction]);
+    const groupResult = validate(groupedTransaction);
+    const leaseResult = validate(
+      createTransaction({ lease: new Uint8Array(32).fill(1) })
+    );
+
+    expect(closeResult.errors).toContain(
+      "ADv proof transaction must not close the sender account balance."
+    );
+    expect(rekeyResult.errors).toContain(
+      "ADv proof transaction must not rekey the sender account."
+    );
+    expect(groupResult.errors).toContain(
+      "ADv proof transaction must not belong to a transaction group."
+    );
+    expect(leaseResult.errors).toContain(
+      "ADv proof transaction must not contain a transaction lease."
     );
   });
 });

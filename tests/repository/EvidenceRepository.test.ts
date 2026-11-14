@@ -100,16 +100,36 @@ describe("EvidenceRepository async API", () => {
   it("notifies subscribers when records change", async () => {
     const listener = vi.fn();
     const unsubscribe = EvidenceRepository.subscribe(listener);
+    const record = createRecord("record-1", hashA);
 
-    await EvidenceRepository.saveAsync(
-      createRecord("record-1", hashA)
-    );
+    await EvidenceRepository.saveAsync(record);
 
     expect(listener).toHaveBeenCalledTimes(1);
-    expect(listener).toHaveBeenCalledWith(
-      await EvidenceRepository.listAsync()
-    );
+    expect(listener).toHaveBeenCalledWith({ type: "upsert", record });
 
+    await EvidenceRepository.saveAllAsync([record]);
+    expect(listener).toHaveBeenLastCalledWith({
+      type: "replace",
+      records: [record],
+    });
+
+    await EvidenceRepository.clearAsync();
+    expect(listener).toHaveBeenLastCalledWith({ type: "clear" });
+
+    unsubscribe();
+  });
+
+  it("does not reload the full repository to publish a write event", async () => {
+    const listener = vi.fn();
+    const unsubscribe = EvidenceRepository.subscribe(listener);
+    const listSpy = vi.spyOn(EvidenceRepository, "listAsync");
+
+    await EvidenceRepository.saveAsync(createRecord("record-1", hashA));
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listSpy).not.toHaveBeenCalled();
+
+    listSpy.mockRestore();
     unsubscribe();
   });
 

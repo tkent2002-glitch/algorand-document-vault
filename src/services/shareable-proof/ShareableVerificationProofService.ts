@@ -1,8 +1,8 @@
 import type { Transaction } from "algosdk";
 import type { EvidenceRecord } from "../notarization";
 import { AlgorandProofNoteService } from "../algorand/AlgorandProofNoteService";
+import { AlgorandProofTransactionValidationService } from "../algorand/AlgorandProofTransactionValidationService";
 import { AlgorandService } from "../algorand/AlgorandService";
-import { AlgorandTransactionPolicyService } from "../algorand/AlgorandTransactionPolicyService";
 import {
   BackupIntegrityService,
   type BackupIntegrityMetadata,
@@ -357,8 +357,10 @@ export class ShareableVerificationProofService {
         algorithm: "SHA-256",
         value: proof.evidence.hashValue,
       });
-      const policyResult = AlgorandTransactionPolicyService.validate({
+      const policyResult =
+        AlgorandProofTransactionValidationService.validateTransaction({
         transaction,
+        expectedTransactionId: proof.evidence.transactionId,
         expectedSenderAddress: transaction.sender.toString(),
         expectedNote: AlgorandProofNoteService.createNote(canonicalProof),
       });

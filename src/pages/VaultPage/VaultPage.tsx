@@ -1,23 +1,24 @@
 import {
   useDeferredValue,
-  useEffect,
   useMemo,
   useState,
 } from "react";
 import EvidenceDetailsPanel from "../../components/evidence/EvidenceDetailsPanel";
 import ShareVerificationActions from "../../components/verification/ShareVerificationActions";
-import { EvidenceRepository } from "../../repositories";
+import { useEvidenceRecords } from "../../hooks/useEvidenceRecords";
 import {
   AlgorandExplorerService,
-  type EvidenceRecord,
 } from "../../services";
 import VaultBackupActions from "./VaultBackupActions";
 import VaultImportPreview from "./VaultImportPreview";
+import BatchVaultSection from "./BatchVaultSection";
 import {
   buildEvidenceIndex,
   DEFAULT_VAULT_PAGE_SIZE,
   filterAndSortEvidenceIndex,
   paginateEvidenceIndex,
+  SUPPORTED_VAULT_RECORD_LIMIT,
+  VAULT_RECORD_WARNING_THRESHOLD,
   VAULT_HISTORY_PAGE_SIZE,
   type VaultSortOrder,
   type VaultStatusFilter,
@@ -33,7 +34,7 @@ function shorten(value: string): string {
 }
 
 function VaultPage() {
-  const [records, setRecords] = useState<EvidenceRecord[]>([]);
+  const records = useEvidenceRecords();
   const [searchText, setSearchText] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<VaultStatusFilter>("all");
   const [sortOrder, setSortOrder] = useState<VaultSortOrder>("newest");
@@ -43,36 +44,6 @@ function VaultPage() {
   const [detailOpen, setDetailOpen] = useState<boolean>(false);
   const [toolsOpen, setToolsOpen] = useState<boolean>(false);
   const deferredSearchText = useDeferredValue(searchText);
-
-  async function reloadRecords(): Promise<void> {
-    const repositoryRecords = await EvidenceRepository.listAsync();
-    setRecords(repositoryRecords);
-  }
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadInitialRecords(): Promise<void> {
-      const repositoryRecords = await EvidenceRepository.listAsync();
-
-      if (mounted) {
-        setRecords(repositoryRecords);
-      }
-    }
-
-    void loadInitialRecords();
-
-    const unsubscribe = EvidenceRepository.subscribe((repositoryRecords) => {
-      if (mounted) {
-        setRecords(repositoryRecords);
-      }
-    });
-
-    return () => {
-      mounted = false;
-      unsubscribe();
-    };
-  }, []);
 
   const evidenceIndex = useMemo(() => buildEvidenceIndex(records), [records]);
 
@@ -173,6 +144,22 @@ function VaultPage() {
           </span>
       </div>
 
+      {records.length >= VAULT_RECORD_WARNING_THRESHOLD && (
+        <div className="vault-capacity-warning" role="status">
+          <strong>Vault capacity notice</strong>
+          <p>
+            This device stores {records.length.toLocaleString()} evidence records.
+            The public alpha is validated for up to{" "}
+            {SUPPORTED_VAULT_RECORD_LIMIT.toLocaleString()}. Create a current
+            backup before adding substantially more records; browsing performance
+            may vary by device.
+          </p>
+          <small>This notice is calculated locally. No telemetry is sent.</small>
+        </div>
+      )}
+
+      <BatchVaultSection />
+
       <details
         className="vault-tools"
         open={toolsOpen}
@@ -193,7 +180,7 @@ function VaultPage() {
         </summary>
 
         <div className="vault-tools-content">
-          <VaultImportPreview onImportComplete={reloadRecords} />
+          <VaultImportPreview />
         </div>
       </details>
 

@@ -6,6 +6,7 @@ import {
 } from "../../src/services/algorand/AlgorandNotarizationLifecycleService";
 import { AlgorandConfirmationService } from "../../src/services/algorand/AlgorandConfirmationService";
 import { AlgorandSubmissionService } from "../../src/services/algorand/AlgorandSubmissionService";
+import { AlgorandProofTransactionValidationService } from "../../src/services/algorand/AlgorandProofTransactionValidationService";
 import type { EvidenceRecord } from "../../src/services";
 import type { AlgorandSignedProofTransaction } from "../../src/types";
 
@@ -49,6 +50,10 @@ function createSignedTransaction(txId = "UNSIGNED-TX-ID"):
 describe("Algorand lifecycle recovery boundary", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.spyOn(
+      AlgorandProofTransactionValidationService,
+      "decodeAndValidateSignedTransaction"
+    ).mockReturnValue({} as never);
   });
 
   it("preserves the transaction id when confirmation fails", async () => {
@@ -76,6 +81,7 @@ describe("Algorand lifecycle recovery boundary", () => {
       await AlgorandNotarizationLifecycleService.complete({
         signedTransaction: createSignedTransaction("RECOVERY-TX-ID"),
         evidenceRecord: createEvidenceRecord(),
+        expectedSenderAddress: "EXPECTED-SENDER",
       });
 
       throw new Error("Expected lifecycle failure.");
@@ -106,6 +112,7 @@ describe("Algorand lifecycle recovery boundary", () => {
       await AlgorandNotarizationLifecycleService.complete({
         signedTransaction: createSignedTransaction(),
         evidenceRecord: createEvidenceRecord(),
+        expectedSenderAddress: "EXPECTED-SENDER",
       });
 
       throw new Error("Expected lifecycle failure.");

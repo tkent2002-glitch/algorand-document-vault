@@ -11,6 +11,10 @@ export {
 } from "./EvidenceBackupImportService";
 
 export {
+  EvidenceBackupExportService,
+} from "./EvidenceBackupExportService";
+
+export {
   EvidenceBackupImportPreviewService,
 } from "./EvidenceBackupImportPreviewService";
 
@@ -38,4 +42,6 @@ export type {
 export type {
   EvidenceBackupFile,
   EvidenceBackupValidationResult,
+  LegacyEvidenceBackupFile,
+  MerkleEvidenceBackupFile,
 } from "./EvidenceBackupValidationService";

@@ -2,9 +2,12 @@ import { useEffect, useState } from "react";
 import EvidenceCard from "../../components/cards/EvidenceCard";
 import EvidenceDetailsPanel from "../../components/evidence/EvidenceDetailsPanel";
 import { EvidenceRepository } from "../../repositories";
+import { BatchEvidenceRepository } from "../../repositories/evidence/BatchEvidenceRepository";
 import { HashService, VerificationLinkService } from "../../services";
 import type {
   EvidenceRecord,
+  BatchEvidenceMemberRecord,
+  BatchEvidenceRecord,
   VerificationLinkEnvelope,
 } from "../../services";
 import SharedProofVerifier from "./SharedProofVerifier";
@@ -26,6 +29,10 @@ function VerifyPage() {
   const [fileName, setFileName] = useState("");
   const [hashValue, setHashValue] = useState("");
   const [match, setMatch] = useState<EvidenceRecord | null>(null);
+  const [batchMatch, setBatchMatch] = useState<{
+    member: BatchEvidenceMemberRecord;
+    batch: BatchEvidenceRecord;
+  } | null>(null);
   const [checked, setChecked] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [selectedRecord, setSelectedRecord] =
@@ -68,6 +75,7 @@ function VerifyPage() {
 
     setChecked(false);
     setMatch(null);
+    setBatchMatch(null);
     setSelectedRecord(null);
     setHashValue("");
     setFileName(file?.name ?? "");
@@ -77,12 +85,20 @@ function VerifyPage() {
     try {
       setProcessing(true);
       const hash = await HashService.sha256FromFile(file);
-      const records = await EvidenceRepository.listAsync();
+      const [records, members] = await Promise.all([
+        EvidenceRepository.listAsync(),
+        BatchEvidenceRepository.findMembersByHashAsync(hash),
+      ]);
       const matchingRecord =
         records.find((record) => record.hashValue === hash) ?? null;
 
       setHashValue(hash);
       setMatch(matchingRecord);
+      if (members[0]) {
+        const batches = await BatchEvidenceRepository.listBatchesAsync();
+        const batch = batches.find((candidate) => candidate.id === members[0].batchId);
+        setBatchMatch(batch ? { member: members[0], batch } : null);
+      }
       setChecked(true);
     } finally {
       setProcessing(false);
@@ -201,13 +217,17 @@ function VerifyPage() {
                 <p>Complete Step 1 to see the local verification result.</p>
               </div>
             )}
-            {checked && match && (
+            {checked && (match || batchMatch) && (
               <div className="verify-final-result verified" role="status">
                 <strong>Local fingerprint match found</strong>
-                <p>This document matches evidence saved in this device&apos;s Vault.</p>
+                <p>
+                  This document matches {batchMatch
+                    ? `member ${batchMatch.member.leafIndex + 1} of a ${batchMatch.batch.leafCount}-document Merkle batch saved in this device's Vault.`
+                    : "evidence saved in this device's Vault."}
+                </p>
               </div>
             )}
-            {checked && !match && (
+            {checked && !match && !batchMatch && (
               <div className="verify-final-result failed" role="status">
                 <strong>No local evidence match found</strong>
                 <p>

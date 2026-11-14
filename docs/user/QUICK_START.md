@@ -9,6 +9,23 @@
 7. Open **Vault** to review the stored evidence record.
 8. Open **Verify** and select the same document to recompute its hash.
 
+## Notarize a document batch
+
+1. Open **Notarize** and choose **Document batch**.
+2. Select 2–1,000 files. The app hashes them locally and displays one Merkle
+   root; file contents and names are not written to Algorand.
+3. Connect Pera Wallet, review the batch count and root, then approve one
+   TestNet transaction.
+4. Open **Vault** and expand **Batch anchors** to see every member.
+5. Create a verification link beside the specific member you intend to share.
+   Send that link with that original file; the recipient does not need the
+   other files in the batch.
+
+If confirmation is interrupted after submission, open **Vault**, expand the
+submitted batch, and choose **Check batch confirmation**. The app validates the
+existing transaction against that batch proof before confirming the record.
+Do not create a second transaction while the first transaction is unresolved.
+
 ## Share a verification
 
 1. Open **Vault** and select a document with a confirmed record.
@@ -35,6 +52,9 @@ Use the Vault backup controls to export either:
 
 - a readable JSON backup with integrity metadata, or
 - a password-protected AES-GCM backup.
+
+Version 2 backups include Merkle batch headers and membership proofs. Version 1
+single-document backups remain importable.
 
 Store backup passwords safely. They are not recoverable by the application.
 

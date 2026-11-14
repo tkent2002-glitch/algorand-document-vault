@@ -1,7 +1,7 @@
 ﻿import algosdk from "algosdk";
 import type {
   AlgorandUnsignedProofTransaction,
-  NotarizationProof,
+  AnchoringProof,
 } from "../../types";
 import { AlgorandProofNoteService } from "./AlgorandProofNoteService";
 import { AlgorandService } from "./AlgorandService";
@@ -10,7 +10,7 @@ const PROOF_TRANSACTION_AMOUNT_MICROALGOS = 0;
 
 export class AlgorandTransactionBuilderService {
   static async buildUnsignedProofTransaction(
-    proof: NotarizationProof,
+    proof: AnchoringProof,
     senderAddress: string
   ): Promise<AlgorandUnsignedProofTransaction> {
     const client = AlgorandService.createAlgodClient();

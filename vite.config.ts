@@ -25,7 +25,7 @@ export default defineConfig({
         codeSplitting: {
           groups: [
             {
-              name: "algorand",
+              name: "algorand-sdk",
               test: /node_modules[\\/]algosdk[\\/]/,
               includeDependenciesRecursively: true,
               priority: 20,

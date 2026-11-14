@@ -1,10 +1,11 @@
 ﻿import algosdk from "algosdk";
 import type {
   AlgorandSignedProofTransaction,
-  NotarizationProof,
+  AnchoringProof,
 } from "../../types";
 import { WalletService } from "../wallet/WalletService";
 import { AlgorandProofNoteService } from "./AlgorandProofNoteService";
+import { AlgorandProofTransactionValidationService } from "./AlgorandProofTransactionValidationService";
 import { AlgorandService } from "./AlgorandService";
 import { AlgorandTransactionPolicyService } from "./AlgorandTransactionPolicyService";
 
@@ -81,7 +82,7 @@ function waitForWalletApproval(
 
 export class AlgorandTransactionSigningService {
   static async signProofTransaction(
-    proof: NotarizationProof,
+    proof: AnchoringProof,
     senderAddress: string,
     options: WalletApprovalOptions = {}
   ): Promise<AlgorandSignedProofTransaction> {
@@ -112,6 +113,13 @@ export class AlgorandTransactionSigningService {
       WalletService.signSingleTransaction(transaction),
       options
     );
+
+    AlgorandProofTransactionValidationService.decodeAndValidateSignedTransaction({
+      signedTransaction,
+      expectedTransactionId: transaction.txID(),
+      expectedSenderAddress: senderAddress,
+      expectedNote: note,
+    });
 
     return {
       txId: transaction.txID(),

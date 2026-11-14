@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { EvidenceRepository } from "../../repositories";
+import { BatchEvidenceRepository } from "../../repositories/evidence/BatchEvidenceRepository";
 import {
   BackupEncryptionService,
   BackupIntegrityValidationService,
@@ -19,10 +20,6 @@ import {
   formatByteLimit,
 } from "../../services/security/InputSecurityLimits";
 
-type VaultImportPreviewProps = {
-  onImportComplete: () => void;
-};
-
 function isEncryptedBackup(
   value: unknown
 ): value is EncryptedEvidenceBackupFile {
@@ -34,9 +31,7 @@ function isEncryptedBackup(
   );
 }
 
-function VaultImportPreview({
-  onImportComplete,
-}: VaultImportPreviewProps) {
+function VaultImportPreview() {
   const [fileName, setFileName] = useState<string>("");
   const [backup, setBackup] =
     useState<EvidenceBackupFile | null>(null);
@@ -54,6 +49,7 @@ function VaultImportPreview({
     useState<EvidenceBackupImportPreview | null>(null);
   const [importResult, setImportResult] =
     useState<EvidenceBackupImportResult | null>(null);
+  const [batchImportMessage, setBatchImportMessage] = useState<string>("");
 
   async function prepareBackupPreview(
     candidate: unknown
@@ -86,13 +82,25 @@ function VaultImportPreview({
       return;
     }
 
-    const currentRecords = await EvidenceRepository.listAsync();
+    const [currentRecords, currentBatches] = await Promise.all([
+      EvidenceRepository.listAsync(),
+      BatchEvidenceRepository.listBatchesAsync(),
+    ]);
+    const currentBatchMembers = (
+      await Promise.all(
+        currentBatches.map((batch) =>
+          BatchEvidenceRepository.listMembersAsync(batch.id)
+        )
+      )
+    ).flat();
     const validBackup =
       candidate as IntegrityProtectedEvidenceBackupFile;
     const changePreview =
       EvidenceBackupImportPreviewService.preview(
         validBackup,
-        currentRecords
+        currentRecords,
+        currentBatches,
+        currentBatchMembers
       );
 
     setBackup(validBackup);
@@ -112,6 +120,7 @@ function VaultImportPreview({
     setValidation(null);
     setPreview(null);
     setImportResult(null);
+    setBatchImportMessage("");
 
     if (!file) {
       return;
@@ -184,7 +193,7 @@ function VaultImportPreview({
       return;
     }
 
-    if (preview.conflictingRecordIds > 0) {
+    if (preview.conflictingRecordIds > 0 || preview.conflictingBatchIds > 0) {
       setImportResult({
         importedRecords: 0,
         skippedExistingRecords: 0,
@@ -196,6 +205,25 @@ function VaultImportPreview({
 
     const currentRecords =
       await EvidenceRepository.listAsync();
+    const currentBatches = await BatchEvidenceRepository.listBatchesAsync();
+    const currentBatchMembers = (
+      await Promise.all(
+        currentBatches.map((batch) =>
+          BatchEvidenceRepository.listMembersAsync(batch.id)
+        )
+      )
+    ).flat();
+
+    const batchResult = await EvidenceBackupImportService.selectNewBatches(
+      backup,
+      currentBatches,
+      currentBatchMembers
+    );
+
+    if (batchResult.blockedConflictingBatches > 0) {
+      setBatchImportMessage("Batch import blocked because conflicting IDs were detected.");
+      return;
+    }
 
     const result =
       await EvidenceBackupImportService.importNewRecords(
@@ -204,14 +232,25 @@ function VaultImportPreview({
       );
 
     await EvidenceRepository.saveAllAsync(result.records);
+    for (const candidate of batchResult.batches) {
+      await BatchEvidenceRepository.saveBatchAsync(
+        candidate.batch,
+        candidate.members
+      );
+    }
 
     setImportResult(result);
-    onImportComplete();
+    setBatchImportMessage(
+      `${batchResult.importedBatches} Merkle batch${
+        batchResult.importedBatches === 1 ? "" : "es"
+      } imported; ${batchResult.skippedExistingBatches} already present.`
+    );
   }
 
   const canImport =
     Boolean(backup && validation?.valid && preview) &&
-    preview?.conflictingRecordIds === 0;
+    preview?.conflictingRecordIds === 0 &&
+    preview?.conflictingBatchIds === 0;
 
   return (
     <section className="vault-import-preview">
@@ -334,6 +373,15 @@ function VaultImportPreview({
                 <span>Records</span>
                 <strong>{backup.recordCount}</strong>
               </div>
+
+              <div>
+                <span>Merkle batches</span>
+                <strong>
+                  {backup.schema === "adv-evidence-backup-v2"
+                    ? backup.batchCount
+                    : 0}
+                </strong>
+              </div>
             </div>
           )}
 
@@ -371,9 +419,25 @@ function VaultImportPreview({
                   <span>Conflicting Record IDs</span>
                   <strong>{preview.conflictingRecordIds}</strong>
                 </div>
+
+                <div>
+                  <span>New Merkle Batches</span>
+                  <strong>{preview.newBatches}</strong>
+                </div>
+
+                <div>
+                  <span>Existing Merkle Batches</span>
+                  <strong>{preview.existingBatches}</strong>
+                </div>
+
+                <div>
+                  <span>Conflicting Batch IDs</span>
+                  <strong>{preview.conflictingBatchIds}</strong>
+                </div>
               </div>
 
-              {preview.conflictingRecordIds > 0 && (
+              {(preview.conflictingRecordIds > 0 ||
+                preview.conflictingBatchIds > 0) && (
                 <p className="vault-import-conflict-warning">
                   Import is blocked because conflicting record IDs
                   were detected.
@@ -417,6 +481,12 @@ function VaultImportPreview({
                 </div>
               </div>
             </div>
+          )}
+
+          {batchImportMessage && (
+            <p className="vault-import-status valid" role="status">
+              {batchImportMessage}
+            </p>
           )}
 
           {validation.errors.length > 0 && (

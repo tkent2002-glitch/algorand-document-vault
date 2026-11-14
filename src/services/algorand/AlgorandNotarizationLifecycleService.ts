@@ -7,6 +7,8 @@ import type {
   AlgorandSubmissionResult,
 } from "../../types";
 import { AlgorandConfirmationService } from "./AlgorandConfirmationService";
+import { AlgorandProofNoteService } from "./AlgorandProofNoteService";
+import { AlgorandProofTransactionValidationService } from "./AlgorandProofTransactionValidationService";
 import { AlgorandSubmissionService } from "./AlgorandSubmissionService";
 
 export type AlgorandNotarizationLifecycleStage =
@@ -23,6 +25,7 @@ export type AlgorandNotarizationLifecycleProgress = {
 export type AlgorandNotarizationLifecycleInput = {
   signedTransaction: AlgorandSignedProofTransaction;
   evidenceRecord: EvidenceRecord;
+  expectedSenderAddress: string;
   onProgress?: (
     progress: AlgorandNotarizationLifecycleProgress
   ) => void;
@@ -73,6 +76,16 @@ export class AlgorandNotarizationLifecycleService {
     };
 
     try {
+      AlgorandProofTransactionValidationService.decodeAndValidateSignedTransaction({
+        signedTransaction:
+          input.signedTransaction.signedTransaction,
+        expectedTransactionId: input.signedTransaction.txId,
+        expectedSenderAddress: input.expectedSenderAddress,
+        expectedNote: AlgorandProofNoteService.createNote(
+          input.evidenceRecord.proof
+        ),
+      });
+
       report(
         "submitting",
         "Submitting signed transaction to Algorand TestNet..."
