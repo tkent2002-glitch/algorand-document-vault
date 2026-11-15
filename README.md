@@ -33,7 +33,8 @@ contains proof metadata and a document-name hint, never the document itself.
 1. **Notarize:** select a document, connect Pera Wallet, review the zero-amount
    TestNet transaction, and approve it.
 2. **Verify:** compare a document with this browser's Vault or open a verification
-   link supplied by the document owner.
+   link supplied by the document owner. The selected filename is shown separately
+   from the expected name in the proof; verification compares file contents.
 3. **Share:** create a reusable verification link from confirmed Vault evidence
    and send it together with the original document through a channel you trust.
 

@@ -176,12 +176,12 @@ function SharedProofVerifier({
           <strong>Verification link loaded</strong>
           <p>
             {loadedDocumentLabel
-              ? `Now select “${loadedDocumentLabel}” in Step 1.`
-              : "Now select the document from the owner in Step 1."}
+              ? `Expected document from proof: “${loadedDocumentLabel}”.`
+              : "The proof from the owner is ready."}
           </p>
           <small>
-            The displayed name is guidance. The SHA-256 fingerprint is the
-            authority.
+            The expected name is guidance. The SHA-256 fingerprint determines
+            whether the selected document matches.
           </small>
           {!initialProof && (
             <button

@@ -3,6 +3,10 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { HashService } from "../../src/services";
+import { EvidenceRepository } from "../../src/repositories";
+import { BatchEvidenceRepository } from "../../src/repositories/evidence/BatchEvidenceRepository";
+import { ShareableVerificationProofService } from "../../src/services/shareable-proof";
 import VerifyPage from "../../src/pages/VerifyPage/VerifyPage";
 import type { ShareableVerificationProofFile } from "../../src/services/shareable-proof";
 import { VerificationLinkService } from "../../src/services/verification-link";
@@ -66,7 +70,7 @@ describe("VerifyPage", () => {
 
     expect(await screen.findByText("Verification link loaded")).toBeVisible();
     expect(
-      screen.getByText("Now select “test 8 link test.txt” in Step 1.")
+      screen.getByText("Expected document from proof: “test 8 link test.txt”.")
     ).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "Local verification" }));
@@ -77,4 +81,40 @@ describe("VerifyPage", () => {
     expect(screen.queryByLabelText("Verification link")).not.toBeInTheDocument();
     expect(parseHash).toHaveBeenCalledTimes(1);
   });
+  it("keeps the selected filename distinct from the proof label when files change", async () => {
+    vi.spyOn(EvidenceRepository, "listAsync").mockResolvedValue([]);
+    vi.spyOn(BatchEvidenceRepository, "findMembersByHashAsync").mockResolvedValue([]);
+    vi.mocked(HashService.sha256FromFile).mockResolvedValue("a".repeat(64));
+    vi.spyOn(ShareableVerificationProofService, "verify").mockResolvedValue({
+      verified: false,
+      status: "document_mismatch",
+      message: "The selected document does not match the shared proof fingerprint.",
+      errors: [],
+    });
+    vi.spyOn(VerificationLinkService, "parseHash").mockResolvedValue({
+      valid: true,
+      envelope: {
+        version: "adv-verification-link-v1",
+        documentLabel: "original.txt",
+        proof: PROOF,
+      },
+      errors: [],
+    });
+    render(<VerifyPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Shared verification" }));
+    fireEvent.change(screen.getByLabelText("Verification link"), {
+      target: { value: "https://vault.example/#verify=filename-test" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Load verification link" }));
+    expect(await screen.findByText("Expected document from proof: “original.txt”.")).toBeVisible();
+    for (const name of ["modified.txt", "another-copy.txt"]) {
+      fireEvent.change(screen.getByLabelText("Document to verify"), {
+        target: { files: [new File(["changed"], name)] },
+      });
+      expect(await screen.findByRole("heading", { name: `Selected document: ${name}` })).toBeVisible();
+      expect(await screen.findByText("Public verification not confirmed")).toBeVisible();
+      expect(screen.getByText("Expected document from proof: “original.txt”.")).toBeVisible();
+    }
+  });
+
 });

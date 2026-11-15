@@ -121,9 +121,7 @@ function VerifyPage() {
         <section className="verify-flow-step" aria-labelledby="verify-step-one">
           <span className="verify-step-label">Step 1</span>
           <h3 id="verify-step-one">
-            {verificationLink
-              ? `Select ${verificationLink.documentLabel}`
-              : "Select the document"}
+            {fileName ? `Selected document: ${fileName}` : "Select the document"}
           </h3>
           <p>
             {verificationLink
