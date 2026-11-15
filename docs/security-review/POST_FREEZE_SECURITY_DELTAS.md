@@ -115,3 +115,21 @@ immutable JavaScript strings cannot be reliably erased.
 The proof payload formats and actual wallet/network recovery policy are now
 documented. The accompanying internal assessment corrects stale proposed
 findings and does not change the project's unaudited status.
+
+## 2026-11-15: Pera Wallet font resources
+
+Pera Wallet Connect 1.10.0 injects an Inter stylesheet from fonts.googleapis.com
+when its deferred wallet module loads. The production CSP blocked that request.
+The policy now allows HTTPS stylesheets from fonts.googleapis.com and font files
+from fonts.gstatic.com. Script sources remain restricted to self; no wildcard
+font or stylesheet sources were added.
+
+This permits third-party font requests when wallet features load. Google receives
+normal request metadata, including the client IP and origin under the existing
+referrer policy; document content, proof data, and wallet secrets are not included
+in the font URLs. No signing, transaction, or storage behavior changes.
+
+Regression coverage loads the SDK-injected stylesheet through the packaged
+artifact server with the real CSP, verifies it applies, checks for CSP violations,
+and asserts that script sources remain restricted. The stylesheet response is
+stubbed for deterministic CI; actual Google font loading is checked separately.

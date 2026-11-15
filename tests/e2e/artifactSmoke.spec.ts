@@ -90,3 +90,37 @@ test("allows the Pera secure relay through the packaged security policy", async 
   );
   expect(relayPolicyBlocks).toEqual([]);
 });
+
+test("loads Pera font styles under the packaged security policy", async ({ page }) => {
+  await page.route("https://fonts.googleapis.com/**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "text/css",
+      body: ":root { --pera-font-stylesheet-loaded: yes; }",
+    })
+  );
+  await page.addInitScript(() => {
+    const violations: string[] = [];
+    Object.assign(window, { cspViolations: violations });
+    document.addEventListener("securitypolicyviolation", (event) => {
+      violations.push(`${event.effectiveDirective}: ${event.blockedURI}`);
+    });
+  });
+
+  const response = await page.goto("/");
+  const directives = response?.headers()["content-security-policy"]
+    .split(";").map((value) => value.trim());
+  expect(directives).toContain("script-src 'self'");
+
+
+  await page.getByRole("button", { name: "Wallet", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Pera Wallet" })).toBeVisible();
+  await expect.poll(() => page.evaluate(() =>
+    getComputedStyle(document.documentElement)
+      .getPropertyValue("--pera-font-stylesheet-loaded").trim()
+  )).toBe("yes");
+  expect(directives).toContain("font-src 'self' data: https://fonts.gstatic.com");
+  expect(await page.evaluate(() =>
+    (window as Window & { cspViolations: string[] }).cspViolations
+  )).toEqual([]);
+});
