@@ -152,7 +152,7 @@ describe("SharedProofVerifier", () => {
 
     expect(await screen.findByText("Verification link loaded")).toBeVisible();
     expect(
-      screen.getByText("Now select “test 6 link test.txt” in Step 1.")
+      screen.getByText("Expected document from proof: “test 6 link test.txt”.")
     ).toBeVisible();
     expect(screen.queryByLabelText("Technical proof file")).not.toBeInTheDocument();
     expect(VerificationLinkService.parseHash).toHaveBeenCalledWith("#verify=proof");
